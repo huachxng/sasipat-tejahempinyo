@@ -1,0 +1,28 @@
+---
+import { CHAPTERS, chapterBySlug, type ChapterSlug } from '../site.config.ts';
+interface Props { slug: ChapterSlug; title?: string; dek?: string }
+const { slug, title, dek } = Astro.props;
+const c = chapterBySlug(slug);
+const idx = CHAPTERS.findIndex((x) => x.slug === slug) + 1;
+---
+<header class="chapter-header container">
+  <div class="row">
+    <h1 class="display t-1">
+      <span class="num numeral" aria-hidden="true" style={`view-transition-name: chapter-${c.num}`}>{c.num}</span>
+      <span class="sr-only">Chapter {idx}: </span>
+      <span class="reveal"><span>{title ?? c.title}</span></span>
+    </h1>
+    <p class="progress mono">{c.num} / {String(CHAPTERS.length).padStart(2, '0')}</p>
+  </div>
+  <p class="dek mono">{dek ?? c.dek}</p>
+  <slot />
+</header>
+<style>
+  .chapter-header { padding-top: clamp(40px, 8vh, 120px); padding-bottom: clamp(24px, 4vh, 56px); }
+  .row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+  h1 { margin: 0; display: flex; flex-direction: column; }
+  .num { font-size: calc(var(--t-1) * 1.6); line-height: 0.8; margin-bottom: -0.25em; }
+  .progress { font-size: 12px; color: var(--fg-3); margin: 0 0 0.5em; }
+  .dek { margin: 1.25rem 0 0; color: var(--fg-2); font-size: var(--t-small); max-width: 60ch; }
+  @media (min-width: 1024px) { h1 { flex-direction: row; align-items: baseline; gap: 0.15em; } .num { margin-bottom: 0; margin-right: 0.05em; } }
+</style>

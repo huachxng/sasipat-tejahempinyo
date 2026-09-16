@@ -1,0 +1,61 @@
+---
+import { Font } from 'astro:assets';
+import Analytics from '@vercel/analytics/astro';
+import Seo from '../components/Seo.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import NowIndicator from '../components/NowIndicator.astro';
+import SearchDialog from '../components/SearchDialog.astro';
+import { getProfile } from '../lib/published.ts';
+import type { ChapterSlug } from '../site.config.ts';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/motion.css';
+import '../styles/print.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  active?: ChapterSlug | 'home';
+  type?: 'website' | 'article' | 'profile';
+  image?: string;
+  noindex?: boolean;
+  published?: Date;
+  modified?: Date;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  now?: string;
+  draft?: boolean;
+  bodyClass?: string;
+}
+const { title, description, active, type, image, noindex, published, modified, jsonLd, now, draft = false, bodyClass } = Astro.props;
+const profile = await getProfile();
+const nowText = now ?? profile.data.now[0] ?? 'Now — senior year at BASIS Bangkok';
+---
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      document.documentElement.classList.remove('no-js');
+      try { if (localStorage.getItem('motion') === 'off') document.documentElement.dataset.motion = 'off'; } catch (e) {}
+    </script>
+    <Seo {title} {description} {type} {image} {noindex} {published} {modified} {jsonLd} />
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-text" />
+    <Font cssVariable="--font-mono" />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav {active} />
+    {draft && <div class="draft-ribbon">Draft · not published</div>}
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    <NowIndicator text={nowText} />
+    <SearchDialog />
+    <div class="grain" aria-hidden="true"></div>
+    <Analytics />
+  </body>
+</html>

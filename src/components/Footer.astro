@@ -1,0 +1,45 @@
+---
+import { PERSON, CHAPTERS } from '../site.config.ts';
+const built = new Date().toISOString().slice(0, 10);
+---
+<footer class="site-footer ruled">
+  <div class="container footer-inner">
+    <div class="col">
+      <p class="label">Sasipat (Hua) Tejahempinyo</p>
+      <p class="muted small">Writes here as {PERSON.penName}. {PERSON.school}, class of {PERSON.classOf}.</p>
+    </div>
+    <div class="col">
+      <p class="label">Chapters</p>
+      <ul class="links">{CHAPTERS.map((c) => <li><a href={c.href}><span class="mono num">{c.num}</span> {c.title}</a></li>)}</ul>
+    </div>
+    <div class="col">
+      <p class="label">Elsewhere</p>
+      <ul class="links">
+        <li><a href={`mailto:${PERSON.email}`}>{PERSON.email}</a></li>
+        <li><a href={PERSON.github} rel="me noopener" target="_blank">GitHub</a></li>
+        {PERSON.linkedin && <li><a href={PERSON.linkedin} rel="me noopener" target="_blank">LinkedIn</a></li>}
+        <li><a href="/rss.xml">RSS (essays)</a></li>
+      </ul>
+    </div>
+    <div class="col">
+      <p class="label">Settings</p>
+      <button type="button" class="chip" data-motion-toggle aria-pressed="false">Motion: on</button>
+      <p class="muted small built">Built from Markdown · updated {built}</p>
+    </div>
+  </div>
+</footer>
+<script src="../scripts/motion.ts"></script>
+<style>
+  .site-footer { padding-block: clamp(48px, 8vh, 96px) 2rem; margin-top: clamp(64px, 10vh, 160px); }
+  .footer-inner { display: grid; gap: 2rem var(--gutter); grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
+  .col { grid-column: span 4; }
+  @media (min-width: 640px) { .col { grid-column: span 3; } }
+  @media (min-width: 1024px) { .col { grid-column: span 3; } }
+  .label { margin: 0 0 0.75rem; }
+  .links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; font-size: var(--t-small); }
+  .links a { color: var(--fg); }
+  .links a:hover { color: var(--gold); }
+  .num { font-size: 11px; color: var(--gold); }
+  .built { margin-top: 1rem; }
+  p { margin: 0; }
+</style>

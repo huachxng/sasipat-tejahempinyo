@@ -1,0 +1,6 @@
+---
+// STUB — replaced by the hero agent. Props: focus?: string (graph node id like "notes/slug").
+interface Props { focus?: string }
+const { focus } = Astro.props;
+---
+<div class="graph2d" data-focus={focus} style="min-height:40vh;border:1px solid var(--rule)"></div>

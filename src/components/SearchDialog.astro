@@ -1,0 +1,20 @@
+---
+---
+<dialog id="search-dialog" class="search-dialog" aria-label="Search">
+  <div class="inner">
+    <button type="button" class="chip" data-search-close>Close</button>
+    <div id="search" class="pagefind-host"></div>
+  </div>
+</dialog>
+<script>
+  const dlg = document.getElementById('search-dialog') as HTMLDialogElement | null;
+  document.querySelector('[data-search-open]')?.addEventListener('click', () => dlg?.showModal());
+  document.querySelector('[data-search-close]')?.addEventListener('click', () => dlg?.close());
+  dlg?.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+</script>
+<style>
+  .search-dialog { border: 1px solid var(--rule-strong); background: var(--bg-2); color: var(--fg); padding: 0; width: min(92vw, 720px); margin-top: 10vh; }
+  .search-dialog::backdrop { background: rgba(10, 10, 11, 0.7); backdrop-filter: blur(4px); }
+  .inner { padding: 1rem; display: grid; gap: 1rem; }
+  .chip { justify-self: end; }
+</style>

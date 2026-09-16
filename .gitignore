@@ -1,0 +1,22 @@
+node_modules
+dist
+.astro
+.vercel
+.DS_Store
+*.log
+test-results
+playwright-report
+# Obsidian per-machine state
+content/.obsidian/workspace*.json
+content/.obsidian/cache
+# private notes never leave this machine
+content/_private/
+# never publish documents or video from the vault
+content/**/*.pdf
+content/**/*.docx
+content/**/*.doc
+content/**/*.mp4
+content/**/*.mov
+content/**/*.m4v
+content/**/*.heic
+content/**/*.zip

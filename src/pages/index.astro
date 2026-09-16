@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPublished } from '../lib/published.ts';
+const ach = await getPublished('achievements');
+const notes = await getPublished('notes');
+const posts = await getPublished('blog');
+---
+<Base title="Sasipat (Hua) Tejahempinyo" active="home">
+  <section class="container section">
+    <h1 class="display t-1">Sasipat<br />Tejahempinyo</h1>
+    <p class="mono muted">{ach.length} achievements · {notes.length} notes · {posts.length} essays</p>
+  </section>
+</Base>

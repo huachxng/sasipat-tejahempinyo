@@ -1,0 +1,22 @@
+---
+import { CHAPTERS, type ChapterSlug } from '../site.config.ts';
+interface Props { current: ChapterSlug }
+const { current } = Astro.props;
+const i = CHAPTERS.findIndex((c) => c.slug === current);
+const next = CHAPTERS[(i + 1) % CHAPTERS.length];
+---
+<a class="chapter-next ruled" href={next.href}>
+  <div class="container inner">
+    <span class="label">Next chapter</span>
+    <span class="display t-1"><span class="num numeral" aria-hidden="true">{next.num}</span> {next.title} <span class="arrow" aria-hidden="true">→</span></span>
+  </div>
+</a>
+<style>
+  .chapter-next { display: block; color: var(--fg); padding-block: clamp(48px, 8vh, 120px); }
+  .chapter-next:hover { text-decoration: none; }
+  .inner { display: grid; gap: 0.75rem; }
+  .num { font-size: 0.6em; vertical-align: 0.2em; margin-right: 0.15em; }
+  .arrow { display: inline-block; transition: transform var(--d-small) var(--ease-out-quint); }
+  .chapter-next:hover .arrow { transform: translateX(8px); }
+  .chapter-next:hover .num, .chapter-next:hover .display { color: var(--gold); }
+</style>

@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPublished } from '../../lib/published.ts';
+import { render } from 'astro:content';
+export async function getStaticPaths() {
+  const notes = await getPublished('notes');
+  return notes.map((n) => ({ params: { id: n.id }, props: { n } }));
+}
+const { n } = Astro.props;
+const { Content } = await render(n);
+---
+<Base title={n.data.title ?? n.id} active="notes">
+  <article class="container section prose">
+    <h1 class="display t-2">{n.data.title}</h1>
+    <Content />
+  </article>
+</Base>

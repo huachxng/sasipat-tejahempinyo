@@ -1,0 +1,68 @@
+---
+import { CHAPTERS, type ChapterSlug } from '../site.config.ts';
+interface Props { active?: ChapterSlug | 'home' }
+const { active } = Astro.props;
+---
+<header class="site-nav" data-nav>
+  <div class="container nav-inner">
+    <a class="wordmark" href="/" aria-label="Home">HUA</a>
+    <nav class="chapters" aria-label="Chapters">
+      <ul>
+        {CHAPTERS.map((c) => (
+          <li>
+            <a href={c.href} aria-current={active === c.slug ? 'page' : undefined}>
+              <span class="num">{c.num}</span><span class="lbl">{c.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="nav-btn" data-search-open aria-label="Search (press / or ⌘K)">
+        <span class="num">/</span><span class="lbl">Search</span>
+      </button>
+      <button type="button" class="nav-btn menu-btn" data-menu-open aria-haspopup="dialog" aria-controls="site-menu">Menu</button>
+    </div>
+  </div>
+  <dialog id="site-menu" class="menu" aria-label="Chapters">
+    <div class="menu-inner">
+      <button type="button" class="nav-btn menu-close" data-menu-close>Close</button>
+      <ol class="menu-list">
+        {CHAPTERS.map((c, i) => (
+          <li style={`--i:${i}`}>
+            <a href={c.href} aria-current={active === c.slug ? 'page' : undefined}>
+              <span class="num">{c.num}</span>
+              <span class="display">{c.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </dialog>
+</header>
+<script src="../scripts/nav.ts"></script>
+<style>
+  .site-nav { position: fixed; inset: 0 0 auto 0; z-index: 80; height: var(--nav-h); transition: background var(--d-small), backdrop-filter var(--d-small); }
+  .site-nav.is-scrolled { background: rgba(10, 10, 11, 0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule); }
+  .nav-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .wordmark { font-family: var(--font-display), sans-serif; font-weight: 700; letter-spacing: 0.08em; color: var(--fg); font-size: 0.95rem; }
+  .wordmark:hover { color: var(--gold); text-decoration: none; }
+  .chapters { display: none; }
+  .chapters ul { display: flex; gap: clamp(1rem, 2.2vw, 2rem); list-style: none; margin: 0; padding: 0; }
+  .chapters a, .nav-btn { display: inline-flex; align-items: baseline; gap: 0.45em; color: var(--fg); font-size: var(--t-small); padding: 0.25rem 0; border-bottom: 1px solid transparent; }
+  .chapters a:hover, .nav-btn:hover { color: var(--gold); text-decoration: none; }
+  .chapters a[aria-current='page'] { color: var(--gold); border-bottom-color: var(--gold); }
+  .num { font-family: var(--font-mono), monospace; font-size: 11px; color: var(--gold); letter-spacing: 0.04em; }
+  .nav-actions { display: flex; gap: 1.25rem; align-items: center; }
+  .menu-btn .lbl { font-size: var(--t-small); }
+  @media (min-width: 1024px) { .chapters { display: block; } .menu-btn { display: none; } }
+  .menu { border: 0; padding: 0; margin: 0; width: 100vw; max-width: none; height: 100svh; max-height: none; background: var(--bg); color: var(--fg); }
+  .menu::backdrop { background: rgba(10, 10, 11, 0.6); }
+  .menu-inner { padding: 1rem var(--margin) 2rem; display: flex; flex-direction: column; min-height: 100%; }
+  .menu-close { align-self: flex-end; height: var(--nav-h); }
+  .menu-list { list-style: none; margin: auto 0; padding: 0; display: grid; gap: 0.35em; }
+  .menu-list a { display: flex; align-items: baseline; gap: 0.6em; color: var(--fg); font-size: clamp(2rem, 9vw, 4rem); }
+  .menu-list a[aria-current='page'] .display, .menu-list a:hover .display { color: var(--gold); }
+  .menu-list li { opacity: 0; transform: translateY(12px); transition: opacity var(--d-small) var(--ease-out-expo), transform var(--d-small) var(--ease-out-expo); transition-delay: calc(var(--i) * 60ms); }
+  .menu[open] .menu-list li { opacity: 1; transform: none; }
+</style>

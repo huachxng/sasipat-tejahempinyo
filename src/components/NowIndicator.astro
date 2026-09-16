@@ -1,0 +1,14 @@
+---
+interface Props { text: string }
+const { text } = Astro.props;
+---
+<div class="now-indicator mono" data-now aria-live="polite">
+  <span class="dot" aria-hidden="true"></span>
+  <span class="now-text" data-now-text data-now-default={text}>{text}</span>
+</div>
+<style>
+  .now-indicator { position: fixed; left: var(--margin); bottom: 16px; z-index: 70; display: flex; align-items: center; gap: 0.6em; font-size: 12px; color: var(--fg-2); max-width: min(60vw, 420px); pointer-events: none; }
+  .dot { width: 6px; height: 6px; background: var(--gold); flex: none; }
+  .now-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 640px) { .now-indicator { display: none; } }
+</style>

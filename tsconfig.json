@@ -1,0 +1,12 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "erasableSyntaxOnly": true,
+    "types": ["astro/client", "node"]
+  },
+  "include": [".astro/types.d.ts", "src/**/*", "scripts/**/*", "tests/**/*", "astro.config.mjs"],
+  "exclude": ["dist", "node_modules"]
+}

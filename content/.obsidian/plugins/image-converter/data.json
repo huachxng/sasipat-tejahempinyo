@@ -1,0 +1,1 @@
+{ "outputFormat": "JPEG", "quality": 80, "resizeMode": "LongestEdge", "desiredLongestEdge": 2000, "attachmentLocation": "specified", "attachmentSpecifiedFolder": "media", "autoRename": true, "renameFormat": "{notename}-{timestamp}" }

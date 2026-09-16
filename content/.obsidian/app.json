@@ -1,0 +1,14 @@
+{
+  "useMarkdownLinks": false,
+  "newLinkFormat": "shortest",
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "notes",
+  "attachmentFolderPath": "media",
+  "strictLineBreaks": false,
+  "propertiesInDocument": "visible",
+  "showUnsupportedFiles": false,
+  "userIgnoreFilters": ["_templates/", ".obsidian/"],
+  "promptDelete": true,
+  "trashOption": "system"
+}

@@ -1,0 +1,40 @@
+---
+import { SITE_URL, PERSON } from '../site.config.ts';
+interface Props {
+  title: string;
+  description?: string;
+  type?: 'website' | 'article' | 'profile';
+  image?: string; // absolute or root-relative
+  noindex?: boolean;
+  published?: Date;
+  modified?: Date;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+const { title, description = `${PERSON.displayName}: achievements, notes and essays on economics, data and archery.`, type = 'website', image = '/og/default.png', noindex = false, published, modified, jsonLd } = Astro.props;
+const canonical = new URL(Astro.url.pathname.replace(/\/$/, '') || '/', SITE_URL).toString();
+const ogImage = new URL(image, SITE_URL).toString();
+const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
+<meta name="theme-color" content="#0a0a0b" />
+<meta property="og:site_name" content={PERSON.displayName} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+{published && <meta property="article:published_time" content={published.toISOString()} />}
+{modified && <meta property="article:modified_time" content={modified.toISOString()} />}
+<link rel="alternate" type="application/rss+xml" title="Essays by Noah" href="/rss.xml" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="manifest" href="/site.webmanifest" />
+{ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}

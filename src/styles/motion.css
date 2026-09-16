@@ -1,0 +1,29 @@
+/* Cross-document view transitions, zero JS. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: vt-out 220ms var(--ease-in-out-quart) both; }
+::view-transition-new(root) { animation: vt-in 320ms var(--ease-out-expo) both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(12px); } }
+.site-nav { view-transition-name: site-nav; }
+.grain { view-transition-name: grain; }
+.now-indicator { view-transition-name: now-indicator; }
+
+/* Headline reveals: wrap in .reveal, add .in when visible. */
+.reveal { overflow: hidden; }
+.reveal > * { display: block; transform: translateY(105%); transition: transform var(--d-large) var(--ease-out-expo); }
+.reveal.in > *, .no-js .reveal > * { transform: none; }
+.fade { opacity: 0; transform: translateY(12px); transition: opacity var(--d-medium) var(--ease-out-expo), transform var(--d-medium) var(--ease-out-expo); }
+.fade.in, .no-js .fade { opacity: 1; transform: none; }
+.stagger > * { transition-delay: calc(var(--i, 0) * 60ms); }
+
+/* Reduced motion, or the footer toggle. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.01ms; }
+  .reveal > *, .fade { transition-duration: 300ms; transform: none; }
+  .reveal > * { transition-property: opacity; }
+}
+html[data-motion='off'] { scroll-behavior: auto; }
+html[data-motion='off'] ::view-transition-old(root), html[data-motion='off'] ::view-transition-new(root) { animation-duration: 0.01ms; }
+html[data-motion='off'] .reveal > *, html[data-motion='off'] .fade { transition: opacity 300ms; transform: none; }
+html[data-motion='off'] .stagger > * { transition-delay: 0ms; }

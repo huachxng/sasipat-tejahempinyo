@@ -1,0 +1,6 @@
+---
+// STUB — replaced by the hero agent. Props: nodeId: string (graph node id like "notes/slug").
+interface Props { nodeId: string }
+const { nodeId } = Astro.props;
+---
+<div class="local-graph" data-node={nodeId}></div>

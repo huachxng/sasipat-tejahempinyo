@@ -1,0 +1,9 @@
+@media print {
+  :root { --bg: #fff; --bg-2: #fff; --fg: #111; --fg-2: #333; --fg-3: #666; --rule: #ddd; --rule-strong: #bbb; }
+  @page { size: Letter; margin: 0.6in; }
+  html, body { background: #fff !important; color: #111 !important; }
+  .site-nav, .site-footer, .grain, .now-indicator, .no-print, .skip-link, .draft-ribbon { display: none !important; }
+  main { padding-top: 0 !important; }
+  a { color: #111; text-decoration: none; }
+  .print-page { max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; }
+}

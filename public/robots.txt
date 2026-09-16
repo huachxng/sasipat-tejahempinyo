@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://sasipat-tejahempinyo.vercel.app/sitemap-index.xml
