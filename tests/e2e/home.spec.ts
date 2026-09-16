@@ -48,7 +48,8 @@ test.describe('home hero', () => {
     expect(await page.locator('canvas:visible').count()).toBe(0);
   });
 
-  test('keyboard order: skip link, nav, hub list, chapter index', async ({ page }) => {
+  test('keyboard order: skip link, nav, hub list, chapter index', async ({ page, browserName }) => {
+    test.skip(browserName === 'webkit', 'WebKit on macOS does not move focus to links with Tab (Safari default); verified in Chromium');
     await page.goto('/', { waitUntil: 'load' });
     const seen: string[] = [];
     for (let i = 0; i < 60; i++) {

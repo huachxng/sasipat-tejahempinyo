@@ -6,7 +6,8 @@ test.describe('achievement lightbox', () => {
     test.slow();
     // find an achievement page with at least two gallery triggers
     const candidates = [KNOWN.achievementWithGallery, ...(await sitemapPaths(request)).filter((p) => p.startsWith('/achievements/'))];
-    const trigger = page.locator('main .gallery a, main figure a[href], main a[data-pswp-width]');
+    // Lightbox triggers: the achievements builder's `.lb-trigger`, or generic PhotoSwipe/gallery anchors (never the local-graph SVG links).
+    const trigger = page.locator('main .lb-trigger, main a[data-pswp-width], main .gallery a[href]').filter({ hasNot: page.locator('.local-graph') });
     let opened = '';
     for (const path of candidates.slice(0, 12)) {
       const res = await page.goto(path);

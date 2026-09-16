@@ -46,8 +46,8 @@ test.describe('/achievements timeline', () => {
     const res = await page.goto(path);
     expect(res?.status()).toBe(200);
     await expect(page.locator('main h1')).toBeVisible();
-    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(await page.locator('script[type="application/ld+json"]').count());
-    expect(await page.locator('script[type="application/ld+json"]').count()).toBeGreaterThan(0);
-    await expect(page.locator('main[data-pagefind-body]')).toBeAttached();
+    expect(await page.locator('script[type="application/ld+json"]').count(), 'BreadcrumbList JSON-LD').toBeGreaterThan(0);
+    await expect(page.locator('main [data-pagefind-body], main[data-pagefind-body]').first()).toBeAttached();
+    await expect(page.locator('main').getByText(/connected/i).first()).toBeAttached();
   });
 });

@@ -10,7 +10,7 @@ test.describe('notes chapter', () => {
     const section = linkedFrom.locator('xpath=ancestor::*[self::section or self::aside or self::div][1]');
     expect(await section.locator('a[href^="/notes/"], a[href^="/blog/"], a[href^="/achievements/"]').count()).toBeGreaterThan(0);
     await expect(page.locator('main svg a[href^="/"]').first()).toBeAttached();
-    await expect(page.locator('main[data-pagefind-body]')).toBeAttached();
+    await expect(page.locator('main [data-pagefind-body], main[data-pagefind-body]').first()).toBeAttached();
     await expect(page.locator('body')).toContainText('Noah');
   });
 
@@ -42,7 +42,9 @@ test.describe('notes chapter', () => {
     expect(await page.locator('iframe').count(), 'no iframe before the section is near the viewport').toBe(0);
     expect(await page.locator('script[src*="giscus.app"]').count()).toBe(0);
 
-    await expect(page.locator('script[type="application/ld+json"]').filter({ hasText: 'BlogPosting' })).toHaveCount(1);
+    const jsonLd = await page.locator('script[type="application/ld+json"]').evaluateAll((els) => els.map((e) => e.textContent ?? ''));
+    expect(jsonLd.filter((t) => t.includes('"BlogPosting"')), 'one BlogPosting JSON-LD block').toHaveLength(1);
+    expect(jsonLd.join('\n')).toContain('Noah');
 
     // The giscus <script> is injected only once the section is near the viewport (and only when giscus is configured).
     const { GISCUS } = await import('../../src/site.config.ts');

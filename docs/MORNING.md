@@ -9,12 +9,13 @@
 - 03 About (names block, your bio), 04 Resume (page + `resume.pdf`, 29 entries, 2 pages), 05 Contact (s.tejahempinyo@gmail.com, GitHub).
 - Safety rails: nothing publishes without `publish: true`; the build refuses ID numbers, passport data, PDFs and videos; `content/_private/` never leaves your Mac.
 
-## Five things only you can do (about 10 minutes)
+## Six things only you can do (about 12 minutes)
 1. **Vercel push-to-deploy**: vercel.com → project `sasipat-tejahempinyo` → Settings → Git → Connect `huachxng/sasipat-tejahempinyo` (installs the Vercel GitHub app). Until then I deploy from the terminal.
 2. **Comments**: install https://github.com/apps/giscus on *only* this repository, then tell me. Discussions are already enabled and the ids are recorded; I flip one flag.
 3. **CI**: in the prompt type `! gh auth refresh -h github.com -s workflow` and approve in the browser. Then I move `.github/workflows-pending` back and the content checks + tests run on every push.
 4. **Publish button**: `! brew install --cask github`, open GitHub Desktop, sign in as huachxng, File → Add Local Repository → `~/Sites/sasipat-tejahempinyo`.
-5. **Obsidian**: File → Open folder as vault → `~/Sites/sasipat-tejahempinyo/content`. Trust the settings. Settings → Community plugins → Browse → install and enable **Image Converter** (its settings are already in place). `content/README.md` is the one-page guide; `⌘T` inserts a template.
+5. **Analytics** (optional, free): Vercel → project → Analytics tab → Enable. Cookieless, no banner needed.
+6. **Obsidian**: File → Open folder as vault → `~/Sites/sasipat-tejahempinyo/content`. Trust the settings. Settings → Community plugins → Browse → install and enable **Image Converter** (its settings are already in place). `content/README.md` is the one-page guide; `⌘T` inserts a template.
 
 ## Please review (in Obsidian)
 - `_inbox/Review checklist.md` — every fact I could not verify, every held-back image, and the photo questions. Fix directly in the notes; anything with `%% … %%` around it is a private comment that never renders.
