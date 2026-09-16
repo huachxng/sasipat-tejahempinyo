@@ -124,6 +124,7 @@ for (const f of files) {
   if (f.size > ASSET_LIMIT) error(relName(f.rel), `is ${(f.size / MB).toFixed(1)} MB (limit 2 MB)`, f.rel.startsWith('_astro/') ? 'lower the image widths/quality in the component that emits it, or `npm run shrink` the source' : 'shrink or remove the file');
 }
 if (!fileSet.has('resume.pdf')) warning(relName('resume.pdf'), 'resume.pdf is missing from the build output', 'scripts/resume-pdf.mjs should write it in postbuild before check-dist runs');
+if (fileSet.has('resume.json')) warning(relName('resume.json'), 'resume.json is still in the build output (it exists only to feed the PDF script)', 'scripts/resume-pdf.mjs deletes it after writing resume.pdf; run the full `npm run build`');
 
 // ---------------------------------------------------------------------------------------------- 4. internal links resolve
 const stripHashQuery = (u: string) => u.split('#')[0].split('?')[0];

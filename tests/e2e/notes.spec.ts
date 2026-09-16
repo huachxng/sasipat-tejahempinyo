@@ -42,13 +42,20 @@ test.describe('notes chapter', () => {
     expect(await page.locator('iframe').count(), 'no iframe before the section is near the viewport').toBe(0);
     expect(await page.locator('script[src*="giscus.app"]').count()).toBe(0);
 
+    await expect(page.locator('script[type="application/ld+json"]').filter({ hasText: 'BlogPosting' })).toHaveCount(1);
+
+    // The giscus <script> is injected only once the section is near the viewport (and only when giscus is configured).
+    const { GISCUS } = await import('../../src/site.config.ts');
+    if (!GISCUS.repoId || !GISCUS.categoryId) {
+      test.info().annotations.push({ type: 'skip-part', description: 'GISCUS.repoId/categoryId not set yet in site.config.ts; script injection not asserted' });
+      return;
+    }
     await comments.scrollIntoViewIfNeeded();
     const script = page.locator('script[src*="giscus.app/client.js"]');
     await expect(script).toHaveCount(1, { timeout: 5_000 });
-    expect(await script.getAttribute('data-repo')).toMatch(/^[\w.-]+\/[\w.-]+$/);
+    expect(await script.getAttribute('data-repo')).toBe(GISCUS.repo);
     expect(await script.getAttribute('data-mapping')).toBe('pathname');
     expect(await script.getAttribute('data-strict')).toBe('1');
-    await expect(page.locator('script[type="application/ld+json"]').filter({ hasText: 'BlogPosting' })).toHaveCount(1);
   });
 
   test('the search dialog opens with ⌘K, / and the nav button', async ({ page }) => {

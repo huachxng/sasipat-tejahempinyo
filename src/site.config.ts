@@ -63,7 +63,8 @@ export const RESUME_SECTION_BY_CATEGORY: Record<CategoryKey, ResumeSection> = {
 };
 export const RESUME_SECTION_CAP = 8;
 
-// Fill repoId/categoryId from https://giscus.app after enabling Discussions on the repo.
+// Discussions are enabled on the repo. Ids (captured 2026-09-16): repoId 'R_kgDOUdpVhQ', category 'Announcements' id 'DIC_kwDOUdpVhc4DFvw9'.
+// Fill them in below ONLY after the giscus GitHub App is installed on the repo, otherwise visitors see a giscus error box.
 export const GISCUS = {
   repo: REPO,
   repoId: '',
