@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import ChapterHeader from '../components/ChapterHeader.astro';
+import ChapterNext from '../components/ChapterNext.astro';
+import { PERSON } from '../site.config.ts';
+
+const githubLabel = PERSON.github.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const linkedinLabel = PERSON.linkedin ? PERSON.linkedin.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') : '';
+const description = `Email, GitHub and the one-page resume PDF for ${PERSON.displayName}.`;
+---
+<Base title={`Contact — ${PERSON.displayName}`} {description} active="contact">
+  <ChapterHeader slug="contact" />
+
+  <section class="contact ruled">
+    <div class="container">
+      <ol class="c-list">
+        <li class="c-row">
+          <span class="c-label label">Email</span>
+          <div class="c-body">
+            <a id="contact-email" class="c-value display" href={`mailto:${PERSON.email}`}>{PERSON.email}</a>
+            <p class="c-note">The whole system: research, archery, the podcast, or a correction to something written here.</p>
+          </div>
+          <div class="c-action">
+            <button type="button" class="chip copy-btn" data-copy={PERSON.email} data-copy-target="contact-email" aria-label={`Copy ${PERSON.email} to the clipboard`}>Copy</button>
+          </div>
+        </li>
+
+        <li class="c-row">
+          <span class="c-label label">GitHub</span>
+          <div class="c-body">
+            <a class="c-value display" href={PERSON.github} rel="me noopener" target="_blank">{githubLabel}</a>
+            <p class="c-note">Code, including the replication pipeline for the AI-bubble paper.</p>
+          </div>
+          <span class="c-action c-ext mono" aria-hidden="true">↗</span>
+        </li>
+
+        {PERSON.linkedin && (
+          <li class="c-row">
+            <span class="c-label label">LinkedIn</span>
+            <div class="c-body">
+              <a class="c-value display" href={PERSON.linkedin} rel="me noopener" target="_blank">{linkedinLabel}</a>
+            </div>
+            <span class="c-action c-ext mono" aria-hidden="true">↗</span>
+          </li>
+        )}
+
+        <li class="c-row">
+          <span class="c-label label">Resume</span>
+          <div class="c-body">
+            <a class="c-value display" href="/resume.pdf">resume.pdf</a>
+            <p class="c-note">For application readers: one page, generated at build time from the same entries as the timeline. Also as a <a href="/resume">web page</a>.</p>
+          </div>
+          <span class="c-action c-ext mono" aria-hidden="true">PDF</span>
+        </li>
+      </ol>
+
+      <p class="response mono"><span class="marker" aria-hidden="true"></span><span>Response time — usually within two or three days; slower during exams and competition weeks. There is no form; email reaches me directly.</span></p>
+      <p class="sr-only" role="status" aria-live="polite" data-copy-status></p>
+    </div>
+  </section>
+
+  <ChapterNext current="contact" />
+</Base>
+
+<script>
+  // Copy-to-clipboard with graceful fallbacks: Clipboard API → execCommand over a selection → leave the address selected.
+  const btn = document.querySelector<HTMLButtonElement>('[data-copy]');
+  const status = document.querySelector<HTMLElement>('[data-copy-status]');
+  if (btn) {
+    const idle = btn.textContent?.trim() || 'Copy';
+    let timer: number | undefined;
+    const say = (msg: string) => {
+      btn.textContent = msg;
+      if (status) status.textContent = msg === idle ? '' : msg;
+      window.clearTimeout(timer);
+      if (msg !== idle) timer = window.setTimeout(() => say(idle), 2000);
+    };
+    const selectTarget = () => {
+      const target = document.getElementById(btn.dataset.copyTarget ?? '');
+      if (!target) return false;
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+      return true;
+    };
+    btn.addEventListener('click', async () => {
+      const text = btn.dataset.copy ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        say('Copied');
+        return;
+      } catch {}
+      const selected = selectTarget();
+      let ok = false;
+      try { ok = selected && document.execCommand('copy'); } catch {}
+      say(ok ? 'Copied' : selected ? 'Selected — press ⌘C' : 'Copy failed');
+    });
+  }
+</script>
+
+<style>
+  .contact { padding-block: clamp(40px, 6vh, 88px) clamp(64px, 10vh, 160px); }
+  .c-list { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--rule); }
+  .c-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'label action' 'body body';
+    gap: 0.75rem var(--gutter);
+    align-items: start;
+    padding-block: clamp(24px, 4vw, 44px);
+    border-top: 1px solid var(--rule);
+  }
+  .c-label { grid-area: label; margin: 0; padding-top: 0.35em; }
+  .c-body { grid-area: body; min-width: 0; display: grid; gap: 0.75rem; }
+  .c-action { grid-area: action; justify-self: end; }
+  .c-value { font-size: clamp(1.375rem, 4.6vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; color: var(--fg); overflow-wrap: anywhere; }
+  .c-value:hover, .c-value:focus-visible { color: var(--gold); text-decoration: none; }
+  .c-note { margin: 0; color: var(--fg-2); max-width: 60ch; text-wrap: pretty; font-size: var(--t-small); }
+  .c-note a { text-decoration: underline; text-decoration-color: var(--gold-dim); }
+  .c-ext { font-size: var(--t-small); color: var(--fg-3); letter-spacing: 0.06em; padding-top: 0.25em; }
+  .copy-btn { min-width: 5.5em; justify-content: center; }
+  :global(html.no-js) .copy-btn { display: none; }
+  .response { display: grid; grid-template-columns: 6px minmax(0, 1fr); gap: 0.75rem; align-items: start; margin: clamp(32px, 5vh, 56px) 0 0; font-size: var(--t-small); color: var(--fg-2); max-width: 60ch; }
+  .response .marker { margin-top: 0.55em; }
+  @media (min-width: 768px) {
+    .c-row { grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) auto; grid-template-areas: 'label body action'; }
+  }
+  @media (min-width: 1024px) {
+    .c-row { grid-template-columns: calc(3 * ((100% - 11 * var(--gutter)) / 12) + 2 * var(--gutter)) minmax(0, 1fr) auto; }
+  }
+</style>

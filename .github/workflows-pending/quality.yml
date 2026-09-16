@@ -1,0 +1,65 @@
+# Code quality for the assistant's branches and PRs: unit tests, types, the full build (prebuild check-content →
+# astro build → postbuild resume PDF + check-dist), bundle budgets, Playwright + axe, and Lighthouse CI.
+# Content-only pushes are handled by content-check.yml. A red run here never blocks the author's deploys.
+name: Quality
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['content/**']
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1' # Mondays 03:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CI: true
+      STRICT_LINKS: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+
+      - name: Unit tests
+        run: npx vitest run
+
+      - name: Types (astro check)
+        run: npx astro check
+
+      - name: Build (check-content → astro build → resume PDF → check-dist)
+        run: npm run build
+
+      - name: Bundle budgets
+        run: npx size-limit
+
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Playwright + axe
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+      - name: Lighthouse CI (mobile, /, /achievements, /notes)
+        continue-on-error: true
+        run: npx --yes @lhci/cli@0.15.1 autorun

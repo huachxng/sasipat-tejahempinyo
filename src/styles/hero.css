@@ -1,0 +1,92 @@
+/* Home hero: wordmark + note graph (SVG poster, Canvas upgrade). Tokens from tokens.css; no radius anywhere. */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-height: 100svh;
+  margin-top: calc(-1 * var(--nav-h)); /* the graph runs behind the transparent nav */
+  padding-top: var(--nav-h);
+  overflow: hidden;
+}
+
+/* graph box: right ~55 % on desktop (height capped so the box is never taller than 1.18× its width — the poster's
+   `slice` scaling and the canvas share that geometry, so the object always fits the box), top 55 % below 1024 px */
+.hero-graph { position: absolute; top: 50%; right: 0; left: 45%; height: min(100%, 64.7vw); transform: translateY(-50%); z-index: 0; opacity: calc(1 - var(--hg-p, 0)); }
+.hg-svg, .hero-gl { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hg-svg { overflow: hidden; transform: scale(0.97); transform-origin: 50% 50%; transition: opacity 500ms var(--ease-out-expo), transform 900ms var(--ease-out-expo); }
+.hero.is-live .hg-svg { opacity: 0; transform: none; pointer-events: none; }
+.hero-gl { opacity: 0; transition: opacity 500ms var(--ease-out-expo); touch-action: pan-y; }
+.hero.is-live .hero-gl { opacity: 1; }
+.hero-gl.is-pointer { cursor: pointer; }
+
+/* poster styling (mirrors the canvas sprites) */
+.hg-svg .s-fg { stop-color: var(--fg); }
+.hg-svg .s-fg2 { stop-color: var(--fg-2); }
+.hg-svg .s-gold { stop-color: var(--gold); }
+.hg-svg line { stroke: var(--edge); stroke-width: 1; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.hg-svg .hg-n circle { fill: url(#hg-w); transition: fill var(--d-micro) var(--ease-out-quint), stroke var(--d-micro) var(--ease-out-quint); }
+.hg-svg .hg-n.is-ach circle { fill: url(#hg-a); }
+.hg-svg .hg-n.is-gold circle { fill: url(#hg-g); }
+.hg-svg .hg-n.is-tag circle { fill: none; stroke: var(--gold-dim); }
+.hg-svg .hg-n:hover, .hg-svg .hg-n:focus-visible, .hg-svg .hg-n.is-focus { opacity: 1; }
+.hg-svg .hg-n:hover circle, .hg-svg .hg-n:focus-visible circle, .hg-svg .hg-n.is-focus circle { fill: var(--gold); }
+.hg-svg .hg-n.is-tag:hover circle, .hg-svg .hg-n.is-tag:focus-visible circle, .hg-svg .hg-n.is-tag.is-focus circle { fill: none; stroke: var(--gold); }
+.hg-svg .hg-n:focus { outline: none; }
+.hg-svg .hg-n:focus-visible circle { outline: var(--focus); outline-offset: 3px; }
+
+/* label chip (shared markup with the 2D map) */
+.hg-label {
+  position: absolute; z-index: 2; pointer-events: none;
+  display: grid; gap: 0.2rem; max-width: 260px; padding: 0.5rem 0.7rem;
+  background: var(--bg-2); border: 1px solid var(--rule-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.hg-kind { font: 500 var(--t-label) / 1.2 var(--font-mono), monospace; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+.hg-title { font: 500 16px / 1.25 var(--font-display), sans-serif; letter-spacing: -0.01em; color: var(--fg); text-wrap: balance; }
+.hg-date { font: 400 var(--t-label) / 1.2 var(--font-mono), monospace; color: var(--fg-2); }
+.hg-open { display: none; font: 500 var(--t-label) / 1.2 var(--font-mono), monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-top: 0.2rem; }
+.hg-label.is-tap .hg-open { display: block; }
+.hg-label[hidden] { display: none; }
+
+/* type */
+.hero-type { position: relative; z-index: 1; align-self: end; padding-bottom: clamp(56px, 9vh, 112px); pointer-events: none; }
+.hero-type a { pointer-events: auto; }
+.wordmark {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 600;
+  font-size: min(var(--t-hero), 12.6vw);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.wm-line { display: block; }
+.wm-sup {
+  display: inline-block; vertical-align: top; position: relative; top: 0.12em; margin-left: 0.3em;
+  font: 500 var(--t-label) / 1.2 var(--font-mono), monospace; letter-spacing: 0.04em; text-transform: none; color: var(--fg-2); white-space: nowrap;
+}
+.hero-explore { display: inline-block; margin-top: 1.75rem; font-size: var(--t-small); letter-spacing: 0.02em; }
+
+/* scroll hint */
+.hero-scroll {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 1;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: var(--t-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3);
+}
+.hero-scroll span { display: block; width: 1px; height: 32px; background: var(--rule-strong); }
+
+/* sr-only hub list stays focusable; the focus ring is drawn on the graph instead */
+.hero .hero-hubs a:focus { outline: none; }
+
+@media (max-width: 1023px) {
+  .hero { grid-template-rows: 55% 1fr; }
+  .hero-graph { inset: 0 0 auto 0; height: 55%; transform: none; }
+  .hero-type { grid-row: 2; align-self: center; padding-block: 24px 64px; }
+  .wm-sup { display: block; margin: 0 0 0.5rem; top: 0; }
+  .hero-explore { margin-top: 1.25rem; }
+  .hero-scroll { display: none; }
+}
+@media (max-width: 1023px) and (min-height: 700px) {
+  .hero-scroll { display: flex; }
+}

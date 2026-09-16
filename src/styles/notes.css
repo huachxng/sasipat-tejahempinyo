@@ -1,0 +1,84 @@
+/* Chapter 02 — notes, blog, tags. Page-level layout; components (NoteCard, TagList, Backlinks, Comments) carry their own styles. */
+
+/* Tabs under the chapter header (client-side on /notes, plain links on /blog) */
+.tabs { margin-top: clamp(24px, 4vh, 40px); }
+.tabs__list { display: flex; gap: clamp(1.5rem, 4vw, 3rem); border-bottom: 1px solid var(--rule); }
+.tab { display: inline-flex; align-items: baseline; gap: 0.5em; padding: 0.6rem 0; margin-bottom: -1px; color: var(--fg-2); font-family: var(--font-display), sans-serif; font-weight: 600; font-size: var(--t-3); letter-spacing: -0.02em; border-bottom: 2px solid transparent; transition: color var(--d-micro) var(--ease-out-quint), border-color var(--d-micro) var(--ease-out-quint); }
+.tab:hover { color: var(--gold); text-decoration: none; }
+.tab[aria-selected='true'], .tab[aria-current='page'] { color: var(--fg); border-bottom-color: var(--gold); }
+.tab .count { font-family: var(--font-mono), monospace; font-size: var(--t-label); color: var(--fg-3); letter-spacing: 0; font-weight: 400; }
+.tabpanel[hidden] { display: none; }
+
+/* 2D graph panel */
+.graph-section { padding-block: clamp(24px, 4vh, 48px) clamp(40px, 6vh, 80px); scroll-margin-top: calc(var(--nav-h) + 16px); }
+.graph-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem 2rem; margin-bottom: 1rem; }
+.graph-head h2, .graph-head p { margin: 0; }
+.graph-head p { max-width: 60ch; }
+.graph-panel { min-height: 40vh; }
+@media (min-width: 1024px) { .graph-panel { min-height: 60vh; } }
+.graph-panel > :only-child { min-height: inherit; }
+
+/* Lists */
+.list-section { padding-block: clamp(40px, 6vh, 80px); scroll-margin-top: calc(var(--nav-h) + 16px); }
+.list-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+.list-head h2 { margin: 0; }
+.list-head .numeral { font-size: 0.7em; margin-left: 0.4em; }
+.list-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.list-tools .more { font-family: var(--font-mono), monospace; font-size: var(--t-small); margin-left: 0.5rem; }
+.note-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+
+/* Essays grouped by year */
+.year { display: grid; gap: 0.75rem; padding-top: clamp(24px, 4vh, 48px); }
+@media (min-width: 1024px) { .year { grid-template-columns: minmax(0, 2fr) minmax(0, 10fr); column-gap: var(--gutter); align-items: start; } }
+.year__label { margin: 0; font-size: var(--t-2); line-height: 1; }
+
+/* Tag cloud */
+.tags-section { padding-block: clamp(40px, 6vh, 80px); scroll-margin-top: calc(var(--nav-h) + 16px); }
+.tags-section h2 { margin: 0 0 1rem; }
+.tag-more { margin-top: 1rem; }
+.tag-more summary { list-style: none; cursor: pointer; width: max-content; }
+.tag-more summary::-webkit-details-marker { display: none; }
+.tag-more summary::before { content: '+'; margin-right: 0.5em; }
+.tag-more[open] summary::before { content: '−'; }
+.tag-more[open] summary { margin-bottom: 0.75rem; }
+.tag-page__counts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.25rem 0 0; font-size: 12px; color: var(--fg-2); }
+.tag-page__counts strong { color: var(--fg); font-weight: 500; }
+
+/* Entry (note or essay) */
+.entry { padding-top: clamp(32px, 6vh, 96px); }
+.entry__head { display: grid; gap: 1rem; margin-bottom: clamp(32px, 5vh, 64px); max-width: 68ch; }
+.entry__head h1 { margin: 0; overflow-wrap: anywhere; }
+.entry__eyebrow { margin: 0; font-size: 12px; color: var(--fg-2); letter-spacing: 0.02em; }
+.entry__eyebrow a { color: var(--fg-2); }
+.entry__eyebrow a:hover { color: var(--gold); }
+.entry__eyebrow .num { color: var(--gold); }
+.entry__thai { margin: 0; font-size: var(--t-3); line-height: 1.3; }
+.entry__meta { display: grid; gap: 1rem; }
+.entry__cover { margin: 0 0 clamp(32px, 5vh, 64px); max-width: 960px; }
+.entry__cover figcaption { margin-top: 0.5rem; font-family: var(--font-mono), monospace; font-size: 12px; color: var(--fg-3); }
+.entry__body h1 { font-family: var(--font-display), sans-serif; font-size: var(--t-3); font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+.entry__body.has-dup-h1 > h1:first-child { display: none; }
+.entry__body.has-dup-h1 > h1:first-child + * { margin-top: 0; }
+
+/* Connections + local graph */
+.entry__links { margin-top: clamp(48px, 8vh, 96px); padding-top: clamp(40px, 6vh, 72px); border-top: 1px solid var(--rule); display: grid; gap: 2.5rem var(--gutter); }
+@media (min-width: 1024px) { .entry__links { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); align-items: start; } }
+.entry__graph h2 { margin: 0 0 0.75rem; }
+.entry__graph .local-graph:empty { min-height: 240px; max-width: 360px; border: 1px dashed var(--rule); }
+.entry__open-graph { display: inline-block; margin-top: 0.75rem; font-family: var(--font-mono), monospace; font-size: var(--t-small); }
+
+/* Essay pager */
+.pager { margin-top: clamp(48px, 8vh, 96px); border-top: 1px solid var(--rule); display: grid; gap: 0 var(--gutter); }
+@media (min-width: 640px) { .pager { grid-template-columns: 1fr 1fr; } }
+.pager a { display: grid; gap: 0.4rem; padding: 1.25rem 0; color: var(--fg); align-content: start; }
+.pager a:hover { text-decoration: none; }
+.pager a:hover .pager__title { color: var(--gold); }
+.pager__title { font-family: var(--font-display), sans-serif; font-weight: 600; font-size: var(--t-3); line-height: 1.2; letter-spacing: -0.02em; text-wrap: balance; transition: color var(--d-micro) var(--ease-out-quint); }
+.pager--next { text-align: right; }
+@media (min-width: 640px) { .pager--next { grid-column: 2; } }
+.pager--prev + .pager--next { border-top: 1px solid var(--rule); }
+@media (min-width: 640px) { .pager--prev + .pager--next { border-top: 0; } }
+
+/* Share row (essays) */
+.share { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; margin-top: clamp(32px, 5vh, 48px); }
+.share__status { font-size: 12px; color: var(--fg-2); }

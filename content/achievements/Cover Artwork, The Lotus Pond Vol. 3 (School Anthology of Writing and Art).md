@@ -15,7 +15,7 @@ cover: lotus-pond-vol-3-cover-artwork-2025-01.jpg
 
 My artwork is the cover of The Lotus Pond Vol. 3, my school's 2024–25 anthology of student writing and art, credited 'Artwork by Hua T. (Grade 10)'. I also read at the anthology's launch event in April 2025.
 
-<!-- TODO (review): Confirm whether you also had a written piece in the anthology and what you read at the launch. -->
+%% TODO (review): Confirm whether you also had a written piece in the anthology and what you read at the launch. %%
 
 ![[lotus-pond-vol-3-cover-artwork-2025-01.jpg|Reading at the school event for The Lotus Pond Volume 3, with her cover artwork displayed on an easel.]]
 ![[lotus-pond-vol-3-cover-artwork-2025-02.jpg|Cover of The Lotus Pond Volume 3, the BASIS International School Bangkok 2024-2025 anthology, featuring the client's painting.]]

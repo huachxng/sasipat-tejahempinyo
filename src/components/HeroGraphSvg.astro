@@ -1,0 +1,44 @@
+---
+// Server-rendered poster of the note graph at the exact camera the canvas starts with. It shares the projection module
+// with the client renderer (same camera, same 1600×1000 box, same radii and edge alphas), so the canvas crossfade is
+// seamless and, with no JS / reduced motion, the poster *is* the hero graph: links work and nodes go gold on hover/focus.
+import { getGraph } from '../lib/graph.ts';
+import { CAM0, VB, EDGE_ALPHA, edgeClass, fog, nodeRadius, project } from '../scripts/graph-render.ts';
+
+const g = getGraph();
+const hubs = new Set(g.hubs);
+const gold = new Set(g.hubs.slice(0, 6)); // hubs are already the top non-tag nodes by degree
+const P = g.nodes.map((n) => {
+  const [x, y, z, s] = project(n.p3, CAM0.yaw, CAM0.pitch);
+  return { x: Math.round(VB.w / 2 + x * VB.r), y: Math.round(VB.h / 2 + y * VB.r), z, r: Math.round(nodeRadius(n.deg) * s * 10) / 10, f: Math.round(fog(z) * 100) / 100 };
+});
+// Edges batched by quantised alpha (8 bins), exactly like the canvas.
+const bins = new Map<number, number[]>();
+g.edges.forEach((e, j) => {
+  const a = EDGE_ALPHA[edgeClass(e, g.nodes)] * (P[e.s].f + P[e.t].f) * 0.5;
+  const b = Math.min(7, Math.floor(a * 8));
+  bins.set(b, [...(bins.get(b) ?? []), j]);
+});
+const order = g.nodes.map((n) => n.i).sort((a, b) => P[b].z - P[a].z); // back to front
+---
+<svg class="hg-svg" viewBox={`0 0 ${VB.w} ${VB.h}`} preserveAspectRatio="xMidYMid slice" aria-label="Map of connected notes, essays and achievements">
+  <defs>
+    <radialGradient id="hg-w" cx=".5" cy=".5" r=".5" fx=".39" fy=".37"><stop offset="0" stop-color="#fff" /><stop offset=".25" class="s-fg" /><stop offset=".9" class="s-fg" /><stop offset="1" class="s-fg" stop-opacity="0" /></radialGradient>
+    <radialGradient id="hg-a" cx=".5" cy=".5" r=".5" fx=".39" fy=".37"><stop offset="0" stop-color="#fff" /><stop offset=".25" class="s-fg2" /><stop offset=".9" class="s-fg2" /><stop offset="1" class="s-fg2" stop-opacity="0" /></radialGradient>
+    <radialGradient id="hg-g" cx=".5" cy=".5" r=".5" fx=".39" fy=".37"><stop offset="0" stop-color="#fff" /><stop offset=".25" class="s-gold" /><stop offset=".9" class="s-gold" /><stop offset="1" class="s-gold" stop-opacity="0" /></radialGradient>
+  </defs>
+  {[...bins.entries()].sort((a, b) => a[0] - b[0]).map(([b, js]) => (
+    <g class="hg-e" opacity={((b + 0.5) / 8).toFixed(3)}>
+      {js.map((j) => { const e = g.edges[j]; return <line x1={P[e.s].x} y1={P[e.s].y} x2={P[e.t].x} y2={P[e.t].y} />; })}
+    </g>
+  ))}
+  {order.map((i) => {
+    const n = g.nodes[i], p = P[i];
+    return (
+      <a href={n.u} class:list={['hg-n', { 'is-gold': gold.has(i), 'is-tag': n.k === 'tag', 'is-ach': n.k === 'ach' }]} data-i={i} tabindex={hubs.has(i) ? undefined : -1} style={`opacity:${p.f}`}>
+        {n.k === 'tag' ? <circle cx={p.x} cy={p.y} r={(p.r * 0.78).toFixed(1)} style={`stroke-width:${(p.r * 0.19).toFixed(2)}`} /> : <circle cx={p.x} cy={p.y} r={p.r} />}
+        <title>{n.t}</title>
+      </a>
+    );
+  })}
+</svg>

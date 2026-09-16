@@ -9,13 +9,13 @@ summary: "Volunteer TA for AP Micro and Macro, the ECONBRIEF101 channel, and why
 
 This year I am a volunteer teaching assistant for AP Microeconomics and AP Macroeconomics at BASIS International School Bangkok. I took both courses earlier and scored 5 on each exam, so the TA role is partly a way to stay inside the material while I write [[AI Bubble Research]], and partly the most direct way I know to test whether I understand something.
 
-<!-- TODO: which teacher you assist, how many sections, and what the role involves week to week (review sessions, grading, office hours). -->
+%% TODO: which teacher you assist, how many sections, and what the role involves week to week (review sessions, grading, office hours). %%
 
 ## ECONBRIEF101
 
 ECONBRIEF101 is a YouTube channel I set up in 2025 for short-form economics explainers aimed at students. The branding is done; the channel is the public-facing counterpart to the classroom work.
 
-<!-- TODO: number of videos published, first topics, and the channel link. -->
+%% TODO: number of videos published, first topics, and the channel link. %%
 
 ## Why teach it
 

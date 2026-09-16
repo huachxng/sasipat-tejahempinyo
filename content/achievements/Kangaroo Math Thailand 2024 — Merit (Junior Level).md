@@ -17,6 +17,6 @@ certificate: kangaroo-math-thailand-2024-certificate.jpg
 
 I received a Merit award in the Junior level of Kangaroo Math Thailand 2024. The certificate is in my portfolio.
 
-<!-- TODO (review): Confirm the competition date. -->
+%% TODO (review): Confirm the competition date. %%
 
 ![[kangaroo-math-thailand-2024-certificate.jpg]]

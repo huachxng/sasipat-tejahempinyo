@@ -17,7 +17,7 @@ cover: meekveggies-01.png
 
 I founded MEEKVEGGIES, a premium freeze-dried fruit, vegetable, and mushroom brand for the Thai market, and began the brand identity and market research in February 2026. In June 2026 I cold-called the D'Nuts factory, negotiated a reseller arrangement in which the factory packs and ships each order directly to the customer, and confirmed the deal on 17 June 2026. I built the market research, the margin and feasibility model, and the launch plan myself, and the brand launched on Shopee and Lazada with dropship logistics.
 
-<!-- TODO (review): Confirm the founding month (brand assets date from Feb 2026), the Shopee/Lazada launch date, whether the D'Nuts deal is exclusive (Brag Sheet v2 says exclusive; the 17 June feasibility note does not), and whether the factory name may be published. Note the banner art spells the name MEEKVEGIES. -->
+%% TODO (review): Confirm the founding month (brand assets date from Feb 2026), the Shopee/Lazada launch date, whether the D'Nuts deal is exclusive (Brag Sheet v2 says exclusive; the 17 June feasibility note does not), and whether the factory name may be published. Note the banner art spells the name MEEKVEGIES. %%
 
 Related notes: [[MEEKVEGGIES]].
 

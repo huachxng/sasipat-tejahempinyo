@@ -15,4 +15,4 @@ resumeLine: "Art Student of the Year, BASIS International School Bangkok (2023â€
 
 BASIS International School Bangkok named me Art Student of the Year for the 2023â€“24 school year. I also completed AP Drawing, scoring 4.
 
-<!-- TODO (review): Confirm the AP Drawing exam year (2024 or 2025) and whether you want the score published. -->
+%% TODO (review): Confirm the AP Drawing exam year (2024 or 2025) and whether you want the score published. %%

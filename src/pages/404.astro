@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import { CHAPTERS, PERSON } from '../site.config.ts';
+---
+<Base title={`Page not found — ${PERSON.displayName}`} description="That page does not exist. Start from a chapter or search the site." noindex>
+  <section class="nf">
+    <div class="container">
+      <p class="label">Error</p>
+      <p class="nf-num numeral" aria-hidden="true">404</p>
+      <h1 class="display t-1"><span class="sr-only">404: </span>Page not found</h1>
+      <p class="nf-lede">Nothing lives at this address. Notes are renamed now and then; old links redirect when I know about them.</p>
+      <p class="nf-actions">
+        <a class="chip" href="/"><span aria-hidden="true">←</span> Home</a>
+        <button type="button" class="chip" data-search-hint>Search <kbd class="nf-key">/</kbd></button>
+        <span class="nf-hint mono">Search opens with <kbd class="nf-key">/</kbd> or <kbd class="nf-key">⌘K</kbd> on any page.</span>
+      </p>
+    </div>
+  </section>
+
+  <section class="nf-chapters ruled" aria-labelledby="nf-chapters-title">
+    <div class="container">
+      <h2 id="nf-chapters-title" class="label">Chapters</h2>
+      <ol class="nf-list">
+        {CHAPTERS.map((c, i) => (
+          <li>
+            <a href={c.href}>
+              <span class="num numeral" aria-hidden="true">{c.num}</span>
+              <span class="sr-only">Chapter {i + 1}: </span>
+              <span class="ttl display t-2">{c.title}</span>
+              <span class="dek mono">{c.dek}</span>
+              <span class="arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // The nav owns the Pagefind dialog; this button just forwards the click.
+  document.querySelector('[data-search-hint]')?.addEventListener('click', () => {
+    document.querySelector<HTMLButtonElement>('[data-search-open]')?.click();
+  });
+</script>
+
+<style>
+  .nf { padding-block: clamp(40px, 8vh, 120px) clamp(48px, 8vh, 96px); }
+  .label { margin: 0 0 1rem; }
+  .nf-num { font-size: var(--t-numeral); line-height: 0.85; letter-spacing: -0.04em; margin: 0 0 0.1em -0.04em; }
+  h1 { margin: 0 0 1.25rem; }
+  .nf-lede { margin: 0; max-width: 52ch; color: var(--fg-2); text-wrap: pretty; }
+  .nf-actions { margin: 2rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; }
+  .nf-hint { font-size: var(--t-label); color: var(--fg-3); letter-spacing: 0.04em; }
+  .nf-key { font-family: var(--font-mono), monospace; font-size: 0.9em; border: 1px solid var(--rule-strong); padding: 0 0.35em; color: inherit; }
+  .nf-chapters { padding-block: clamp(40px, 6vh, 88px) clamp(64px, 10vh, 160px); }
+  .nf-list { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--rule); }
+  .nf-list li { border-top: 1px solid var(--rule); }
+  .nf-list a {
+    display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) auto; grid-template-areas: 'num ttl arrow' 'num dek arrow';
+    column-gap: var(--gutter); row-gap: 0.4rem; align-items: start; padding-block: clamp(16px, 2.5vw, 28px); color: var(--fg);
+  }
+  .nf-list a:hover, .nf-list a:focus-visible { text-decoration: none; color: var(--fg); }
+  .nf-list .num { grid-area: num; font-size: 1.125rem; padding-top: 0.35em; transition: color var(--d-micro) var(--ease-out-quint); }
+  .nf-list .ttl { grid-area: ttl; overflow-wrap: anywhere; }
+  .nf-list .dek { grid-area: dek; font-size: var(--t-small); color: var(--fg-2); }
+  .nf-list .arrow { grid-area: arrow; font-family: var(--font-display), sans-serif; font-size: var(--t-3); line-height: 1; color: var(--fg-3); padding-top: 0.25em; transition: transform var(--d-small) var(--ease-out-quint), color var(--d-micro); }
+  .nf-list a:hover .num, .nf-list a:hover .arrow, .nf-list a:focus-visible .num, .nf-list a:focus-visible .arrow { color: var(--gold); }
+  .nf-list a:hover .arrow, .nf-list a:focus-visible .arrow { transform: translateX(8px); }
+</style>

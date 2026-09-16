@@ -7,9 +7,8 @@ tags: [podcast, quant, careers, students]
 summary: "The gap between what a student in Bangkok can find out about quantitative finance and what the job actually is, and why recording one conversation seemed like the cheapest fix."
 ---
 
-<!-- TODO: confirm the publish date; set it to the day EP1 went live. -->
+%% TODO: confirm the publish date; set it to the day EP1 went live. %%
 
-# Why I Made a Podcast About Quant Careers
 
 A year ago, what I knew about quantitative finance came from three places. A Chinese-language interview prep book, the kind people call a green book, which sits on my shelf and which my own planning notes describe as college-era preparation, not for now. A handful of headlines about hedge funds. And the general sense, common among students who like maths and economics, that "quant" is where those two things go if you are good enough.
 
@@ -33,13 +32,13 @@ Each of those answered a piece. The courses answered "what maths". The project i
 
 I went into EP1 with a short list of questions I could not answer from a book. What does a quant actually do between nine and six. Which parts of the maths are used daily and which are interview theatre. What a student can do before university that is not wasted effort. How much of the job is code, how much is markets, how much is arguing with people about risk. Whether the path from an international school in Bangkok looks different from the path from a US university town.
 
-<!-- TODO: guest name and role, recording date, and the three or four answers from the episode you want to quote here. Do not paraphrase from memory; use the transcript. -->
+%% TODO: guest name and role, recording date, and the three or four answers from the episode you want to quote here. Do not paraphrase from memory; use the transcript. %%
 
 ## What making it changed for me
 
 Preparing one episode meant writing my questions down precisely, which is harder than asking them casually. It also made me notice that I had been treating the career as a destination rather than a set of daily habits. The internship project is where I am trying to learn those habits now; the notes in [[Quant Career Pathway]] track what I find out.
 
-<!-- TODO: add anything specific you learned about production (equipment, editing time, what you would do differently) if you want it on the record. -->
+%% TODO: add anything specific you learned about production (equipment, editing time, what you would do differently) if you want it on the record. %%
 
 ## What comes next
 
@@ -47,4 +46,4 @@ More episodes, on careers I understand less well than this one. The format I hav
 
 If you do a job you think students misunderstand, and you would sit down for an hour, write to me. The address is on the About page.
 
-<!-- TODO: confirm that further episodes are planned and, if there is a release schedule, state it. -->
+%% TODO: confirm that further episodes are planned and, if there is a release schedule, state it. %%

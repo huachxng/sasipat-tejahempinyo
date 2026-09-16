@@ -9,7 +9,7 @@ summary: "Winnipeg, August 2025: what I can state plainly about shooting for Tha
 
 The World Archery Youth Championships were held in Winnipeg, Canada, in August 2025. I shot recurve there as a member of Thailand's youth national team. It is the event I am asked about most, so this note keeps to what I can state plainly.
 
-<!-- TODO: confirm the city. The portfolio folder is named CA_winnipeg_youth; the summary documents say only "Canada". -->
+%% TODO: confirm the city. The portfolio folder is named CA_winnipeg_youth; the summary documents say only "Canada". %%
 
 ## What I can say
 
@@ -21,7 +21,7 @@ The World Archery Youth Championships were held in Winnipeg, Canada, in August 2
 
 I have deliberately not written results, my age category, the events I shot (individual, team, mixed team) or the qualification score, because none of that is in my working notes and I would rather leave a gap than guess.
 
-<!-- TODO: age category (U18 or U21), events entered, qualification ranking, match results, teammates, and the coach who travelled. -->
+%% TODO: age category (U18 or U21), events entered, qualification ranking, match results, teammates, and the coach who travelled. %%
 
 ## What it sits next to
 

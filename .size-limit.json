@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Client JS — every chunk in dist/_astro (upper bound for the home page; check-dist measures the exact set index.html loads)",
+    "path": ["dist/_astro/*.js"],
+    "limit": "60 KB",
+    "gzip": true
+  },
+  {
+    "name": "CSS — every stylesheet in dist/_astro",
+    "path": ["dist/_astro/*.css"],
+    "limit": "40 KB",
+    "gzip": true
+  },
+  {
+    "name": "Home page HTML (inline scripts, poster SVG and styles included)",
+    "path": ["dist/index.html"],
+    "limit": "60 KB",
+    "gzip": true
+  }
+]

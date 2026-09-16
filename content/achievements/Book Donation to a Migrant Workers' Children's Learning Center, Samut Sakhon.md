@@ -16,6 +16,6 @@ cover: book-donation-samut-sakhon-01.jpg
 
 In early 2026 I delivered a box of donated books to a learning center for children of migrant workers in Samut Sakhon province. It connects to my weekly teaching with Burmese migrant children through Saturday School x BISB.
 
-<!-- TODO (review): Confirm the exact date, the center's name, and whether the donation was organized through NHS or Saturday School. -->
+%% TODO (review): Confirm the exact date, the center's name, and whether the donation was organized through NHS or Saturday School. %%
 
 ![[book-donation-samut-sakhon-01.jpg|The client delivers a box of donated books to staff of a learning centre for children of migrant workers in Samut Sakhon.]]

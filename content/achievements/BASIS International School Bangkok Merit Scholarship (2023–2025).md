@@ -16,4 +16,4 @@ resumeLine: "BASIS International School Bangkok Merit Scholarship (2023–2025).
 
 I held a merit scholarship from BASIS International School Bangkok for the 2023–2025 school years. It is listed in both my school resume and my Common App honors.
 
-<!-- TODO (review): Confirm the scholarship's official name and criteria, whether it continued into 2025–26, and that you want it public. -->
+%% TODO (review): Confirm the scholarship's official name and criteria, whether it continued into 2025–26, and that you want it public. %%

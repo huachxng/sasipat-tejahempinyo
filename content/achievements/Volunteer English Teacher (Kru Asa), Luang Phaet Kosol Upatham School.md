@@ -17,7 +17,7 @@ cover: volunteer-teaching-luang-phaet-kosol-upatham-school-01.jpg
 
 With a team of BASIS International School Bangkok student volunteers I taught English at Luang Phaet Kosol Upatham School on two Saturdays in February 2026. On 7 February we ran a role-play lesson on greetings, 'How are you', 'Where are you from', and everyday vocabulary. On 14 February, an outdoor activity day, we coached older pupils one-on-one through worksheets.
 
-<!-- TODO (review): Confirm whether these sessions were part of the Saturday School x BISB program or a separate school volunteer trip. -->
+%% TODO (review): Confirm whether these sessions were part of the Saturday School x BISB program or a separate school volunteer trip. %%
 
 ![[volunteer-teaching-luang-phaet-kosol-upatham-school-01.jpg|A volunteer teacher opens the English lesson for a class at Luang Phaet Kosol Upatham School on 7 February 2026 (client identity in this frame unconfirmed).]]
 ![[volunteer-teaching-luang-phaet-kosol-upatham-school-02.jpg|Volunteers lead an outdoor worksheet activity with pupils of Luang Phaet Kosol Upatham School on 14 February 2026.]]

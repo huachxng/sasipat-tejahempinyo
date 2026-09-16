@@ -2,8 +2,10 @@
 import type { Root, Element, ElementContent } from 'hast';
 
 const isImg = (n: ElementContent): n is Element => n.type === 'element' && n.tagName === 'img';
+// remark-breaks turns consecutive embed lines into one paragraph separated by <br>, so <br> counts as whitespace here.
+const isFiller = (c: ElementContent) => (c.type === 'text' && !c.value.trim()) || (c.type === 'element' && c.tagName === 'br');
 const isImageParagraph = (n: ElementContent | Root['children'][number]) =>
-  n.type === 'element' && n.tagName === 'p' && n.children.length > 0 && n.children.every((c) => isImg(c) || (c.type === 'text' && !c.value.trim()));
+  n.type === 'element' && n.tagName === 'p' && n.children.some(isImg) && n.children.every((c) => isImg(c) || isFiller(c));
 
 export function rehypeGallery() {
   return (tree: Root) => {

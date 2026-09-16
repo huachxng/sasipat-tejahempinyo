@@ -15,4 +15,4 @@ resumeLine: "AAPT PhysicsBowl 2026 — participant."
 
 I took part in the 2026 PhysicsBowl, the annual physics contest run by the American Association of Physics Teachers. My result document is on file.
 
-<!-- TODO (review): Confirm the test date and whether to publish the score or division placement (the result PDF was not opened). -->
+%% TODO (review): Confirm the test date and whether to publish the score or division placement (the result PDF was not opened). %%

@@ -15,4 +15,4 @@ resumeLine: "American Mathematics Olympiad (SIMCC) — Honorable Mention (2025);
 
 I earned an Honorable Mention in the 2025 American Mathematics Olympiad, competing in the Grade 11 division, two years after my Bronze Award in the same competition. The certificate is on file.
 
-<!-- TODO (review): Confirm the competition date. Crop the QR code and certificate numbers before publishing the scan. -->
+%% TODO (review): Confirm the competition date. Crop the QR code and certificate numbers before publishing the scan. %%

@@ -1,6 +1,46 @@
 ---
-// STUB — replaced by the hero agent. Props: nodeId: string (graph node id like "notes/slug").
+// Static SVG of one node and up to 12 of its neighbours on a 90 px ring. Zero JS; each neighbour is a link with a <title>.
+// Props: nodeId: string (graph node id like "notes/slug"). Renders nothing when the node has no connections.
+import { getGraph } from '../lib/graph.ts';
 interface Props { nodeId: string }
 const { nodeId } = Astro.props;
+const g = getGraph();
+const byId = new Map(g.nodes.map((n) => [n.id, n]));
+const centre = byId.get(nodeId);
+const all = centre ? [...new Set(g.neighbors.get(nodeId) ?? [])].map((id) => byId.get(id)!).filter(Boolean) : [];
+const nbs = all.sort((a, b) => b.deg - a.deg || a.t.localeCompare(b.t)).slice(0, 12);
+const S = 240, C = 120, R = 90;
+const rad = (deg: number) => (3 + 1.2 * Math.log2(1 + deg)).toFixed(1);
+const pos = nbs.map((_, i) => {
+  const a = -Math.PI / 2 + (i / nbs.length) * 2 * Math.PI;
+  return [Math.round(C + R * Math.cos(a)), Math.round(C + R * Math.sin(a))];
+});
 ---
-<div class="local-graph" data-node={nodeId}></div>
+{centre && nbs.length > 0 && (
+  <figure class="local-graph">
+    <figcaption class="label">Connections · {nbs.length}{all.length > nbs.length ? ` of ${all.length}` : ''}</figcaption>
+    <svg viewBox={`0 0 ${S} ${S}`} width={S} height={S} role="group" aria-label={`Notes connected to ${centre.t}`}>
+      <g class="lg-e">{pos.map(([x, y]) => <line x1={C} y1={C} x2={x} y2={y} />)}</g>
+      {nbs.map((n, i) => (
+        <a href={n.u} class:list={['lg-n', `is-${n.k}`]}>
+          <circle cx={pos[i][0]} cy={pos[i][1]} r={rad(n.deg)} />
+          <title>{n.t}</title>
+        </a>
+      ))}
+      <g class="lg-n is-centre"><circle cx={C} cy={C} r={(+rad(centre.deg) + 1.5).toFixed(1)} /><title>{centre.t}</title></g>
+    </svg>
+  </figure>
+)}
+<style>
+  .local-graph { margin: 0; display: grid; gap: 0.75rem; }
+  svg { display: block; width: 240px; max-width: 100%; height: auto; overflow: visible; }
+  .lg-e line { stroke: var(--edge); stroke-width: 1; }
+  .lg-n circle { fill: var(--fg); transition: fill var(--d-micro) var(--ease-out-quint), stroke var(--d-micro) var(--ease-out-quint); }
+  .lg-n.is-ach circle { fill: var(--fg-2); }
+  .lg-n.is-tag circle { fill: none; stroke: var(--gold-dim); stroke-width: 1.5; }
+  .lg-n.is-centre circle { fill: var(--gold); }
+  .lg-n:hover circle, .lg-n:focus-visible circle { fill: var(--gold); }
+  .lg-n.is-tag:hover circle, .lg-n.is-tag:focus-visible circle { fill: none; stroke: var(--gold); }
+  .lg-n:focus { outline: none; }
+  .lg-n:focus-visible circle { outline: var(--focus); outline-offset: 3px; }
+</style>

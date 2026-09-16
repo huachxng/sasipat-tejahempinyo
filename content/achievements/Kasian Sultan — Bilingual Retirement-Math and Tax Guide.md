@@ -16,4 +16,4 @@ resumeLine: "Founder and author, Kasian Sultan (kasian-sultan.pages.dev), 2026 â
 
 I wrote and built Kasian Sultan, a free English/Thai guide to retirement math and Thai tax rules for savers who do not have a financial adviser. It has eight chapters and in-browser calculators and is built privacy-first. The site is live at kasian-sultan.pages.dev.
 
-<!-- TODO (review): Confirm the launch month (August 2026 is inferred from 'Grade 12' in Brag Sheet v2), that the URL is live and public, and that 'Kasian Sultan' is the final name. -->
+%% TODO (review): Confirm the launch month (August 2026 is inferred from 'Grade 12' in Brag Sheet v2), that the URL is live and public, and that 'Kasian Sultan' is the final name. %%

@@ -21,7 +21,7 @@ The original plan was a cheap reseller shop. The deal changed that. Wel-B and Gr
 
 The gate for the whole business is one number: reseller cost at or below about 40% of my selling price, never above about 55%. Modelled at 50% of factory retail with an 8% platform fee, the average margin came out near 54%, and a 1,000 THB sample spend breaks even in roughly 8 to 12 orders.
 
-<!-- TODO: confirm whether the reseller price list arrived, what it said, and whether the shop went live. The working documents stop on 17 June 2026. -->
+%% TODO: confirm whether the reseller price list arrived, what it said, and whether the shop went live. The working documents stop on 17 June 2026. %%
 
 ## What I learned
 

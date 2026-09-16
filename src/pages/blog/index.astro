@@ -1,0 +1,70 @@
+---
+// Essays grouped by year: summary, cover thumbnail, tags, reading time, RSS link.
+import Base from '../../layouts/Base.astro';
+import ChapterHeader from '../../components/ChapterHeader.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import { getPublished } from '../../lib/published.ts';
+import { getGraph } from '../../lib/graph.ts';
+import { isoDate, monthYear, readingTime } from '../../lib/dates.ts';
+import { entryMedia } from '../../lib/media.ts';
+import { BYLINE } from '../../site.config.ts';
+import '../../styles/notes.css';
+
+const posts = (await getPublished('blog')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const noteCount = (await getPublished('notes')).length;
+const essayNo = new Map([...posts].reverse().map((p, i) => [p.id, String(i + 1).padStart(2, '0')]));
+const years = [...new Set(posts.map((p) => p.data.date.getUTCFullYear()))].sort((a, b) => b - a);
+const g = getGraph();
+const dek = 'Dated essays, left as written. Notes are the evergreen half of this chapter.';
+---
+<Base title={`Blog — ${BYLINE.blog}`} active="notes" description={`Essays by ${BYLINE.blog} on economics, data, markets and archery.`} image="/og/notes.png">
+  <ChapterHeader slug="notes" title="Blog" dek={dek}>
+    <nav class="tabs" aria-label="Notes or Blog">
+      <div class="tabs__list">
+        <a class="tab" href="/notes">Notes <span class="count">{noteCount}</span></a>
+        <a class="tab" href="/blog" aria-current="page">Blog <span class="count">{posts.length}</span></a>
+      </div>
+    </nav>
+  </ChapterHeader>
+
+  <section class="list-section container" aria-labelledby="essays-title">
+    <div class="list-head">
+      <h2 id="essays-title" class="display t-3">Essays <span class="numeral">{posts.length}</span></h2>
+      <div class="list-tools">
+        <a class="chip" href="/rss.xml">RSS</a>
+      </div>
+    </div>
+    {years.map((y) => (
+      <section class="year" aria-labelledby={`year-${y}`}>
+        <h3 id={`year-${y}`} class="year__label numeral">{y}</h3>
+        <ol class="note-list">
+          {posts
+            .filter((p) => p.data.date.getUTCFullYear() === y)
+            .map((p, i) => {
+              const m = entryMedia(p.data, p.body ?? '');
+                const cover = m.cover;
+                const coverAlt = m.gallery.find((x) => x.name === cover?.name)?.alt ?? '';
+              return (
+                <NoteCard
+                  href={`/blog/${p.id}`}
+                  title={p.data.title ?? p.id}
+                  kind={`Essay ${essayNo.get(p.id)}`}
+                  meta={`${monthYear(p.data.date)} · ${readingTime(p.body ?? '')} min read`}
+                  summary={p.data.summary}
+                  thai={p.data.thai}
+                  tags={g.tagsOf.get(`blog/${p.id}`) ?? p.data.tags}
+                  cover={cover?.meta}
+                  coverAlt={coverAlt}
+                  sortDate={isoDate(p.data.date)}
+                  index={i}
+                />
+              );
+            })}
+        </ol>
+      </section>
+    ))}
+  </section>
+
+  <ChapterNext current="notes" />
+</Base>

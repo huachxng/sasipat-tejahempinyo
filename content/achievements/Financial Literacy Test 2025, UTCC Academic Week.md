@@ -15,4 +15,4 @@ resumeLine: "Financial Literacy Test 2025, UTCC Business School with the Stock E
 
 I sat the Financial Literacy Test 2025 on 10 November 2025. It was run by UTCC Business School together with the Stock Exchange of Thailand as part of UTCC Academic Week.
 
-<!-- TODO (review): No certificate or score is on file; confirm your result and whether you want this listed. -->
+%% TODO (review): No certificate or score is on file; confirm your result and whether you want this listed. %%

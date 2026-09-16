@@ -17,6 +17,6 @@ certificate: stanford-summer-session-2026-certificate.jpg
 
 I was admitted to Stanford Summer Session as a visiting student (offer dated 15 January 2026) and spent 22 June to 16 August 2026 on campus taking CS106A (Programming Methodology) and STATS 110 (Probability for Statistical Inference). For the STATS 110 final project I tested whether civil-liberties ratings differ between least-developed and other countries using the 2020 Freedom House cross-section of 193 countries, pairing a two-proportion z-test (z = -4.76; 95% confidence interval for the gap of 26 to 54 percentage points) with a 10,000-permutation randomization test (empirical p < 0.001). I restricted the data to a single year so that each country appeared once and the observations stayed independent, and I wrote up regional clustering as a confounder that makes the p-value somewhat anti-conservative.
 
-<!-- TODO (review): Decide whether to publish course grades (final grades are not in the sources; only 'assignments graded ✓+' is recorded). -->
+%% TODO (review): Decide whether to publish course grades (final grades are not in the sources; only 'assignments graded ✓+' is recorded). %%
 
 ![[stanford-summer-session-2026-certificate.jpg]]

@@ -1,0 +1,194 @@
+---
+// Chapter 02 landing: tabs Notes · Blog, the 2D graph, the note list (accessible equivalent), tag cloud, essays.
+import Base from '../../layouts/Base.astro';
+import ChapterHeader from '../../components/ChapterHeader.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import Graph2D from '../../components/Graph2D.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import TagList from '../../components/TagList.astro';
+import { getPublished, byDateDesc } from '../../lib/published.ts';
+import { getGraph } from '../../lib/graph.ts';
+import { isoDate, monthYear, readingTime } from '../../lib/dates.ts';
+import { entryMedia } from '../../lib/media.ts';
+import { BYLINE, chapterBySlug } from '../../site.config.ts';
+import '../../styles/notes.css';
+
+const notes = (await getPublished('notes')).sort(byDateDesc);
+const posts = (await getPublished('blog')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const g = getGraph();
+const tagEntries = Object.entries(g.tags).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const tagNames = tagEntries.map(([t]) => t);
+const frequentTags = tagEntries.filter(([, c]) => c >= 2).map(([t]) => t);
+const rareTags = tagEntries.filter(([, c]) => c < 2).map(([t]) => t);
+const years = [...new Set(posts.map((p) => p.data.date.getUTCFullYear()))].sort((a, b) => b - a);
+const essayNo = new Map([...posts].reverse().map((p, i) => [p.id, String(i + 1).padStart(2, '0')]));
+const chapter = chapterBySlug('notes');
+const updatedOf = (n: (typeof notes)[number]) => n.data.updated ?? n.data.date;
+---
+<Base title={`Notes & Blog — ${BYLINE.notes}`} active="notes" description={chapter.dek} image="/og/notes.png">
+  <ChapterHeader slug="notes">
+    <nav class="tabs" aria-label="Notes or Blog">
+      <div class="tabs__list" role="tablist">
+        <a class="tab" role="tab" id="tab-notes" href="/notes" data-tab="notes" aria-selected="true" aria-controls="panel-notes">Notes <span class="count">{notes.length}</span></a>
+        <a class="tab" role="tab" id="tab-blog" href="/notes?tab=blog" data-tab="blog" aria-selected="false" aria-controls="panel-blog" tabindex="-1">Blog <span class="count">{posts.length}</span></a>
+      </div>
+    </nav>
+  </ChapterHeader>
+
+  <div id="panel-notes" class="tabpanel" role="tabpanel" aria-labelledby="tab-notes" data-panel="notes">
+    <section id="graph" class="graph-section container" aria-labelledby="graph-title">
+      <div class="graph-head">
+        <h2 id="graph-title" class="label">Graph</h2>
+        <p class="mono small muted">Every note, essay and achievement, joined by wikilinks and shared tags. The list below is the same map in reading order.</p>
+      </div>
+      <div class="graph-panel" data-graph-panel>
+        <Graph2D />
+      </div>
+      <script is:inline>
+        // Static page: ?focus=<node id> can only be read in the browser. Set it on the graph root before its module runs.
+        (function () {
+          var focus = new URLSearchParams(location.search).get('focus');
+          if (!focus) return;
+          var panel = document.querySelector('[data-graph-panel]');
+          var root = panel && panel.firstElementChild;
+          if (panel) panel.setAttribute('data-focus', focus);
+          if (root) root.setAttribute('data-focus', focus);
+        })();
+      </script>
+    </section>
+
+    <section id="notes" class="list-section container ruled" aria-labelledby="notes-title">
+      <div class="list-head">
+        <h2 id="notes-title" class="display t-3">Notes <span class="numeral">{notes.length}</span></h2>
+        <div class="list-tools" role="group" aria-label="Sort notes">
+          <button type="button" class="chip" data-sort="updated" aria-pressed="true">Recently updated</button>
+          <button type="button" class="chip" data-sort="alpha" aria-pressed="false">A–Z</button>
+        </div>
+      </div>
+      <ol class="note-list" data-note-list>
+        {notes.map((n, i) => {
+          const u = updatedOf(n);
+          return (
+            <NoteCard
+              href={`/notes/${n.id}`}
+              title={n.data.title ?? n.id}
+              kind="Note"
+              meta={u ? `updated ${isoDate(u)}` : undefined}
+              summary={n.data.summary}
+              thai={n.data.thai}
+              tags={g.tagsOf.get(`notes/${n.id}`) ?? n.data.tags}
+              sortDate={u ? isoDate(u) : ''}
+              index={i}
+            />
+          );
+        })}
+      </ol>
+    </section>
+
+    <section id="tags" class="tags-section container" aria-labelledby="tags-title">
+      <h2 id="tags-title" class="label">Tags <span class="muted">{tagNames.length}</span></h2>
+      <TagList tags={frequentTags} counts={g.tags} label="Tags used more than once" />
+      {rareTags.length > 0 && (
+        <details class="tag-more">
+          <summary class="chip">{rareTags.length} tags used once</summary>
+          <TagList tags={rareTags} label="Tags used once" />
+        </details>
+      )}
+    </section>
+  </div>
+
+  <div id="panel-blog" class="tabpanel" role="tabpanel" aria-labelledby="tab-blog" data-panel="blog">
+    <section id="essays" class="list-section container" aria-labelledby="essays-title">
+      <div class="list-head">
+        <h2 id="essays-title" class="display t-3">Essays <span class="numeral">{posts.length}</span></h2>
+        <div class="list-tools">
+          <a class="chip" href="/rss.xml">RSS</a>
+          <a class="more" href="/blog">All essays →</a>
+        </div>
+      </div>
+      {years.map((y) => (
+        <section class="year" aria-labelledby={`year-${y}`}>
+          <h3 id={`year-${y}`} class="year__label numeral">{y}</h3>
+          <ol class="note-list">
+            {posts
+              .filter((p) => p.data.date.getUTCFullYear() === y)
+              .map((p, i) => {
+                const m = entryMedia(p.data, p.body ?? '');
+                const cover = m.cover;
+                const coverAlt = m.gallery.find((x) => x.name === cover?.name)?.alt ?? '';
+                return (
+                  <NoteCard
+                    href={`/blog/${p.id}`}
+                    title={p.data.title ?? p.id}
+                    kind={`Essay ${essayNo.get(p.id)}`}
+                    meta={`${monthYear(p.data.date)} · ${readingTime(p.body ?? '')} min read`}
+                    summary={p.data.summary}
+                    thai={p.data.thai}
+                    tags={g.tagsOf.get(`blog/${p.id}`) ?? p.data.tags}
+                    cover={cover?.meta}
+                    coverAlt={coverAlt}
+                    sortDate={isoDate(p.data.date)}
+                    index={i}
+                  />
+                );
+              })}
+          </ol>
+        </section>
+      ))}
+    </section>
+  </div>
+
+  <ChapterNext current="notes" />
+</Base>
+
+<script>
+  // Tabs: client-side switch, URL mirrors the state as ?tab=blog. Without JS both panels render.
+  const tabs = [...document.querySelectorAll<HTMLAnchorElement>('.tab[role="tab"]')];
+  const panelOf = (t: HTMLAnchorElement) => document.getElementById(t.getAttribute('aria-controls') ?? '');
+  if (tabs.length) {
+    const select = (name: string, focus = false) => {
+      for (const t of tabs) {
+        const on = t.dataset.tab === name;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const p = panelOf(t);
+        if (p) p.hidden = !on;
+        if (on && focus) t.focus();
+      }
+      const url = new URL(location.href);
+      if (name === 'notes') url.searchParams.delete('tab');
+      else url.searchParams.set('tab', name);
+      history.replaceState(null, '', url);
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', (e) => {
+        e.preventDefault();
+        select(t.dataset.tab ?? 'notes');
+      });
+      t.addEventListener('keydown', (e) => {
+        const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+        if (!keys.includes(e.key)) return;
+        e.preventDefault();
+        const j = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+        select(tabs[j].dataset.tab ?? 'notes', true);
+      });
+    });
+    const wantsBlog = new URLSearchParams(location.search).get('tab') === 'blog' && location.hash !== '#graph';
+    select(wantsBlog ? 'blog' : 'notes');
+  }
+
+  // Note list order: recently updated (default) or alphabetical.
+  const list = document.querySelector<HTMLElement>('[data-note-list]');
+  const sorts = [...document.querySelectorAll<HTMLButtonElement>('[data-sort]')];
+  if (list && sorts.length) {
+    const apply = (mode: string) => {
+      const items = [...list.children] as HTMLElement[];
+      const title = (el: HTMLElement) => el.dataset.title ?? '';
+      const date = (el: HTMLElement) => el.dataset.date ?? '';
+      items.sort((a, b) => (mode === 'alpha' ? title(a).localeCompare(title(b)) : date(b).localeCompare(date(a)) || title(a).localeCompare(title(b))));
+      list.append(...items);
+      for (const s of sorts) s.setAttribute('aria-pressed', String(s.dataset.sort === mode));
+    };
+    for (const s of sorts) s.addEventListener('click', () => apply(s.dataset.sort ?? 'updated'));
+  }
+</script>

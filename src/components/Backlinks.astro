@@ -1,0 +1,89 @@
+---
+// Connections of one graph node: Linked from (with the context sentence), Links to, Related by tag.
+import { getGraph, type NodeKind } from '../lib/graph.ts';
+interface Props {
+  nodeId: string; // "notes/<id>" | "blog/<id>" | "achievements/<id>"
+  relatedKinds?: NodeKind[]; // restrict "related by tag" to these kinds (default: all content kinds)
+  relatedTitle?: string;
+  limit?: number;
+}
+const { nodeId, relatedKinds = ['note', 'post', 'ach'], relatedTitle = 'Related by tag', limit = 5 } = Astro.props;
+const KIND: Record<NodeKind, string> = { note: 'Note', post: 'Essay', ach: 'Achievement', tag: 'Tag' };
+
+const g = getGraph();
+const byId = new Map(g.nodes.map((n) => [n.id, n]));
+const linkedFrom = g.backlinks.get(nodeId) ?? [];
+const linksTo = g.outgoing.get(nodeId) ?? [];
+
+// Shared-tag weight: rarer tags weigh more (1 / (members − 1), the same weight the graph uses for tag edges).
+const mine = new Set(g.tagsOf.get(nodeId) ?? []);
+const scored: { id: string; w: number; shared: string[] }[] = [];
+for (const [other, tags] of g.tagsOf) {
+  if (other === nodeId) continue;
+  const node = byId.get(other);
+  if (!node || !relatedKinds.includes(node.k)) continue;
+  const shared = tags.filter((t) => mine.has(t));
+  if (!shared.length) continue;
+  const w = shared.reduce((s, t) => s + 1 / Math.max(1, (g.tags[t] ?? 2) - 1), 0);
+  scored.push({ id: other, w, shared });
+}
+scored.sort((a, b) => b.w - a.w || a.id.localeCompare(b.id));
+const related = scored.slice(0, limit).map((s) => ({ ...s, node: byId.get(s.id)! }));
+const nothing = !linkedFrom.length && !linksTo.length && !related.length;
+---
+{nothing ? (
+  <p class="connections-empty mono small muted">No links yet. This note stands on its own for now.</p>
+) : (
+  <div class="connections">
+    {linkedFrom.length > 0 && (
+      <section class="connections__col" aria-labelledby={`linked-from-${nodeId.replace(/\W/g, '-')}`}>
+        <h2 class="label" id={`linked-from-${nodeId.replace(/\W/g, '-')}`}>Linked from <span class="count">{linkedFrom.length}</span></h2>
+        <ul>
+          {linkedFrom.map((b) => (
+            <li>
+              <a href={b.href}>{b.title}</a><span class="kind">{KIND[b.kind]}</span>
+              {b.context && <p class="context">“{b.context}”</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+    {linksTo.length > 0 && (
+      <section class="connections__col" aria-labelledby={`links-to-${nodeId.replace(/\W/g, '-')}`}>
+        <h2 class="label" id={`links-to-${nodeId.replace(/\W/g, '-')}`}>Links to <span class="count">{linksTo.length}</span></h2>
+        <ul>
+          {linksTo.map((o) => (
+            <li><a href={o.href}>{o.title}</a><span class="kind">{KIND[o.kind]}</span></li>
+          ))}
+        </ul>
+      </section>
+    )}
+    {related.length > 0 && (
+      <section class="connections__col" aria-labelledby={`related-${nodeId.replace(/\W/g, '-')}`}>
+        <h2 class="label" id={`related-${nodeId.replace(/\W/g, '-')}`}>{relatedTitle} <span class="count">{related.length}</span></h2>
+        <ul>
+          {related.map((r) => (
+            <li>
+              <a href={r.node.u}>{r.node.t}</a><span class="kind">{KIND[r.node.k]}</span>
+              <p class="context shared">{r.shared.map((t) => `#${t}`).join(' ')}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+)}
+<style>
+  .connections { display: grid; gap: 2.5rem var(--gutter); }
+  @media (min-width: 640px) { .connections { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
+  .connections h2 { margin: 0 0 0.25rem; }
+  .count { color: var(--fg-3); margin-left: 0.4em; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 0.75rem 0; border-top: 1px solid var(--rule); }
+  li > a { color: var(--fg); font-weight: 500; }
+  li > a:hover { color: var(--gold); }
+  .kind { font-family: var(--font-mono), monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-3); margin-left: 0.6em; white-space: nowrap; }
+  .context { margin: 0.3rem 0 0; font-size: var(--t-small); color: var(--fg-2); text-wrap: pretty; }
+  .shared { font-family: var(--font-mono), monospace; font-size: 12px; color: var(--fg-3); overflow-wrap: anywhere; }
+  .connections-empty { margin: 0; }
+</style>

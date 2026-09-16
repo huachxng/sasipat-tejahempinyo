@@ -1,5 +1,43 @@
 ---
-// STUB — replaced by the hero agent. Interface: no props. Renders the full-height home hero (wordmark + graph).
+// Full-height home hero: wordmark + the 3D note graph. No props. The graph is an inline SVG poster that a Canvas 2D
+// renderer (hero-graph.ts) takes over after load when motion is allowed; with no JS / reduced motion the poster stays.
 import { PERSON } from '../site.config.ts';
+import { getGraph } from '../lib/graph.ts';
+import HeroGraphSvg from './HeroGraphSvg.astro';
+import '../styles/hero.css';
+
+const g = getGraph();
+const hubs = g.hubs.map((i) => g.nodes[i]);
 ---
-<section class="hero container"><h1 class="display" style="font-size:var(--t-hero);line-height:.88;letter-spacing:-.045em;text-transform:uppercase">{PERSON.firstName}<br />{PERSON.lastName}</h1></section>
+<section class="hero" data-hero>
+  <div class="hero-graph" data-hg-box>
+    <HeroGraphSvg />
+    <canvas class="hero-gl" aria-hidden="true" hidden></canvas>
+    <div class="hg-label" hidden data-hg-chip>
+      <span class="hg-kind" data-hg-kind></span>
+      <span class="hg-title" data-hg-title></span>
+      <span class="hg-date" data-hg-date hidden></span>
+      <span class="hg-open">Open →</span>
+    </div>
+  </div>
+
+  <div class="hero-type container">
+    <h1 class="wordmark">
+      <span class="wm-line">{PERSON.firstName}<span class="wm-sup">({PERSON.nickname} · writes as {PERSON.penName})</span></span>
+      <span class="wm-line">{PERSON.lastName}</span>
+    </h1>
+    <a class="hero-explore mono" href="/notes#graph">Explore the 2D map →</a>
+  </div>
+
+  <div class="sr-only hero-hubs" data-hg-hubs>
+    <h2>Most connected notes</h2>
+    <ul>
+      {hubs.map((n) => (
+        <li><a href={n.u} data-i={n.i}>{n.t}</a></li>
+      ))}
+    </ul>
+  </div>
+
+  <div class="hero-scroll mono" aria-hidden="true"><span></span>Scroll</div>
+</section>
+<script src="../scripts/hero-graph.ts"></script>

@@ -1,17 +1,94 @@
 ---
-import Base from '../../layouts/Base.astro';
-import { getPublished } from '../../lib/published.ts';
+// A single note: title, Thai subtitle, mono meta, tags, body, then its connections and a local graph.
 import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import Byline from '../../components/Byline.astro';
+import TagList from '../../components/TagList.astro';
+import Backlinks from '../../components/Backlinks.astro';
+import LocalGraph from '../../components/LocalGraph.astro';
+import Comments from '../../components/Comments.astro';
+import { getPublished, isDraft } from '../../lib/published.ts';
+import { getGraph } from '../../lib/graph.ts';
+import { isoDate } from '../../lib/dates.ts';
+import { entryMedia } from '../../lib/media.ts';
+import { BYLINE, SITE_URL } from '../../site.config.ts';
+import '../../styles/notes.css';
+
 export async function getStaticPaths() {
   const notes = await getPublished('notes');
-  return notes.map((n) => ({ params: { id: n.id }, props: { n } }));
+  return notes.map((note) => ({ params: { id: note.id }, props: { note } }));
 }
-const { n } = Astro.props;
-const { Content } = await render(n);
+const { note } = Astro.props;
+const { Content } = await render(note);
+
+const title = note.data.title ?? note.id;
+const body = note.body ?? '';
+const nodeId = `notes/${note.id}`;
+const g = getGraph();
+const tags = g.tagsOf.get(nodeId) ?? note.data.tags;
+const updated = note.data.updated ?? note.data.date;
+const updatedIso = updated ? isoDate(updated) : undefined;
+const { cover } = entryMedia(note.data, body);
+const og = cover ? (await getImage({ src: cover.meta, width: 1200, height: 630, fit: 'cover', format: 'jpeg' })).src : '/og/notes.png';
+const url = `${SITE_URL}/notes/${note.id}`;
+
+// Authors sometimes repeat the title as a "# Heading" on the first line; hide that duplicate.
+const firstLine = body.replace(/<!--[\s\S]*?-->/g, '').replace(/%%[\s\S]*?%%/g, '').trim().split('\n')[0] ?? '';
+const dupH1 = /^#\s+/.test(firstLine) && firstLine.replace(/^#\s+/, '').trim().toLowerCase() === title.toLowerCase();
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description: note.data.summary,
+    datePublished: note.data.date?.toISOString(),
+    dateModified: updated?.toISOString(),
+    author: { '@type': 'Person', name: BYLINE.notes, url: `${SITE_URL}/about` },
+    mainEntityOfPage: url,
+    url,
+    image: new URL(og, SITE_URL).toString(),
+    keywords: tags.join(', '),
+    inLanguage: 'en',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Notes', item: `${SITE_URL}/notes` },
+      { '@type': 'ListItem', position: 3, name: title, item: url },
+    ],
+  },
+];
 ---
-<Base title={n.data.title ?? n.id} active="notes">
-  <article class="container section prose">
-    <h1 class="display t-2">{n.data.title}</h1>
-    <Content />
+<Base title={`${title} — ${BYLINE.notes}`} description={note.data.summary} active="notes" type="article" image={og} published={note.data.date} modified={updated} jsonLd={jsonLd} draft={isDraft(note)}>
+  <article class="entry container" data-pagefind-body data-pagefind-filter="type:Note" data-pagefind-meta={updatedIso ? `date:${updatedIso}` : undefined} data-pagefind-sort={updatedIso ? `date:${updatedIso}` : undefined}>
+    <header class="entry__head">
+      <p class="entry__eyebrow mono" data-pagefind-ignore><a href="/notes"><span class="num">02</span> Notes</a></p>
+      <h1 class="display t-2">{title}</h1>
+      {note.data.thai && <p class="thai entry__thai">{note.data.thai}</p>}
+      <div class="entry__meta" data-pagefind-ignore>
+        <Byline name={BYLINE.notes} kind="Note" date={updatedIso ? `updated ${updatedIso}` : undefined} />
+        <TagList tags={tags} />
+      </div>
+    </header>
+    <div class:list={['prose', 'entry__body', { 'has-dup-h1': dupH1 }]}>
+      <Content />
+    </div>
   </article>
+
+  <aside class="entry__links container" aria-label="Connections" data-pagefind-ignore>
+    <Backlinks nodeId={nodeId} />
+    <div class="entry__graph">
+      <h2 class="label">Neighbourhood</h2>
+      <LocalGraph nodeId={nodeId} />
+      <a class="entry__open-graph" href={`/notes?focus=${nodeId}#graph`}>Open in graph →</a>
+    </div>
+  </aside>
+
+  {note.data.comments && <Comments />}
+  <ChapterNext current="notes" />
 </Base>

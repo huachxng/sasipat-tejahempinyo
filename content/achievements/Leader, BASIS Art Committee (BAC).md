@@ -15,4 +15,4 @@ resumeLine: "Leader, BASIS Art Committee (Sep 2023–Sep 2024) — ran the schoo
 
 I led the BASIS Art Committee, the school art club, from September 2023 to September 2024. Under my lead the club entered the David Shepherd Wildlife Foundation's global art competition, and one of our members took first place in the Middle School class.
 
-<!-- TODO (review): Confirm the competition year and whether your title was 'Leader' (resume) or 'President' (Brag Sheet v2). -->
+%% TODO (review): Confirm the competition year and whether your title was 'Leader' (resume) or 'President' (Brag Sheet v2). %%

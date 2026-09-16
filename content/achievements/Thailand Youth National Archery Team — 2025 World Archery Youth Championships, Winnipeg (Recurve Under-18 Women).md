@@ -17,7 +17,7 @@ cover: thailand-youth-national-archery-team-wayc-2025-01.jpg
 
 I shoot recurve for the Thailand youth national archery team and represented Thailand in the Recurve Under-18 Women category at the World Archery Youth Championships in Winnipeg, Canada, from 17 to 24 August 2025 (travelling 16–27 August). I train about six hours a week. Alongside national-team training I co-lead Devil Maker Archery club (formerly RAMA 2 Archery Club) with my coach.
 
-<!-- TODO (review): Confirm your individual and team placings at Winnipeg (no results are in the sources; do not publish a placing until confirmed). The folder's letters contain passport and date-of-birth data and must not be published. -->
+%% TODO (review): Confirm your individual and team placings at Winnipeg (no results are in the sources; do not publish a placing until confirmed). The folder's letters contain passport and date-of-birth data and must not be published. %%
 
 Related notes: [[World Archery Youth Championships 2025]], [[Recurve Archery]], [[Devil Maker Archery]].
 

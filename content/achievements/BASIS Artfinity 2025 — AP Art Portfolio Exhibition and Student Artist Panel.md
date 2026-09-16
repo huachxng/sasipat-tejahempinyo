@@ -16,7 +16,7 @@ cover: basis-artfinity-2025-01.jpg
 
 At BASIS Artfinity 2025, the school's AP Art portfolio exhibition at Q Stadium, EmQuartier, I exhibited a themed series on zoomorphism and took part in the student artist panel. The show ran 24–27 April 2025 and was extended to 7 May 2025.
 
-<!-- TODO (review): Confirm the titles of the exhibited works and whether the extension venue (EmSphere) should be named. -->
+%% TODO (review): Confirm the titles of the exhibited works and whether the extension venue (EmSphere) should be named. %%
 
 ![[basis-artfinity-2025-01.jpg|Taking part in the student artist talk at BASIS Artfinity 2025, Q Stadium, EmQuartier.]]
 ![[basis-artfinity-2025-02.jpg|Standing beside her exhibited paintings at BASIS Artfinity 2025, EmQuartier.]]

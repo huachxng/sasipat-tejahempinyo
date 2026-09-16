@@ -1,4 +1,84 @@
 ---
-// STUB — replaced by the notes agent. Props: none (uses the page pathname).
+// giscus (GitHub Discussions) section. The script is injected only when the section comes within 800 px.
+// With GISCUS.repoId empty the section renders a quiet placeholder and loads nothing.
+import { GISCUS, SITE_URL } from '../site.config.ts';
+const enabled = Boolean(GISCUS.repoId && GISCUS.categoryId);
+const theme = `${SITE_URL}/giscus.css`;
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const discussions = `https://github.com/${GISCUS.repo}/discussions`;
+const thread = `${discussions}?discussions_q=${encodeURIComponent(`"${pathname}"`)}`;
 ---
-<section id="comments" data-pagefind-ignore><h2 class="label">Discussion</h2></section>
+<section id="comments" class="comments container" data-pagefind-ignore aria-labelledby="comments-title">
+  <div class="comments__inner">
+  <h2 id="comments-title" class="label">Discussion</h2>
+  {enabled ? (
+    <>
+      <p class="comments__note mono">Sign in with GitHub to comment · <a href={thread} rel="noopener" target="_blank">Open on GitHub →</a></p>
+      <div
+        class="giscus"
+        data-giscus-host
+        data-repo={GISCUS.repo}
+        data-repo-id={GISCUS.repoId}
+        data-category={GISCUS.category}
+        data-category-id={GISCUS.categoryId}
+        data-theme={theme}
+      >
+        <noscript><p class="comments__note mono">Comments need JavaScript. <a href={thread}>Read the thread on GitHub →</a></p></noscript>
+      </div>
+    </>
+  ) : (
+    <p class="comments__note mono">Comments open once discussions are enabled · <a href={discussions} rel="noopener" target="_blank">GitHub discussions →</a></p>
+  )}
+  </div>
+</section>
+<script>
+  const host = document.querySelector<HTMLElement>('[data-giscus-host]');
+  if (host) {
+    const mount = () => {
+      if (host.dataset.mounted) return;
+      host.dataset.mounted = '1';
+      const s = document.createElement('script');
+      s.src = 'https://giscus.app/client.js';
+      const attrs: Record<string, string> = {
+        repo: host.dataset.repo ?? '',
+        'repo-id': host.dataset.repoId ?? '',
+        category: host.dataset.category ?? '',
+        'category-id': host.dataset.categoryId ?? '',
+        mapping: 'pathname',
+        strict: '1',
+        'reactions-enabled': '1',
+        'emit-metadata': '0',
+        'input-position': 'top',
+        theme: host.dataset.theme ?? 'dark',
+        lang: 'en',
+        loading: 'lazy',
+      };
+      for (const [k, v] of Object.entries(attrs)) s.setAttribute(`data-${k}`, v);
+      s.crossOrigin = 'anonymous';
+      s.async = true;
+      host.append(s);
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            mount();
+          }
+        },
+        { rootMargin: '800px 0px' },
+      );
+      io.observe(host);
+    } else {
+      mount();
+    }
+  }
+</script>
+<style>
+  .comments { padding-block: clamp(48px, 8vh, 96px) 0; margin-top: clamp(48px, 8vh, 96px); border-top: 1px solid var(--rule); }
+  .comments__inner { max-width: 68ch; }
+  .comments h2 { margin: 0 0 0.5rem; }
+  .comments__note { margin: 0 0 1.5rem; font-size: 12px; color: var(--fg-2); letter-spacing: 0.02em; }
+  .giscus { min-height: 1px; }
+  .giscus :global(iframe) { color-scheme: dark; }
+</style>

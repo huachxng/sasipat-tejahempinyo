@@ -1,0 +1,112 @@
+---
+import Base from '../layouts/Base.astro';
+import ChapterHeader from '../components/ChapterHeader.astro';
+import ChapterNext from '../components/ChapterNext.astro';
+import { getProfile, getPublished } from '../lib/published.ts';
+import { buildResumeModel, prettyUrl, type ResumeItem } from '../lib/resume.ts';
+import { PERSON } from '../site.config.ts';
+import '../styles/resume.css';
+
+const [achievements, profile] = await Promise.all([getPublished('achievements'), getProfile()]);
+const model = buildResumeModel(achievements, profile);
+const { header } = model;
+
+interface Block { title: string; lines: string[]; items: ResumeItem[]; more: ResumeItem[] }
+const eduSection = model.sections.find((s) => s.title === 'Education');
+const blocks: Block[] = [
+  { title: 'Education', lines: model.education, items: eduSection?.items ?? [], more: eduSection?.more ?? [] },
+  ...model.sections.filter((s) => s.title !== 'Education').map((s) => ({ title: s.title, lines: [], items: s.items, more: s.more })),
+];
+const extraRows = (
+  [
+    ['Languages', model.languages],
+    ['Coursework', model.coursework],
+    ['Tests', model.tests],
+  ] as [string, string[]][]
+).filter(([, v]) => v.length > 0);
+const otherLinks = header.links.filter((l) => l.href !== header.github);
+
+const title = `Resume — ${PERSON.displayName}`;
+const description = `One-page resume of ${header.name}, generated from the same entries as the achievements timeline. Download the PDF or print it.`;
+---
+<Base {title} {description} active="resume" type="profile" bodyClass="page-resume">
+  <ChapterHeader slug="resume">
+    <div class="resume-actions">
+      <a class="chip resume-btn" href="/resume.pdf" download={model.fileName}>Download PDF</a>
+      <button type="button" class="chip resume-btn" data-print hidden>Print</button>
+      <span class="resume-note mono muted">{model.count} entries · US Letter</span>
+    </div>
+  </ChapterHeader>
+
+  <section class="resume container" aria-labelledby="resume-name">
+    <article class="paper print-page" id="resume">
+      <header class="paper-head">
+        <h2 class="paper-name" id="resume-name">{header.name}</h2>
+        {header.headline && <p class="paper-headline">{header.headline}</p>}
+        <p class="paper-meta">
+          {header.nickname && <span>Goes by {header.nickname}</span>}
+          {header.location && <span>{header.location}</span>}
+          {header.email && <a href={`mailto:${header.email}`}>{header.email}</a>}
+          {header.github && <a href={header.github} rel="me noopener">{prettyUrl(header.github)}</a>}
+          {otherLinks.map((l) => <a href={l.href} rel="noopener">{l.label}</a>)}
+        </p>
+      </header>
+
+      {blocks.map((b) => (
+        <section class="paper-section">
+          <h3 class="paper-h">{b.title}</h3>
+          <ul class="paper-list">
+            {b.lines.map((line) => (
+              <li class="item item--plain"><span class="line">{line}</span></li>
+            ))}
+            {b.items.map((it) => (
+              <li class="item">
+                <a class="line" href={it.href} title={it.title}>{it.line}</a>
+                <span class="date">{it.dateText}</span>
+              </li>
+            ))}
+          </ul>
+          {b.more.length > 0 && (
+            <details class="more no-print">
+              <summary>{b.more.length} more, older</summary>
+              <ul class="paper-list">
+                {b.more.map((it) => (
+                  <li class="item">
+                    <a class="line" href={it.href} title={it.title}>{it.line}</a>
+                    <span class="date">{it.dateText}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </section>
+      ))}
+
+      {(model.skills.length > 0 || extraRows.length > 0) && (
+        <section class="paper-section">
+          <h3 class="paper-h">Skills</h3>
+          {model.skills.length > 0 && <p class="paper-skills-line">{model.skills.join(' · ')}</p>}
+          {extraRows.length > 0 && (
+            <dl class="paper-skills">
+              {extraRows.map(([k, v]) => (
+                <div><dt>{k}</dt><dd>{v.join(' · ')}</dd></div>
+              ))}
+            </dl>
+          )}
+        </section>
+      )}
+
+      <p class="paper-foot">Full record with photos and certificates: <a href="/achievements">{prettyUrl(model.siteUrl)}/achievements</a></p>
+    </article>
+  </section>
+
+  <ChapterNext current="resume" />
+</Base>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-print]');
+  if (btn) {
+    btn.hidden = false;
+    btn.addEventListener('click', () => window.print());
+  }
+</script>

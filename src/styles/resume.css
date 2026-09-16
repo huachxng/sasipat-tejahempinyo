@@ -1,0 +1,94 @@
+/* Chapter 04 — Resume. Page-specific rules only; src/styles/print.css holds the global print reset. */
+.page-resume {
+  --paper: #f2f0ea;
+  --ink: #111111;
+  --ink-2: #4a4843;
+  --ink-3: #6b6862;
+}
+
+/* actions row inside the chapter header */
+.resume-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; margin-top: 1.5rem; }
+.resume-btn { padding: 0.7em 1.15em; }
+.resume-note { font-size: var(--t-label); letter-spacing: 0.04em; }
+html.no-js .resume-btn[data-print] { display: none; }
+
+/* the paper panel: what prints */
+.resume { padding-bottom: clamp(48px, 8vh, 112px); }
+.paper {
+  max-width: 820px;
+  margin-inline: auto;
+  padding: clamp(24px, 6vw, 58px);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.7);
+  font-family: var(--font-text), sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  -webkit-font-smoothing: auto;
+  font-feature-settings: 'ss01', 'cv11', 'tnum';
+}
+.paper a { color: inherit; text-decoration: none; }
+.paper a:hover, .paper a:focus-visible { color: var(--ink); text-decoration: underline; text-decoration-color: var(--gold-dim); }
+.paper :focus-visible { outline-color: var(--ink); }
+.paper ::selection { background: var(--ink); color: var(--paper); }
+
+.paper-head { padding-bottom: 0.9rem; border-bottom: 1px solid var(--ink); }
+.paper-name { margin: 0; font-family: var(--font-text), sans-serif; font-weight: 600; font-size: clamp(1.5rem, 3.4vw, 1.875rem); letter-spacing: -0.02em; line-height: 1.1; text-wrap: balance; }
+.paper-headline { margin: 0.4rem 0 0; color: var(--ink-2); text-wrap: pretty; }
+.paper-meta { margin: 0.45rem 0 0; display: flex; flex-wrap: wrap; font-size: 0.8125rem; color: var(--ink-2); }
+.paper-meta > * + *::before { content: '·'; margin: 0 0.5em; color: var(--ink-3); }
+.paper-meta a { overflow-wrap: anywhere; }
+
+.paper-section { margin-top: 1.15rem; }
+.paper-h {
+  margin: 0 0 0.45rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--gold);
+  font-family: var(--font-mono), monospace;
+  font-weight: 500;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.paper-list { list-style: none; margin: 0; padding: 0; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; align-items: baseline; padding: 0.2rem 0; }
+.item .line { overflow-wrap: anywhere; text-wrap: pretty; }
+.item .date { font-family: var(--font-mono), monospace; font-size: 0.6875rem; letter-spacing: 0.02em; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) {
+  .item { grid-template-columns: 1fr; row-gap: 0.1rem; }
+}
+
+.more { margin-top: 0.35rem; }
+.more > summary { cursor: pointer; list-style: none; font-family: var(--font-mono), monospace; font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); padding: 0.2rem 0; }
+.more > summary::-webkit-details-marker { display: none; }
+.more > summary::before { content: '+ '; }
+.more[open] > summary::before { content: '− '; }
+.more > summary:hover, .more > summary:focus-visible { color: var(--ink); }
+
+.paper-skills-line { margin: 0; text-wrap: pretty; }
+.paper-skills { margin: 0.35rem 0 0; display: grid; gap: 0.25rem; }
+.paper-skills > div { display: grid; grid-template-columns: 7em minmax(0, 1fr); column-gap: 1rem; }
+.paper-skills dt { font-family: var(--font-mono), monospace; font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); padding-top: 0.25em; }
+.paper-skills dd { margin: 0; }
+.paper-foot { margin: 1.4rem 0 0; font-size: 0.75rem; color: var(--ink-3); }
+
+/* print: mirrors the PDF. print.css already sets @page Letter / .6in and hides nav, footer, grain, .no-print */
+@media print {
+  .page-resume .chapter-header, .page-resume .chapter-next, .resume-actions, .more { display: none !important; }
+  .page-resume .resume { width: auto; margin: 0; padding: 0; }
+  .paper { max-width: none; margin: 0; padding: 0; box-shadow: none; background: #fff; color: #111; font-size: 10.5pt; line-height: 1.35; }
+  .paper-head { padding-bottom: 6pt; border-bottom-color: #111; }
+  .paper-name { font-size: 20pt; }
+  .paper-headline { font-size: 10.5pt; color: #333; margin-top: 3pt; }
+  .paper-meta { font-size: 9pt; color: #333; margin-top: 3pt; }
+  .paper-section { margin-top: 9pt; }
+  .paper-h { font-size: 9pt; color: #111; border-bottom-color: #e8b84a; margin-bottom: 3pt; break-after: avoid; page-break-after: avoid; }
+  .item { break-inside: avoid; page-break-inside: avoid; padding: 1.5pt 0; column-gap: 12pt; }
+  .item .date { font-size: 8pt; color: #555; }
+  .paper-skills dt, .paper-foot { color: #555; }
+  .paper-foot { margin-top: 10pt; font-size: 8pt; }
+  .paper a { color: #111; text-decoration: none; }
+}
+
+/* the fixed Now indicator (shared component) crosses the light paper between ~640 and ~1400 px; invert it there */

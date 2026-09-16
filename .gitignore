@@ -20,3 +20,4 @@ content/**/*.mov
 content/**/*.m4v
 content/**/*.heic
 content/**/*.zip
+.env*

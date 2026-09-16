@@ -1,0 +1,158 @@
+---
+// A single essay: like a note plus date, reading time, cover with mosaic, essay number, prev/next, share row.
+import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import Byline from '../../components/Byline.astro';
+import TagList from '../../components/TagList.astro';
+import Backlinks from '../../components/Backlinks.astro';
+import LocalGraph from '../../components/LocalGraph.astro';
+import Comments from '../../components/Comments.astro';
+import Mosaic from '../../components/Mosaic.astro';
+import { getPublished, isDraft } from '../../lib/published.ts';
+import { getGraph } from '../../lib/graph.ts';
+import { isoDate, monthYear, readingTime } from '../../lib/dates.ts';
+import { entryMedia } from '../../lib/media.ts';
+import { BYLINE, SITE_URL } from '../../site.config.ts';
+import '../../styles/notes.css';
+
+export async function getStaticPaths() {
+  const posts = (await getPublished('blog')).sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+  const brief = (p: (typeof posts)[number] | undefined) => (p ? { id: p.id, title: p.data.title ?? p.id } : undefined);
+  return posts.map((post, i) => ({
+    params: { id: post.id },
+    props: { post, number: i + 1, prev: brief(posts[i - 1]), next: brief(posts[i + 1]) },
+  }));
+}
+const { post, number, prev, next } = Astro.props;
+const { Content } = await render(post);
+
+const title = post.data.title ?? post.id;
+const body = post.body ?? '';
+const nodeId = `blog/${post.id}`;
+const g = getGraph();
+const tags = g.tagsOf.get(nodeId) ?? post.data.tags;
+const date = post.data.date;
+const updated = post.data.updated;
+const dateIso = isoDate(date);
+const minutes = readingTime(body);
+const no = String(number).padStart(2, '0');
+const media = entryMedia(post.data, body);
+const cover = media.cover;
+const coverAlt = media.gallery.find((x) => x.name === cover?.name)?.alt ?? '';
+const og = cover ? (await getImage({ src: cover.meta, width: 1200, height: 630, fit: 'cover', format: 'jpeg' })).src : '/og/notes.png';
+const url = `${SITE_URL}/blog/${post.id}`;
+const extra = [`${minutes} min read`, updated && isoDate(updated) !== dateIso ? `updated ${isoDate(updated)}` : undefined].filter(Boolean).join(' · ');
+
+const firstLine = body.replace(/<!--[\s\S]*?-->/g, '').replace(/%%[\s\S]*?%%/g, '').trim().split('\n')[0] ?? '';
+const dupH1 = /^#\s+/.test(firstLine) && firstLine.replace(/^#\s+/, '').trim().toLowerCase() === title.toLowerCase();
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description: post.data.summary,
+    datePublished: date.toISOString(),
+    dateModified: (updated ?? date).toISOString(),
+    author: { '@type': 'Person', name: BYLINE.blog, url: `${SITE_URL}/about` },
+    mainEntityOfPage: url,
+    url,
+    image: new URL(og, SITE_URL).toString(),
+    keywords: tags.join(', '),
+    wordCount: body.split(/\s+/).filter(Boolean).length,
+    timeRequired: `PT${minutes}M`,
+    inLanguage: 'en',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog` },
+      { '@type': 'ListItem', position: 3, name: title, item: url },
+    ],
+  },
+];
+---
+<Base title={`${title} — ${BYLINE.blog}`} description={post.data.summary} active="notes" type="article" image={og} published={date} modified={updated ?? date} jsonLd={jsonLd} draft={isDraft(post)}>
+  <article class="entry container" data-pagefind-body data-pagefind-filter="type:Essay" data-pagefind-meta={`date:${dateIso}`} data-pagefind-sort={`date:${dateIso}`}>
+    <header class="entry__head">
+      <p class="entry__eyebrow mono" data-pagefind-ignore><a href="/blog"><span class="num">02</span> Blog</a> · Essay <span class="num">{no}</span> · {monthYear(date)}</p>
+      <h1 class="display t-2">{title}</h1>
+      {post.data.thai && <p class="thai entry__thai">{post.data.thai}</p>}
+      <div class="entry__meta" data-pagefind-ignore>
+        <Byline name={BYLINE.blog} kind="Essay" date={dateIso} extra={extra} />
+        <TagList tags={tags} />
+      </div>
+    </header>
+    {cover && (
+      <figure class="entry__cover">
+        <Mosaic src={cover.meta} alt={coverAlt} widths={[640, 960, 1440]} sizes="(min-width: 1024px) 960px, 100vw" loading="eager" />
+        {coverAlt && <figcaption>{coverAlt}</figcaption>}
+      </figure>
+    )}
+    <div class:list={['prose', 'entry__body', { 'has-dup-h1': dupH1 }]}>
+      <Content />
+    </div>
+    <div class="share" data-share data-url={url} data-title={title} data-pagefind-ignore>
+      <span class="label">Share</span>
+      <button type="button" class="chip" data-share-copy>Copy link</button>
+      <button type="button" class="chip" data-share-native hidden>Share…</button>
+      <span class="share__status mono" data-share-status aria-live="polite"></span>
+    </div>
+  </article>
+
+  <aside class="entry__links container" aria-label="Connections" data-pagefind-ignore>
+    <Backlinks nodeId={nodeId} relatedKinds={['note']} relatedTitle="Related notes" />
+    <div class="entry__graph">
+      <h2 class="label">Neighbourhood</h2>
+      <LocalGraph nodeId={nodeId} />
+      <a class="entry__open-graph" href={`/notes?focus=${nodeId}#graph`}>Open in graph →</a>
+    </div>
+  </aside>
+
+  {(prev || next) && (
+    <nav class="pager container" aria-label="Other essays">
+      {prev && (
+        <a class="pager--prev" href={`/blog/${prev.id}`}>
+          <span class="label">← Previous essay</span>
+          <span class="pager__title">{prev.title}</span>
+        </a>
+      )}
+      {next && (
+        <a class="pager--next" href={`/blog/${next.id}`}>
+          <span class="label">Next essay →</span>
+          <span class="pager__title">{next.title}</span>
+        </a>
+      )}
+    </nav>
+  )}
+
+  {post.data.comments && <Comments />}
+  <ChapterNext current="notes" />
+</Base>
+
+<script>
+  const share = document.querySelector<HTMLElement>('[data-share]');
+  if (share) {
+    const url = share.dataset.url ?? location.href;
+    const title = share.dataset.title ?? document.title;
+    const status = share.querySelector<HTMLElement>('[data-share-status]');
+    const copy = share.querySelector<HTMLButtonElement>('[data-share-copy]');
+    const native = share.querySelector<HTMLButtonElement>('[data-share-native]');
+    copy?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        if (status) status.textContent = 'Link copied';
+      } catch {
+        if (status) status.textContent = url;
+      }
+    });
+    if (native && typeof navigator.share === 'function') {
+      native.hidden = false;
+      native.addEventListener('click', () => navigator.share({ title, url }).catch(() => {}));
+    }
+  }
+</script>

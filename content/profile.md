@@ -6,13 +6,14 @@ stanfordAlias: "Landa Tejahempinyo"
 headline: "Senior, BASIS Int'l School Bangkok | Economics & quant research | Founder, MEEKVEGGIES | Thai youth national archer"
 school: "BASIS International School Bangkok"
 classOf: 2027
+resumeHeadline: "Senior at BASIS International School Bangkok · economics and quantitative research · Thailand youth national archery team"
 location: "Bangkok, Thailand"
 email: "s.tejahempinyo@gmail.com"
 links: ["GitHub | https://github.com/huachxng"]
 skills: ["Python", "R (tidyverse)", "Statistics", "Probability", "Data Analysis", "Economic Research", "Financial Analysis", "Portfolio Optimization", "Risk Management", "Backtesting", "Entrepreneurship", "Public Speaking", "Leadership", "Content Creation", "Video and Podcast Editing"]
 languages: ["Thai", "English"]
 now: ["Now — senior year at BASIS Bangkok · recurve training", "Finishing the AI Bubble paper for SSRN"]
-education: ["BASIS International School Bangkok ()", "Stanford University ()", "Summer Discovery at UCLA ()"]
+education: ["Stanford University, Summer Session — CS106A Programming Methodology, STATS 110 Probability for Statistical Inference (Jun – Aug 2026)", "Summer Discovery at UCLA — Personal Finance & Investing Academy (Jul 2025)"]
 ---
 My legal name is Sasipat Tejahempinyo. At home and at school I go by Hua, and I write here as Noah. At Stanford Summer Session in 2026 I signed my coursework as Landa Tejahempinyo, so if you knew me there, that was also me.
 

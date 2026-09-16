@@ -15,4 +15,4 @@ resumeLine: "House Leader / Captain, NAGA House, BASIS International School Bang
 
 Since September 2024 I have led NAGA (Red) House, one of the school houses, which spans middle and high school with more than 200 students. I run sports-day operations and spirit events, mentor younger students, and give the faculty feedback on making sports day include every grade level.
 
-<!-- TODO (review): Confirm the start date (resume says Sep 2024; Brag Sheet v2 says grades 11–12, which would be from Aug 2025) and the 200+ student figure. -->
+%% TODO (review): Confirm the start date (resume says Sep 2024; Brag Sheet v2 says grades 11–12, which would be from Aug 2025) and the 200+ student figure. %%

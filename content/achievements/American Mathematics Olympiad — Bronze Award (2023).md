@@ -15,4 +15,4 @@ resumeLine: "American Mathematics Olympiad (SIMCC) — Bronze Award (2023)."
 
 I won a Bronze Award in the 2023 American Mathematics Olympiad, competing in the Grade 9 division. The certificate is in my portfolio.
 
-<!-- TODO (review): Confirm the competition date. Crop the QR code and certificate numbers before publishing the scan. -->
+%% TODO (review): Confirm the competition date. Crop the QR code and certificate numbers before publishing the scan. %%

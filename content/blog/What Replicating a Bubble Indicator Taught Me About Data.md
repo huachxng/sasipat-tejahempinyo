@@ -7,9 +7,8 @@ tags: [research, ai-bubble, r, reproducibility, data]
 summary: "Porting my bubble index from Python to R and forcing it to reproduce five known numbers taught me more about data than building it did."
 ---
 
-<!-- TODO: confirm the publish date. -->
+%% TODO: confirm the publish date. %%
 
-# What Replicating a Bubble Indicator Taught Me About Data
 
 In June I had a Python script that produced a number I liked. The [[Bubble Intensity Score]], my four-pillar composite for [[AI Bubble Research]], read +1.81 in March 2000, the month of the Nasdaq top, and +0.93 in May 2026. In August, after a summer statistics course, I decided to rebuild the whole thing in R and not trust it until it reproduced five anchor months from the prototype to two decimal places.
 

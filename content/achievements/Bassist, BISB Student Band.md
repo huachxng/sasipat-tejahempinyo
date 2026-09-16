@@ -16,4 +16,4 @@ resumeLine: "Bassist, BISB student band (Sep 2023–Sep 2024) — Santa & Santy 
 
 I played bass in the school band from September 2023 to September 2024. We performed outside school at the Santa & Santy Kids Contest at Central Rama 2 on 23–24 December 2023, and on the school's outdoor stage, including the Songkran festival event.
 
-<!-- TODO (review): Brag Sheet v2 also lists 'The EN Band (founder/bassist)'; confirm whether this is the same band, whether you founded it, and whether you still play. The photos carry drawn arrows and need clean originals or cropping before publishing. -->
+%% TODO (review): Brag Sheet v2 also lists 'The EN Band (founder/bassist)'; confirm whether this is the same band, whether you founded it, and whether you still play. The photos carry drawn arrows and need clean originals or cropping before publishing. %%

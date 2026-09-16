@@ -1,0 +1,109 @@
+---
+// One tag: notes, essays and achievements under one heading, with kind labels and counts.
+import Base from '../../layouts/Base.astro';
+import ChapterHeader from '../../components/ChapterHeader.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import NoteCard from '../../components/NoteCard.astro';
+import TagList from '../../components/TagList.astro';
+import { getPublished, byDateDesc, type Entry } from '../../lib/published.ts';
+import { allTags } from '../../lib/tags.ts';
+import { dateRange, isoDate, monthYear, readingTime } from '../../lib/dates.ts';
+import { entryMedia } from '../../lib/media.ts';
+import { CATEGORIES, PERSON } from '../../site.config.ts';
+import '../../styles/notes.css';
+
+export async function getStaticPaths() {
+  const [notes, posts, achievements] = await Promise.all([getPublished('notes'), getPublished('blog'), getPublished('achievements')]);
+  type Group = { notes: Entry<'notes'>[]; posts: Entry<'blog'>[]; achievements: Entry<'achievements'>[] };
+  const groups = new Map<string, Group>();
+  const bucket = (tag: string): Group => {
+    let g = groups.get(tag);
+    if (!g) {
+      g = { notes: [], posts: [], achievements: [] };
+      groups.set(tag, g);
+    }
+    return g;
+  };
+  // Achievement categories are not tags (category/* is an implicit graph-only tag), so they never get a page.
+  const tagsOf = (e: { data: { tags: string[] }; body?: string }) => allTags(e.data.tags, e.body ?? '').filter((t) => t && !t.startsWith('category/'));
+  for (const n of notes) for (const t of tagsOf(n)) bucket(t).notes.push(n);
+  for (const p of posts) for (const t of tagsOf(p)) bucket(t).posts.push(p);
+  for (const a of achievements) for (const t of tagsOf(a)) bucket(t).achievements.push(a);
+  const counts: Record<string, number> = {};
+  for (const [t, g] of groups) counts[t] = g.notes.length + g.posts.length + g.achievements.length;
+  return [...groups.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([tag, g]) => ({
+      params: { tag },
+      props: {
+        tag,
+        notes: [...g.notes].sort(byDateDesc),
+        posts: [...g.posts].sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+        achievements: [...g.achievements].sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+        counts,
+      },
+    }));
+}
+const { tag, notes, posts, achievements, counts } = Astro.props;
+const total = notes.length + posts.length + achievements.length;
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const parts = [
+  notes.length ? plural(notes.length, 'note', 'notes') : '',
+  posts.length ? plural(posts.length, 'essay', 'essays') : '',
+  achievements.length ? plural(achievements.length, 'achievement', 'achievements') : '',
+].filter(Boolean);
+const otherTags = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+const frequentTags = otherTags.filter((t) => counts[t] >= 2 || t === tag);
+const rareTags = otherTags.filter((t) => counts[t] < 2 && t !== tag);
+const description = `${plural(total, 'entry', 'entries')} tagged #${tag}: ${parts.join(', ')}.`;
+---
+<Base title={`#${tag} — ${PERSON.displayName}`} active="notes" description={description} image="/og/notes.png">
+  <ChapterHeader slug="notes" title={`#${tag}`} dek={`Everything tagged #${tag}, across notes, essays and achievements.`}>
+    <p class="tag-page__counts mono">
+      <span><strong>{total}</strong> {total === 1 ? 'entry' : 'entries'}</span>
+      {notes.length > 0 && <span><strong>{notes.length}</strong> {notes.length === 1 ? 'note' : 'notes'}</span>}
+      {posts.length > 0 && <span><strong>{posts.length}</strong> {posts.length === 1 ? 'essay' : 'essays'}</span>}
+      {achievements.length > 0 && <span><strong>{achievements.length}</strong> {achievements.length === 1 ? 'achievement' : 'achievements'}</span>}
+    </p>
+  </ChapterHeader>
+
+  <section class="list-section container" aria-labelledby="tagged-title">
+    <div class="list-head">
+      <h2 id="tagged-title" class="display t-3">Tagged <span class="numeral">{total}</span></h2>
+      <div class="list-tools"><a class="more" href="/notes#tags">All tags →</a></div>
+    </div>
+    <ol class="note-list">
+      {notes.map((n, i) => {
+        const u = n.data.updated ?? n.data.date;
+        return (
+          <NoteCard href={`/notes/${n.id}`} title={n.data.title ?? n.id} kind="Note" meta={u ? `updated ${isoDate(u)}` : undefined} summary={n.data.summary} thai={n.data.thai} tags={allTags(n.data.tags, n.body ?? '')} sortDate={u ? isoDate(u) : ''} index={i} />
+        );
+      })}
+      {posts.map((p, i) => (
+        <NoteCard href={`/blog/${p.id}`} title={p.data.title ?? p.id} kind="Essay" meta={`${monthYear(p.data.date)} · ${readingTime(p.body ?? '')} min read`} summary={p.data.summary} thai={p.data.thai} tags={allTags(p.data.tags, p.body ?? '')} sortDate={isoDate(p.data.date)} index={i} />
+      ))}
+      {achievements.map((a, i) => {
+        const m = entryMedia(a.data, a.body ?? '');
+        const cover = m.cover;
+        const coverAlt = m.gallery.find((x) => x.name === cover?.name)?.alt ?? '';
+        const meta = [CATEGORIES[a.data.category], dateRange(a.data.date, a.data.endDate, a.data.dateText), a.data.result].filter(Boolean).join(' · ');
+        return (
+          <NoteCard href={`/achievements/${a.id}`} title={a.data.title ?? a.id} kind="Achievement" meta={meta} summary={a.data.summary} thai={a.data.thai} tags={allTags(a.data.tags, a.body ?? '')} cover={cover?.meta} coverAlt={coverAlt} sortDate={isoDate(a.data.date)} index={i} />
+        );
+      })}
+    </ol>
+  </section>
+
+  <section class="tags-section container" aria-labelledby="other-tags-title">
+    <h2 id="other-tags-title" class="label">All tags <span class="muted">{otherTags.length}</span></h2>
+    <TagList tags={frequentTags} counts={counts} active={tag} label="Tags used more than once" />
+    {rareTags.length > 0 && (
+      <details class="tag-more">
+        <summary class="chip">{rareTags.length} tags used once</summary>
+        <TagList tags={rareTags} label="Tags used once" />
+      </details>
+    )}
+  </section>
+
+  <ChapterNext current="notes" />
+</Base>

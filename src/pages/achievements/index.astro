@@ -1,0 +1,58 @@
+---
+// Chapter 01 — timeline with year tabs, category chips and the countdown numeral (spec §8.1–8.2).
+import Base from '../../layouts/Base.astro';
+import ChapterHeader from '../../components/ChapterHeader.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import Filters from '../../components/Filters.astro';
+import Timeline from '../../components/Timeline.astro';
+import { getPublished } from '../../lib/published.ts';
+import { getGraph } from '../../lib/graph.ts';
+import { PERSON, SITE_URL, chapterBySlug } from '../../site.config.ts';
+import { byNewest, categoryCounts, hrefOf, titleOf, yearOf, yearTabs } from './_shared.ts';
+import '../../styles/achievements.css';
+
+const entries = (await getPublished('achievements')).sort(byNewest);
+const graph = getGraph();
+const { tabs, earlierBefore } = yearTabs(entries);
+const counts = categoryCounts(entries);
+const chapter = chapterBySlug('achievements');
+const newestYear = entries[0] ? yearOf(entries[0]) : new Date().getUTCFullYear();
+const oldestYear = entries.length ? yearOf(entries[entries.length - 1]) : newestYear;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `Achievements — ${PERSON.legalName}`,
+  description: chapter.dek,
+  numberOfItems: entries.length,
+  itemListOrder: 'https://schema.org/ItemListOrderDescending',
+  itemListElement: entries.map((e, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: new URL(hrefOf(e), SITE_URL).toString(),
+    name: titleOf(e),
+  })),
+};
+---
+<Base
+  title={`Achievements — ${PERSON.displayName}`}
+  active="achievements"
+  description={`${chapter.dek} ${entries.length} entries, ${oldestYear}–${newestYear}.`}
+  image="/og/achievements.png"
+  jsonLd={jsonLd}
+  now={`01 / Achievements / ${newestYear}`}
+  bodyClass="page-achievements"
+>
+  <ChapterHeader slug="achievements">
+    <p class="ach-intro">
+      {entries.length} entries from {oldestYear} to {newestYear}: archery, research, ventures, leadership and the arts.
+      Filter by year or category; the count runs from the newest entry back to where it started.
+    </p>
+  </ChapterHeader>
+  <Filters tabs={tabs} earlierBefore={earlierBefore} counts={counts} total={entries.length} />
+  <Timeline entries={entries} graph={graph} />
+  <ChapterNext current="achievements" />
+</Base>
+<style>
+  .ach-intro { margin: 1.5rem 0 0; max-width: 60ch; color: var(--fg-2); text-wrap: pretty; }
+</style>

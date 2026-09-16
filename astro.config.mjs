@@ -12,6 +12,9 @@ import { rehypeGallery } from './src/plugins/rehype-gallery.ts';
 import { previousSlugsRedirects } from './src/lib/redirects.ts';
 import { SITE_URL } from './src/site.config.ts';
 
+/**
+ * @param {string} name @param {string} cssVariable @param {string} file @param {string} weight @param {string} fallback
+ */
 const localFont = (name, cssVariable, file, weight, fallback) => ({
   provider: fontProviders.local(),
   name,

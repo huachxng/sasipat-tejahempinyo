@@ -1,0 +1,71 @@
+---
+// One timeline entry (spec §8.1): mono date, title, result badge, org · location, summary, category, thai line,
+// media block (cover via <Mosaic> + up to 3 square thumbs + certificate tile), link chips, Details →, Connected chips.
+import { Image } from 'astro:assets';
+import Mosaic from './Mosaic.astro';
+import { entryMedia, isCertificateName } from '../lib/media.ts';
+import { dateRange, isoDate } from '../lib/dates.ts';
+import { CATEGORIES } from '../site.config.ts';
+import { hrefOf, parseLink, titleOf, yearOf, type Achievement, type Connected } from '../pages/achievements/_shared.ts';
+
+interface Props { entry: Achievement; count: number; eager?: boolean; connected?: Connected[] }
+const { entry, count, eager = false, connected = [] } = Astro.props;
+const d = entry.data;
+const title = titleOf(entry);
+const href = hrefOf(entry);
+const year = yearOf(entry);
+const m = entryMedia(d, entry.body ?? '');
+const coverPhoto = m.cover && !isCertificateName(m.cover.name) ? m.cover : m.gallery[0];
+const coverAlt = coverPhoto ? m.gallery.find((g) => g.name === coverPhoto.name)?.alt || `${title} — photo` : '';
+const thumbs = m.gallery.filter((g) => g.name !== coverPhoto?.name).slice(0, 3);
+const cert = m.certificates[0];
+const hasMedia = Boolean(coverPhoto || thumbs.length || cert);
+const links = d.links.map(parseLink).filter((l): l is NonNullable<typeof l> => l !== null);
+const no = String(count).padStart(2, '0');
+---
+<article class="entry" id={entry.id} data-year={year} data-cat={d.category} data-count={count} style={`view-transition-name: ach-${entry.id}`}>
+  <div class="entry-head">
+    <time class="entry-date mono" datetime={isoDate(d.date)}>{dateRange(d.date, d.endDate, d.dateText)}</time>
+    <span class="entry-no mono" data-entry-no>Nº {no}</span>
+  </div>
+  <h2 class="entry-title display t-2"><a href={href}>{title}</a></h2>
+  {d.result && <p class="entry-result"><span class="badge">{d.result}</span></p>}
+  {(d.org || d.location) && <p class="entry-org">{[d.org, d.location].filter(Boolean).join(' · ')}</p>}
+  {d.summary && <p class="entry-summary">{d.summary}</p>}
+  <p class="entry-cat label"><a href={`/achievements?cat=${d.category}`} data-cat-link={d.category}>{CATEGORIES[d.category]}</a></p>
+  {d.thai && <p class="entry-thai thai" lang="th">{d.thai}</p>}
+  {hasMedia && (
+    <div class:list={['entry-media', { 'has-cert': !!cert, 'has-thumbs': thumbs.length > 0, 'no-cover': !coverPhoto }]}>
+      {coverPhoto && (
+        <a class="media-cover" href={href} tabindex="-1">
+          <Mosaic src={coverPhoto.meta} alt={coverAlt} aspect="3/2" widths={[480, 960, 1440]} sizes="(min-width:1024px) 46vw, 100vw" loading={eager ? 'eager' : 'lazy'} />
+        </a>
+      )}
+      {thumbs.length > 0 && (
+        <div class="media-thumbs">
+          {thumbs.map((t) => (
+            <a class="media-thumb photo" href={href} tabindex="-1" aria-hidden="true">
+              <Image src={t.meta} alt="" width={640} height={640} widths={[320, 640]} sizes="(min-width:1024px) 9vw, 30vw" fit="cover" quality={72} format="webp" loading="lazy" />
+            </a>
+          ))}
+        </div>
+      )}
+      {cert && (
+        <a class="media-cert is-certificate" href={`${href}#certificate`}>
+          <span class="label">Certificate</span>
+          <Image src={cert.meta} alt={`Certificate — ${title}`} widths={[800, 1600]} sizes="(min-width:1024px) 18vw, 50vw" quality={80} format="webp" loading="lazy" />
+        </a>
+      )}
+    </div>
+  )}
+  <div class="entry-links">
+    {links.map((l) => <a class="chip" href={l.href} target="_blank" rel="noopener">{l.label} <span aria-hidden="true">↗</span></a>)}
+    <a class="entry-more mono" href={href}>Details <span aria-hidden="true">→</span><span class="sr-only"> about {title}</span></a>
+  </div>
+  {connected.length > 0 && (
+    <div class="entry-connected">
+      <span class="label">Connected</span>
+      {connected.map((c) => <a class="chip chip--ghost" href={c.href}>{c.title}</a>)}
+    </div>
+  )}
+</article>

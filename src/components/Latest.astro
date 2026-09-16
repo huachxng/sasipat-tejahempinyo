@@ -1,0 +1,44 @@
+---
+// Home "Latest": the `limit` most recent notes and essays, by updated-or-published date.
+// Ties (a batch of notes updated on the same day) put essays first, then titles A–Z, so the order is stable between builds.
+import type { Entry } from '../lib/published.ts';
+import { byDateDesc } from '../lib/published.ts';
+import { isoDate, readingTime } from '../lib/dates.ts';
+import { PERSON } from '../site.config.ts';
+interface Props {
+  notes: Entry<'notes'>[];
+  posts: Entry<'blog'>[];
+  limit?: number;
+}
+const { notes, posts, limit = 3 } = Astro.props;
+type Item = { kind: 'Essay' | 'Note'; href: string; title: string; summary?: string; date?: Date; updated?: Date; minutes: number; sort: { data: { date?: Date; updated?: Date } } };
+const items: Item[] = [
+  ...posts.map((e): Item => ({ kind: 'Essay', href: `/blog/${e.id}`, title: e.data.title ?? e.id, summary: e.data.summary, date: e.data.date, updated: e.data.updated, minutes: readingTime(e.body ?? ''), sort: e })),
+  ...notes.map((e): Item => ({ kind: 'Note', href: `/notes/${e.id}`, title: e.data.title ?? e.id, summary: e.data.summary, date: e.data.date, updated: e.data.updated, minutes: readingTime(e.body ?? ''), sort: e })),
+]
+  .sort((a, b) => byDateDesc(a.sort, b.sort) || (a.kind === b.kind ? a.title.localeCompare(b.title) : a.kind === 'Essay' ? -1 : 1))
+  .slice(0, limit);
+const when = (it: Item) => (it.updated && it.date && it.updated.getTime() > it.date.getTime() ? `Updated ${isoDate(it.updated)}` : it.date ? isoDate(it.date) : it.updated ? `Updated ${isoDate(it.updated)}` : '');
+---
+{items.length > 0 && (
+  <section class="latest ruled" aria-labelledby="latest-title">
+    <div class="container">
+      <div class="sec-head">
+        <h2 id="latest-title" class="label">Latest <span class="count">notes &amp; essays by {PERSON.penName}</span></h2>
+        <a class="more mono" href="/notes">All notes <span aria-hidden="true">→</span></a>
+      </div>
+      <ol class="lt-list stagger">
+        {items.map((it, i) => (
+          <li class="lt-row fade" style={`--i:${i}`}>
+            <a class="lt-link" href={it.href}>
+              <span class="lt-meta mono"><span class="lt-kind">{it.kind}</span>{when(it) && <> · {when(it)}</>} · {it.minutes} min</span>
+              <span class="lt-title display t-2">{it.title}</span>
+              {it.summary && <span class="lt-summary">{it.summary}</span>}
+              <span class="lt-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+)}

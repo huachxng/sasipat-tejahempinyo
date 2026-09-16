@@ -1,20 +1,65 @@
 ---
+// Site search: native <dialog>, Pagefind UI mounted on first open. Opened by any [data-search-open]
+// (Nav dispatches clicks for "/" and ⌘K). The index exists only in build output (astro-pagefind).
 ---
-<dialog id="search-dialog" class="search-dialog" aria-label="Search">
-  <div class="inner">
-    <button type="button" class="chip" data-search-close>Close</button>
-    <div id="search" class="pagefind-host"></div>
+<dialog id="search-dialog" class="search-dialog" aria-labelledby="search-title">
+  <div class="search-inner">
+    <div class="search-head">
+      <p id="search-title" class="label">Search <span class="search-scope">notes · essays · achievements</span></p>
+      <button type="button" class="chip" data-search-close>Close <kbd>Esc</kbd></button>
+    </div>
+    <div id="search" class="pagefind-host" data-search-host></div>
+    <p class="search-status mono" data-search-status aria-live="polite" hidden></p>
   </div>
 </dialog>
-<script>
-  const dlg = document.getElementById('search-dialog') as HTMLDialogElement | null;
-  document.querySelector('[data-search-open]')?.addEventListener('click', () => dlg?.showModal());
-  document.querySelector('[data-search-close]')?.addEventListener('click', () => dlg?.close());
-  dlg?.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-</script>
+<script src="../scripts/search.ts"></script>
 <style>
-  .search-dialog { border: 1px solid var(--rule-strong); background: var(--bg-2); color: var(--fg); padding: 0; width: min(92vw, 720px); margin-top: 10vh; }
-  .search-dialog::backdrop { background: rgba(10, 10, 11, 0.7); backdrop-filter: blur(4px); }
-  .inner { padding: 1rem; display: grid; gap: 1rem; }
-  .chip { justify-self: end; }
+  .search-dialog { border: 1px solid var(--rule-strong); background: var(--bg-2); color: var(--fg); padding: 0; width: min(100vw - 2 * var(--gutter), 760px); max-width: none; margin: 8vh auto 0; max-height: min(84vh, 100vh - 2rem); overflow: auto; }
+  .search-dialog::backdrop { background: rgba(10, 10, 11, 0.72); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .search-inner { padding: 1rem clamp(1rem, 3vw, 1.5rem) 1.25rem; display: grid; gap: 1rem; }
+  .search-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .search-head p { margin: 0; }
+  .search-scope { text-transform: none; letter-spacing: 0.02em; color: var(--fg-3); margin-left: 0.5em; }
+  kbd { font: inherit; color: var(--fg-3); }
+  .search-status { margin: 0; font-size: 12px; color: var(--fg-2); }
+  .search-status[hidden] { display: none; }
+</style>
+<style is:global>
+  html:has(.search-dialog[open]) { overflow: hidden; }
+  .search-dialog {
+    --pagefind-ui-scale: 0.9;
+    --pagefind-ui-primary: var(--gold);
+    --pagefind-ui-text: var(--fg);
+    --pagefind-ui-background: var(--bg-2);
+    --pagefind-ui-border: var(--rule-strong);
+    --pagefind-ui-tag: var(--bg-3);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 0;
+    --pagefind-ui-image-border-radius: 0;
+    --pagefind-ui-image-box-ratio: 3 / 2;
+    --pagefind-ui-font: var(--font-text), sans-serif;
+  }
+  .search-dialog .pagefind-ui__search-input { background: var(--bg); color: var(--fg); font-weight: 400; }
+  .search-dialog .pagefind-ui__search-input::placeholder { color: var(--fg-3); }
+  .search-dialog .pagefind-ui__search-input:focus-visible { outline: var(--focus); outline-offset: 2px; }
+  .search-dialog .pagefind-ui__search-clear { background: transparent; color: var(--fg-2); font-family: var(--font-mono), monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .search-dialog .pagefind-ui__search-clear:hover { color: var(--gold); }
+  .search-dialog .pagefind-ui__message { color: var(--fg-2); font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: 0.02em; }
+  .search-dialog .pagefind-ui__result { border-top: 1px solid var(--rule); padding-block: 1rem; }
+  .search-dialog .pagefind-ui__result-title, .search-dialog .pagefind-ui__result-link { color: var(--fg); font-family: var(--font-display), sans-serif; font-weight: 600; letter-spacing: -0.01em; }
+  .search-dialog .pagefind-ui__result-link:hover { color: var(--gold); text-decoration: none; }
+  .search-dialog .pagefind-ui__result-excerpt { color: var(--fg-2); font-size: var(--t-small); }
+  .search-dialog .pagefind-ui__result-excerpt mark { background: color-mix(in srgb, var(--gold) 30%, transparent); color: var(--fg); }
+  .search-dialog .pagefind-ui__result-tags { margin-top: 0.5rem; }
+  .search-dialog .pagefind-ui__result-tag { font-family: var(--font-mono), monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-2); background: transparent; border: 1px solid var(--rule-strong); padding: 0.2em 0.5em; }
+  .search-dialog .pagefind-ui__filter-panel { border-top: 1px solid var(--rule); }
+  .search-dialog .pagefind-ui__filter-name { color: var(--fg-2); font-family: var(--font-mono), monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .search-dialog .pagefind-ui__filter-label { color: var(--fg); font-size: var(--t-small); }
+  .search-dialog .pagefind-ui__filter-value { color: var(--fg-2); }
+  .search-dialog .pagefind-ui__filter-checkbox { accent-color: var(--gold); }
+  .search-dialog .pagefind-ui__button { background: transparent; color: var(--fg-2); border: 1px solid var(--rule-strong); font-family: var(--font-mono), monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .search-dialog .pagefind-ui__button:hover { color: var(--gold); border-color: var(--gold); background: transparent; }
+  .search-dialog .pagefind-ui__result-thumb { display: none; }
+  .search-dialog .pagefind-ui__result-inner { margin-left: 0; }
+  @media (max-width: 640px) { .search-dialog { margin-top: max(1rem, env(safe-area-inset-top)); } }
 </style>

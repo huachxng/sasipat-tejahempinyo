@@ -16,7 +16,7 @@ cover: career-pathway-podcast-ep1-quant-01.png
 
 I started Career Pathway: Your Future Guide, a podcast that explains career paths to students. I recorded and edited Episode 1, on quantitative finance careers, around March 2026, and it is now live. I handle the hosting and editing myself, and any profits are pledged to charity.
 
-<!-- TODO (review): Confirm the EP1 release date and platform link (planning files run Oct 2025 – Mar 2026; a screenshot is dated 21 Feb 2026) and that the podcast name is 'Career Pathway: Your Future Guide' (CPYFG). -->
+%% TODO (review): Confirm the EP1 release date and platform link (planning files run Oct 2025 – Mar 2026; a screenshot is dated 21 Feb 2026) and that the podcast name is 'Career Pathway: Your Future Guide' (CPYFG). %%
 
 Related notes: [[Quant Career Pathway]].
 

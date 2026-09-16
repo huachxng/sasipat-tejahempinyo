@@ -15,4 +15,4 @@ resumeLine: "MediLoop (MYIO 2026 / IFASIF) — AI-driven circular supply chains 
 
 MediLoop is my concept for using AI to run circular supply chains in healthcare, prepared for the MYIO 2026 / IFASIF track. I wrote a research draft and built a pitch deck for it. It is on hold while I finish my economics paper.
 
-<!-- TODO (review): Confirm what MYIO and IFASIF stand for, whether the entry was submitted, the date, and any result. -->
+%% TODO (review): Confirm what MYIO and IFASIF stand for, whether the entry was submitted, the date, and any result. %%

@@ -16,7 +16,7 @@ cover: loy-krathong-mc-01.jpg
 
 I co-hosted my school's Loy Krathong festival as a student master of ceremonies, working alongside two adult MCs and a younger student MC. Photos from the event are in my portfolio.
 
-<!-- TODO (review): Confirm the year: the photos suggest 2023 or 2024 (November 2024 is a placeholder). -->
+%% TODO (review): Confirm the year: the photos suggest 2023 or 2024 (November 2024 is a placeholder). %%
 
 ![[loy-krathong-mc-01.jpg|The client (left) co-hosts the school Loy Krathong festival as a student MC in traditional Thai dress.]]
 ![[loy-krathong-mc-02.jpg|The four festival MCs on stage, with the client at far left holding a microphone.]]

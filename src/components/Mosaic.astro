@@ -1,8 +1,79 @@
 ---
-// STUB — replaced by the achievements agent. Wraps an optimised image with the pixel-mosaic reveal.
+// Optimised image with the pixel-mosaic reveal (spec §6.5). The real <Image> is always in the DOM;
+// mosaic.ts overlays a canvas drawn at 1/64 → full over 660 ms, then removes it. Skipped under reduced motion.
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-interface Props { src: ImageMetadata; alt: string; widths?: number[]; sizes?: string; class?: string; loading?: 'lazy' | 'eager'; aspect?: string }
-const { src, alt, widths = [480, 960, 1440], sizes = '(min-width: 1024px) 50vw, 100vw', class: cls = '', loading = 'lazy', aspect } = Astro.props;
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  /** CSS aspect like "3/2"; when set the image is cropped to it at build (fit: cover). */
+  aspect?: string;
+  /** Monochrome `.photo` treatment (default). Pass false for certificates and other always-colour images. */
+  photo?: boolean;
+  quality?: number;
+  fetchpriority?: 'high' | 'low' | 'auto';
+}
+const {
+  src,
+  alt,
+  widths = [480, 960, 1440],
+  sizes = '(min-width: 1024px) 46vw, 100vw',
+  class: cls = '',
+  loading = 'lazy',
+  aspect,
+  photo = true,
+  quality = 72,
+  fetchpriority,
+} = Astro.props;
+
+// Crop dimensions: largest requested width (never above the source) at the requested aspect.
+const maxW = Math.min(src.width, Math.max(...widths));
+let width = maxW;
+let height = Math.round((maxW * src.height) / src.width);
+let ratio: number | undefined;
+if (aspect) {
+  const m = /^\s*(\d+(?:\.\d+)?)\s*(?:\/\s*(\d+(?:\.\d+)?))?\s*$/.exec(aspect);
+  if (m) ratio = Number(m[1]) / Number(m[2] ?? 1);
+}
+if (ratio && ratio > 0) {
+  height = Math.round(width / ratio);
+  if (height > src.height) {
+    height = src.height;
+    width = Math.round(height * ratio);
+  }
+}
+const usedWidths = [...new Set(widths.filter((w) => w <= width).concat(width))].sort((a, b) => a - b);
+const style = ratio ? `aspect-ratio:${aspect}` : `aspect-ratio:${width}/${height}`;
 ---
-<div class:list={['mosaic photo', cls]} style={aspect ? `aspect-ratio:${aspect}` : undefined}><Image src={src} alt={alt} widths={widths} sizes={sizes} loading={loading} quality={72} format="webp" /></div>
+<div class:list={['mosaic', photo ? 'photo' : 'is-certificate', cls]} data-mosaic style={style}>
+  <Image
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    widths={usedWidths}
+    sizes={sizes}
+    fit="cover"
+    loading={loading}
+    decoding={loading === 'eager' ? 'sync' : 'async'}
+    fetchpriority={fetchpriority ?? (loading === 'eager' ? 'high' : undefined)}
+    quality={quality}
+    format="webp"
+  />
+</div>
+<script src="../scripts/mosaic.ts"></script>
+<style>
+  .mosaic { position: relative; overflow: hidden; background: var(--bg-2); }
+  .mosaic :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Once mosaic.ts is live the image waits under the canvas; the canvas covers it fully before it shows. */
+  .mosaic.is-armed :global(img) { opacity: 0; }
+  .mosaic.is-armed.is-revealing :global(img), .mosaic.is-done :global(img) { opacity: 1; }
+  .mosaic :global(.mosaic-canvas) { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; transition: opacity 240ms var(--ease-out-quint); }
+  .mosaic :global(.mosaic-canvas.is-fading) { opacity: 0; }
+  .mosaic.photo :global(.mosaic-canvas) { filter: grayscale(1) contrast(1.06); }
+</style>

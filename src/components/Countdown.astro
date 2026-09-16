@@ -1,0 +1,26 @@
+---
+// Sticky countdown numeral + year + gold rail (spec §8.2); phones get a fixed badge and a 2 px top bar.
+// Decorative: the whole block is aria-hidden; each entry exposes its own "Nº" to assistive tech.
+interface Props { entries: { id: string; year: number }[]; nowPrefix?: string }
+const { entries, nowPrefix = '01 / Achievements' } = Astro.props;
+const total = entries.length;
+const start = String(total).padStart(2, '0').split('');
+const firstYear = entries[0]?.year ?? '';
+---
+<div class="countdown" data-countdown data-total={total} data-now-prefix={nowPrefix} aria-hidden="true">
+  <div class="countdown-num numeral" data-digits>
+    {start.map((ch) => (
+      <span class="digit"><span class="d d-cur">{ch}</span><span class="d d-in"></span></span>
+    ))}
+  </div>
+  <p class="countdown-year mono" data-countdown-year>{firstYear}</p>
+  <div class="rail" data-rail>
+    <span class="rail-fill" data-rail-fill></span>
+    {entries.map((e, i) => (
+      <i class="rail-marker" data-marker data-for={e.id} data-count={total - i} style={`top:${total > 1 ? ((i / (total - 1)) * 100).toFixed(3) : 0}%`}></i>
+    ))}
+  </div>
+</div>
+<div class="countdown-badge mono" data-countdown-badge aria-hidden="true"><span data-badge-num>{start.join('')}</span></div>
+<div class="countdown-bar" data-countdown-bar aria-hidden="true"></div>
+<script src="../scripts/countdown.ts"></script>

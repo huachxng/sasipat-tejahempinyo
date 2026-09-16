@@ -15,6 +15,6 @@ resumeLine: "Quantitative Research Intern (project-based), buy-side investment f
 
 I was selected by a portfolio risk manager at a buy-side investment firm in Bangkok for an 11-week project running from July to October 2026. The work moves through portfolio construction and optimization, risk metrics (VaR, maximum drawdown, factor exposure), and a backtest, and ends with a written risk report. The final deliverable is due in early October 2026.
 
-<!-- TODO (review): Confirm the firm name, the mentor's name and title, exact start and end dates, and whether the firm may be named publicly (all sources say the name was never recorded). -->
+%% TODO (review): Confirm the firm name, the mentor's name and title, exact start and end dates, and whether the firm may be named publicly (all sources say the name was never recorded). %%
 
 Related notes: [[Quant Career Pathway]].

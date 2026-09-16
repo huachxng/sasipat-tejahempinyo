@@ -1,0 +1,11 @@
+---
+// Slide data for the PhotoSwipe 5 lightbox (spec §8.3). PhotoSwipe's JS is imported on first click by lightbox.ts;
+// only its stylesheet ships with the page. `bodyMap` maps the nth <img> inside [data-lightbox-body] to a slide.
+import 'photoswipe/style.css';
+import type { Slide } from '../pages/achievements/_shared.ts';
+interface Props { slides: Slide[]; bodyMap: number[] }
+const { slides, bodyMap } = Astro.props;
+const safe = (v: unknown) => JSON.stringify(v).replace(/</g, '\\u003c');
+---
+{slides.length > 0 && <script is:inline type="application/json" data-lightbox-slides data-body-map={safe(bodyMap)} set:html={safe(slides)} />}
+<script src="../scripts/lightbox.ts"></script>

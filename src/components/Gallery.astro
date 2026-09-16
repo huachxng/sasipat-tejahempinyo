@@ -1,0 +1,20 @@
+---
+// Certificate slot for the detail page (spec §8.3): its own labelled section, always in colour, part of the
+// page's single lightbox gallery. Body photo galleries are wrapped by rehype-gallery and styled in achievements.css.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+interface Props { certificates: { name: string; meta: ImageMetadata }[]; title: string; startIndex: number; fullSrcs: string[] }
+const { certificates, title, startIndex, fullSrcs } = Astro.props;
+---
+{certificates.length > 0 && (
+  <section class="ach-certs" id="certificate" aria-labelledby="ach-cert-heading" data-pagefind-ignore>
+    <h2 id="ach-cert-heading" class="label">{certificates.length > 1 ? 'Certificates' : 'Certificate'}</h2>
+    <div class="ach-cert-grid" data-count={certificates.length}>
+      {certificates.map((c, i) => (
+        <a class="ach-cert is-certificate lb-trigger" href={fullSrcs[i]} data-lb-index={startIndex + i}>
+          <Image src={c.meta} alt={`Certificate — ${title}`} widths={[800, 1600]} sizes="(min-width:1024px) 40vw, 100vw" quality={80} format="webp" loading="lazy" />
+        </a>
+      ))}
+    </div>
+  </section>
+)}

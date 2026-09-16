@@ -9,7 +9,7 @@ summary: "Minsky's financial instability hypothesis, how the paper maps it onto 
 
 Hyman Minsky's financial instability hypothesis (Minsky, 1992, Levy Economics Institute Working Paper 74) is one of three theoretical anchors in the literature review of [[AI Bubble Research]], alongside Kindleberger's mania-panic-crash stages and Shiller's irrational exuberance. In popular usage a "Minsky moment" is the point at which debt taken on during calm conditions stops being sustainable and forced selling begins.
 
-<!-- TODO: check this one-sentence gloss against Minsky (1992) before publishing; the paper's own Chapter 2 prose is not yet written. -->
+%% TODO: check this one-sentence gloss against Minsky (1992) before publishing; the paper's own Chapter 2 prose is not yet written. %%
 
 ## How the paper uses it
 

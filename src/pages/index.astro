@@ -1,13 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getPublished } from '../lib/published.ts';
-const ach = await getPublished('achievements');
-const notes = await getPublished('notes');
-const posts = await getPublished('blog');
+import HeroGraph from '../components/HeroGraph.astro';
+import ChapterIndex from '../components/ChapterIndex.astro';
+import FeaturedStrip from '../components/FeaturedStrip.astro';
+import Latest from '../components/Latest.astro';
+import { getPublished, getProfile } from '../lib/published.ts';
+import { person } from '../lib/jsonld.ts';
+import { PERSON } from '../site.config.ts';
+import '../styles/home.css';
+
+const [ach, notes, posts, profile] = await Promise.all([getPublished('achievements'), getPublished('notes'), getPublished('blog'), getProfile()]);
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const counts = {
+  achievements: plural(ach.length, 'entry', 'entries'),
+  notes: `${plural(notes.length, 'note', 'notes')} · ${plural(posts.length, 'essay', 'essays')}`,
+};
+const title = `Sasipat "${PERSON.nickname}" ${PERSON.lastName} — Achievements, Notes & Essays`;
+const description = `Sasipat "${PERSON.nickname}" ${PERSON.lastName}, senior at ${PERSON.school}: economics and quant research, Thai youth national archery and ventures, plus connected notes and essays written as ${PERSON.penName}.`;
 ---
-<Base title="Sasipat (Hua) Tejahempinyo" active="home">
-  <section class="container section">
-    <h1 class="display t-1">Sasipat<br />Tejahempinyo</h1>
-    <p class="mono muted">{ach.length} achievements · {notes.length} notes · {posts.length} essays</p>
-  </section>
+<Base {title} {description} active="home" jsonLd={person(profile.data)} bodyClass="is-home">
+  <HeroGraph />
+  <div class="home-sec"><ChapterIndex {counts} /></div>
+  <div class="home-sec"><FeaturedStrip entries={ach} /></div>
+  <div class="home-sec"><Latest {notes} {posts} /></div>
 </Base>

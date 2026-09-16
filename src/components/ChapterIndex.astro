@@ -1,0 +1,38 @@
+---
+// Home chapter index: five rows at --t-1 with a mono count, the dek and an arrow.
+// Numerals carry `view-transition-name: chapter-NN` (same names as ChapterHeader) so they morph on navigation.
+import { CHAPTERS, type ChapterSlug } from '../site.config.ts';
+interface Props {
+  /** Count strings per chapter, e.g. `{ achievements: '44 entries', notes: '12 notes · 2 essays' }`. Omitted chapters show no count. */
+  counts?: Partial<Record<ChapterSlug, string>>;
+}
+const { counts = {} } = Astro.props;
+---
+<section class="chapter-index ruled" aria-labelledby="chapter-index-title">
+  <div class="container">
+    <div class="sec-head">
+      <h2 id="chapter-index-title" class="label">Chapters <span class="count">{String(CHAPTERS.length).padStart(2, '0')}</span></h2>
+    </div>
+    <ol class="ci-list stagger">
+      {CHAPTERS.map((c, i) => {
+        const count = counts[c.slug];
+        return (
+          <li class="ci-row fade" style={`--i:${i}`}>
+            <a class="ci-link" href={c.href}>
+              <span class="ci-num numeral" aria-hidden="true" style={`view-transition-name: chapter-${c.num}`}>{c.num}</span>
+              <span class="sr-only">Chapter {i + 1}: </span>
+              <span class="ci-body">
+                <span class="ci-title display t-1">
+                  {c.title}
+                  {count && <span class="ci-count mono"><span aria-hidden="true">— </span>{count}</span>}
+                </span>
+                <span class="ci-dek mono">{c.dek}</span>
+              </span>
+              <span class="ci-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</section>

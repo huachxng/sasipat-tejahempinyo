@@ -1,0 +1,57 @@
+---
+// Home featured strip: up to `limit` achievements with `featured: true`, newest first.
+// Cover via <Mosaic> (pixel-mosaic reveal; monochrome until hover unless it is a certificate).
+import Mosaic from './Mosaic.astro';
+import type { Entry } from '../lib/published.ts';
+import { entryMedia, isCertificateName } from '../lib/media.ts';
+import { dateRange } from '../lib/dates.ts';
+import { CATEGORIES } from '../site.config.ts';
+interface Props {
+  /** All published achievements; the component filters `featured` and sorts by date. */
+  entries: Entry<'achievements'>[];
+  limit?: number;
+}
+const { entries, limit = 4 } = Astro.props;
+const featured = entries
+  .filter((e) => e.data.featured)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, limit)
+  .map((e) => {
+    const m = entryMedia(e.data, e.body ?? '');
+    const alt = m.cover ? (m.gallery.find((g) => g.name === m.cover!.name)?.alt ?? e.data.title ?? e.id) : '';
+    return { e, cover: m.cover, alt, isCert: m.cover ? isCertificateName(m.cover.name) : false };
+  });
+---
+{featured.length > 0 && (
+  <section class="featured ruled" aria-labelledby="featured-title">
+    <div class="container">
+      <div class="sec-head">
+        <h2 id="featured-title" class="label">Featured <span class="count">{String(featured.length).padStart(2, '0')}</span></h2>
+        <a class="more mono" href="/achievements">All achievements <span aria-hidden="true">→</span></a>
+      </div>
+      <ol class="fs-list stagger">
+        {featured.map(({ e, cover, alt, isCert }, i) => (
+          <li class="fs-card fade" style={`--i:${i}`}>
+            <a class="fs-link" href={`/achievements/${e.id}`}>
+              <div class:list={['fs-media', { 'is-certificate': isCert, 'is-empty': !cover }]}>
+                {cover && (
+                  <Mosaic
+                    src={cover.meta}
+                    alt={alt}
+                    widths={[360, 720, 1080]}
+                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                    aspect="3 / 2"
+                    loading="lazy"
+                  />
+                )}
+              </div>
+              <p class="fs-meta mono">{CATEGORIES[e.data.category]} · {dateRange(e.data.date, e.data.endDate, e.data.dateText)}</p>
+              <h3 class="fs-title display">{e.data.title ?? e.id}</h3>
+              {e.data.result && <span class="badge fs-result">{e.data.result}</span>}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+)}

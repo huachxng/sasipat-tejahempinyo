@@ -1,0 +1,45 @@
+---
+// Chapter 01 timeline: sticky countdown column + entries newest → oldest grouped by year (spec §8.1–8.2).
+import Countdown from './Countdown.astro';
+import Entry from './Entry.astro';
+import { entryMedia, isCertificateName } from '../lib/media.ts';
+import type { GraphData } from '../lib/graph.ts';
+import { connectedFor, nodeIdOf, yearOf, type Achievement } from '../pages/achievements/_shared.ts';
+
+interface Props { entries: Achievement[]; graph: GraphData }
+const { entries, graph } = Astro.props;
+const total = entries.length;
+let coversSeen = 0;
+const rows = entries.map((e, i) => {
+  const m = entryMedia(e.data, e.body ?? '');
+  const hasPhoto = Boolean(m.gallery.length || (m.cover && !isCertificateName(m.cover.name)));
+  const eager = hasPhoto && coversSeen++ < 2; // the first two covers load eagerly
+  const { backlinks, related } = connectedFor(graph, nodeIdOf(e));
+  return { entry: e, count: total - i, eager, connected: [...backlinks, ...related].slice(0, 4), year: yearOf(e) };
+});
+const groups: { year: number; rows: typeof rows }[] = [];
+for (const r of rows) {
+  const g = groups[groups.length - 1];
+  if (g && g.year === r.year) g.rows.push(r);
+  else groups.push({ year: r.year, rows: [r] });
+}
+---
+<section class="ach-timeline" data-timeline aria-label="Achievements timeline">
+  <div class="container ach-grid">
+    <aside class="ach-side" aria-hidden="true">
+      <Countdown entries={rows.map((r) => ({ id: r.entry.id, year: r.year }))} />
+    </aside>
+    <div class="ach-entries">
+      {groups.map((g) => (
+        <section class="ach-year" data-year-group={g.year} aria-label={String(g.year)}>
+          <p class="ach-year-rule mono" aria-hidden="true"><span>{g.year}</span></p>
+          {g.rows.map((r) => <Entry entry={r.entry} count={r.count} eager={r.eager} connected={r.connected} />)}
+        </section>
+      ))}
+      <p class="ach-empty mono" data-filter-empty hidden>
+        <span>No entries match these filters.</span>
+        <button type="button" class="chip" data-filter-clear>Show all</button>
+      </p>
+    </div>
+  </div>
+</section>

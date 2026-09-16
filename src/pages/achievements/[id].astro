@@ -1,0 +1,234 @@
+---
+// Achievement detail page (spec §8.3): cover (mosaic), metadata, body, gallery, certificate slot, PhotoSwipe
+// lightbox, connected notes, prev/next in time, BreadcrumbList JSON-LD, og:image cropped 1200×630.
+import { render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '../../layouts/Base.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import Byline from '../../components/Byline.astro';
+import Mosaic from '../../components/Mosaic.astro';
+import Gallery from '../../components/Gallery.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import LocalGraph from '../../components/LocalGraph.astro';
+import { getPublished, isDraft } from '../../lib/published.ts';
+import { getGraph } from '../../lib/graph.ts';
+import { entryMedia, isCertificateName } from '../../lib/media.ts';
+import { imageEmbeds } from '../../lib/wikilinks.ts';
+import { dateRange, isoDate } from '../../lib/dates.ts';
+import { BYLINE, CATEGORIES, PERSON, SITE_URL } from '../../site.config.ts';
+import { KIND_LABEL, byNewest, connectedFor, hrefOf, nodeIdOf, parseLink, titleOf, yearOf, yearTabs, type Achievement, type Slide } from './_shared.ts';
+import '../../styles/achievements.css';
+
+export async function getStaticPaths() {
+  const entries = (await getPublished('achievements')).sort(byNewest);
+  const { earlierBefore } = yearTabs(entries);
+  return entries.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, newer: entries[i - 1] ?? null, older: entries[i + 1] ?? null, count: entries.length - i, earlierBefore },
+  }));
+}
+interface Props { entry: Achievement; newer: Achievement | null; older: Achievement | null; count: number; earlierBefore: number }
+const { entry, newer, older, count, earlierBefore } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const title = titleOf(entry);
+const year = yearOf(entry);
+const body = entry.body ?? '';
+const media = entryMedia(d, body);
+const graph = getGraph();
+const nodeId = nodeIdOf(entry);
+const { backlinks, related } = connectedFor(graph, nodeId);
+const links = d.links.map(parseLink).filter((l): l is NonNullable<typeof l> => l !== null);
+const no = String(count).padStart(2, '0');
+const yearParam = year < earlierBefore ? 'earlier' : String(year);
+const when = dateRange(d.date, d.endDate, d.dateText);
+
+// One lightbox gallery per page: cover (if not embedded), body photos in order, then certificates.
+const slideIndex = new Map<string, number>();
+const slides: Slide[] = [];
+const addSlide = async (name: string, meta: ImageMetadata, alt: string | undefined, cert: boolean) => {
+  const known = slideIndex.get(name);
+  if (known !== undefined) return known;
+  const img = await getImage({ src: meta, width: Math.min(cert ? 2000 : 1600, meta.width), format: 'webp', quality: cert ? 82 : 80, layout: 'none' });
+  slideIndex.set(name, slides.length);
+  slides.push({
+    src: img.src,
+    width: Number(img.attributes.width) || meta.width,
+    height: Number(img.attributes.height) || meta.height,
+    alt: alt || title,
+    caption: cert ? `Certificate — ${title}` : alt || undefined,
+  });
+  return slides.length - 1;
+};
+const coverIsCert = media.cover ? isCertificateName(media.cover.name) : false;
+const coverPhoto = media.cover && !coverIsCert ? media.cover : undefined;
+const coverAlt = coverPhoto ? media.gallery.find((g) => g.name === coverPhoto.name)?.alt || `${title} — cover photo` : '';
+if (coverPhoto) await addSlide(coverPhoto.name, coverPhoto.meta, coverAlt, false);
+for (const g of media.gallery) await addSlide(g.name, g.meta, g.alt, false);
+const certStart = slides.length;
+for (const c of media.certificates) await addSlide(c.name, c.meta, undefined, true);
+// nth <img> rendered from the body → slide index (missing media render as spans, so they are skipped on both sides)
+const bodyMap = imageEmbeds(body).map((e) => slideIndex.get(e.name)).filter((i): i is number => i !== undefined);
+const coverIndex = media.cover ? slideIndex.get(media.cover.name) : undefined;
+const portrait = Boolean(coverPhoto && coverPhoto.meta.height > coverPhoto.meta.width);
+// The cover is usually the first body embed; hide that first figure so the photo is not shown twice.
+const coverInBody = Boolean(coverPhoto && media.gallery[0]?.name === coverPhoto.name);
+
+const og = media.cover
+  ? (await getImage({ src: media.cover.meta, width: 1200, height: 630, fit: 'cover', format: 'jpeg', quality: 80, layout: 'none' })).src
+  : '/og/achievements.png';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: new URL('/', SITE_URL).toString() },
+    { '@type': 'ListItem', position: 2, name: 'Achievements', item: new URL('/achievements', SITE_URL).toString() },
+    { '@type': 'ListItem', position: 3, name: title, item: new URL(hrefOf(entry), SITE_URL).toString() },
+  ],
+};
+---
+<Base
+  title={`${title} — ${PERSON.displayName}`}
+  active="achievements"
+  type="article"
+  description={d.summary ?? `${title} (${when}).`}
+  image={og}
+  published={d.date}
+  jsonLd={jsonLd}
+  now={`01 / Achievements / ${year}`}
+  draft={isDraft(entry)}
+  bodyClass="page-achievement"
+>
+  <article
+    class="ach-detail"
+    data-entry={entry.id}
+    data-cover-in-body={coverInBody ? "" : undefined}
+    data-pagefind-body
+    data-pagefind-filter="type:Achievement"
+    data-pagefind-meta={`date:${isoDate(d.date)}`}
+    data-pagefind-sort={`date:${isoDate(d.date)}`}
+  >
+    <header class="container ach-detail-head">
+      <nav class="ach-crumbs mono" aria-label="Breadcrumb">
+        <a href="/achievements">01 Achievements</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/achievements?year=${yearParam}`}>{year}</a>
+        <span aria-hidden="true">/</span>
+        <span>Nº {no}</span>
+      </nav>
+      <p class="ach-detail-kicker mono">
+        <time datetime={isoDate(d.date)}>{when}</time>
+        <a class="cat" href={`/achievements?cat=${d.category}`}>{CATEGORIES[d.category]}</a>
+      </p>
+      <h1 class="ach-detail-title display">{title}</h1>
+      {d.result && <p class="ach-detail-result"><span class="badge">{d.result}</span></p>}
+      {d.thai && <p class="ach-detail-thai thai" lang="th">{d.thai}</p>}
+    </header>
+
+    {media.cover && (
+      <div class:list={['container', 'ach-detail-cover', { 'is-portrait': portrait }]}>
+        <a class="lb-trigger" href={coverIndex !== undefined ? slides[coverIndex].src : undefined} data-lb-index={coverIndex}>
+          {coverPhoto ? (
+            <Mosaic src={coverPhoto.meta} alt={coverAlt} aspect={portrait ? undefined : '2/1'} widths={[480, 960, 1440]} sizes={portrait ? '(min-width: 1024px) 560px, 100vw' : '(min-width: 1440px) 1440px, 100vw'} loading="eager" />
+          ) : (
+            <Mosaic src={media.cover.meta} alt={`Certificate — ${title}`} photo={false} widths={[800, 1600]} sizes="(min-width: 1440px) 1440px, 100vw" quality={80} loading="eager" />
+          )}
+        </a>
+      </div>
+    )}
+
+    <div class="container grid ach-detail-body">
+      <aside class="ach-meta">
+        <dl>
+          <dt>Date</dt><dd><time class="mono" datetime={isoDate(d.date)}>{when}</time></dd>
+          {d.org && <><dt>Organisation</dt><dd>{d.org}</dd></>}
+          {d.location && <><dt>Location</dt><dd>{d.location}</dd></>}
+          {d.result && <><dt>Result</dt><dd>{d.result}</dd></>}
+          <dt>Category</dt><dd><a href={`/achievements?cat=${d.category}`}>{CATEGORIES[d.category]}</a></dd>
+          {links.length > 0 && (
+            <>
+              <dt>Links</dt>
+              <dd class="links">{links.map((l) => <a class="chip" href={l.href} target="_blank" rel="noopener">{l.label} <span aria-hidden="true">↗</span></a>)}</dd>
+            </>
+          )}
+        </dl>
+        <div class="ach-share">
+          <Byline name={BYLINE.achievements} kind="Achievement" date={when} />
+          <button type="button" class="chip" data-share data-title={title}>Share</button>
+          <a class="chip" href="/achievements">All achievements</a>
+        </div>
+      </aside>
+
+      <div class="ach-content">
+        <div class="ach-body prose" data-lightbox-body>
+          <Content />
+        </div>
+        <Gallery certificates={media.certificates} title={title} startIndex={certStart} fullSrcs={slides.slice(certStart).map((s) => s.src)} />
+      </div>
+    </div>
+
+    {(backlinks.length > 0 || related.length > 0) && (
+      <section class="container ach-connected" aria-labelledby="ach-connected-heading" data-pagefind-ignore>
+        <div class="ach-connected-grid">
+          <div class="ach-connected-main">
+            <h2 id="ach-connected-heading" class="label">Connected notes</h2>
+            {backlinks.length > 0 && (
+              <ul class="ach-backlinks">
+                {backlinks.map((b) => (
+                  <li>
+                    <a href={b.href}>{b.title}</a><span class="kind mono">{KIND_LABEL[b.kind]}</span>
+                    {b.context && <p class="muted small">{b.context}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {related.length > 0 && (
+              <div class="ach-related">
+                {related.map((r) => <a class="chip chip--ghost" href={r.href} title={KIND_LABEL[r.kind]}>{r.title}</a>)}
+              </div>
+            )}
+          </div>
+          <div class="ach-connected-graph"><LocalGraph nodeId={nodeId} /></div>
+        </div>
+      </section>
+    )}
+
+    <nav class="container ach-prevnext" aria-label="Neighbouring achievements" data-pagefind-ignore>
+      {older ? (
+        <a class="pn pn-older" href={hrefOf(older)} rel="prev">
+          <span class="label"><span aria-hidden="true">← </span>Earlier</span>
+          <span class="pn-title">{titleOf(older)}</span>
+          <span class="mono small muted">{dateRange(older.data.date, older.data.endDate, older.data.dateText)}</span>
+        </a>
+      ) : <span></span>}
+      {newer ? (
+        <a class="pn pn-newer" href={hrefOf(newer)} rel="next">
+          <span class="label">Later<span aria-hidden="true"> →</span></span>
+          <span class="pn-title">{titleOf(newer)}</span>
+          <span class="mono small muted">{dateRange(newer.data.date, newer.data.endDate, newer.data.dateText)}</span>
+        </a>
+      ) : <span></span>}
+    </nav>
+  </article>
+
+  <div data-pagefind-ignore><Lightbox slides={slides} bodyMap={bodyMap} /></div>
+  <ChapterNext current="achievements" />
+</Base>
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-share]');
+  btn?.addEventListener('click', async () => {
+    const url = location.href.split('#')[0];
+    const title = btn.dataset.title ?? document.title;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); } catch { /* cancelled */ }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      btn.textContent = 'Link copied';
+      setTimeout(() => { btn.textContent = 'Share'; }, 1600);
+    } catch { /* clipboard unavailable */ }
+  });
+</script>

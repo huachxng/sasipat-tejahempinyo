@@ -17,6 +17,6 @@ certificate: cpr-first-aid-certification-certificate.jpg
 
 I completed CPR and first aid training at BASIS International School Bangkok in Grade 9, during the 2023–24 school year, and hold the certificate. It was issued by the school's aquatics department.
 
-<!-- TODO (review): The certificate is undated; the only clue is the Grade 9 homeroom on it. Confirm the month if you want a precise date. -->
+%% TODO (review): The certificate is undated; the only clue is the Grade 9 homeroom on it. Confirm the month if you want a precise date. %%
 
 ![[cpr-first-aid-certification-certificate.jpg]]

@@ -16,7 +16,7 @@ cover: econbrief101-youtube-01.png
 
 I created ECONBRIEF101, a YouTube channel with short economics explainers aimed at students taking AP Microeconomics and Macroeconomics. I designed the branding (logo and banner, which reads '1-Minute Econ') and edit the videos myself.
 
-<!-- TODO (review): Confirm the channel's public name (banner says '1-MINUTE ECON'; files say ECONBRIEF), the URL, the launch date (LinkedIn draft says 2025; brand assets are dated Feb 2026), and the number of published videos. -->
+%% TODO (review): Confirm the channel's public name (banner says '1-MINUTE ECON'; files say ECONBRIEF), the URL, the launch date (LinkedIn draft says 2025; brand assets are dated Feb 2026), and the number of published videos. %%
 
 Related notes: [[Teaching Economics]].
 

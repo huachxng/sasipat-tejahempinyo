@@ -1,7 +1,6 @@
 // Build-time index of the Obsidian vault at content/. Synchronous so remark plugins can use it.
 import { readFileSync, existsSync } from 'node:fs';
 import { basename, dirname, extname, join, relative, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { globSync } from 'tinyglobby';
 import { parse as parseYaml } from 'yaml';
 import GithubSlugger from 'github-slugger';
@@ -33,7 +32,9 @@ export interface VaultIndex {
   mediaExact: Set<string>; // exact-case basenames present on disk
 }
 
-export const CONTENT_DIR = fileURLToPath(new URL('../../content/', import.meta.url));
+/** Vault root: `<project root>/content`. Astro bundles this module into a chunk at build time, so import.meta.url
+ * cannot be used; the build always runs from the project root (locally and on Vercel). VAULT_DIR overrides for tests. */
+export const CONTENT_DIR = (process.env.VAULT_DIR ? resolve(process.env.VAULT_DIR) : resolve(process.cwd(), 'content')) + sep;
 const FOLDERS: Record<Collection, string> = { notes: 'notes', blog: 'blog', achievements: 'achievements' };
 export const IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif|svg)$/i;
 

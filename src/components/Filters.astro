@@ -1,0 +1,28 @@
+---
+// Year tabs + category chips for the timeline (spec §8.1). All buttons carry aria-pressed; filters.ts owns the state.
+import { CATEGORIES, CATEGORY_KEYS, type CategoryKey } from '../site.config.ts';
+interface Props { tabs: string[]; earlierBefore: number; counts: Record<CategoryKey, number>; total: number }
+const { tabs, earlierBefore, counts, total } = Astro.props;
+---
+<div class="container ach-filters" data-filters data-earlier-before={earlierBefore} data-filtered="false">
+  <div class="ach-filter-row">
+    <div class="ach-years" role="group" aria-label="Filter by year">
+      <button type="button" class="tab mono" data-year="all" aria-pressed="true">All</button>
+      {tabs.map((t) => (
+        <button type="button" class="tab mono" data-year={t} aria-pressed="false">{t === 'earlier' ? 'Earlier' : t}</button>
+      ))}
+    </div>
+    <p class="ach-status mono">
+      <span data-filter-status aria-live="polite">{total} entries</span>
+      <button type="button" class="ach-clear mono" data-filter-clear>Clear filters</button>
+    </p>
+  </div>
+  <div class="ach-cats" role="group" aria-label="Filter by category">
+    {CATEGORY_KEYS.map((k) => (
+      <button type="button" class="chip" data-cat={k} aria-pressed="false">
+        {CATEGORIES[k]} <span class="count">{counts[k]}</span>
+      </button>
+    ))}
+  </div>
+</div>
+<script src="../scripts/filters.ts"></script>

@@ -1,0 +1,76 @@
+# Runs on every push that touches the vault. Never gates Vercel; on failure it opens/updates one GitHub Issue
+# ("Content problems in latest push") with the file, field and fix, and closes it again on the next green push.
+name: Content check
+
+on:
+  push:
+    paths: ['content/**']
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: content-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ISSUE_TITLE: Content problems in latest push
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+
+      - name: Check content
+        id: check
+        shell: bash
+        run: |
+          set +e
+          node scripts/check-content.ts --report md --out content-report.md
+          status=$?
+          set -e
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat content-report.md >> "$GITHUB_STEP_SUMMARY"
+          node scripts/check-content.ts || true
+
+      - name: Open or update the issue
+        if: steps.check.outputs.status != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          {
+            cat content-report.md
+            echo
+            echo "---"
+            echo "Commit \`${GITHUB_SHA::7}\` pushed by @${GITHUB_ACTOR}. Fix the files in Obsidian and push again; this issue closes itself on the next green check."
+          } > issue-body.md
+          number=$(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number,title --jq '[.[] | select(.title == env.ISSUE_TITLE)][0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file issue-body.md
+            gh issue comment "$number" --body "Still failing after \`${GITHUB_SHA::7}\` — see the updated description."
+          else
+            gh issue create --title "$ISSUE_TITLE" --body-file issue-body.md
+          fi
+
+      - name: Close the issue when the content is clean
+        if: steps.check.outputs.status == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          number=$(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number,title --jq '[.[] | select(.title == env.ISSUE_TITLE)][0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue close "$number" --comment "Fixed in \`${GITHUB_SHA::7}\` — the content check is green again."
+          fi
+
+      - name: Fail the job when problems were found
+        if: steps.check.outputs.status != '0'
+        run: exit 1

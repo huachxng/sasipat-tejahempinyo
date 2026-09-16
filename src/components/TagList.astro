@@ -1,0 +1,25 @@
+---
+// Tag chips linking to /tags/<tag>. Optional counts (tag cloud) and an active tag (tag page).
+interface Props { tags: string[]; counts?: Record<string, number>; active?: string; class?: string; label?: string }
+const { tags, counts, active, class: cls, label = 'Tags' } = Astro.props;
+const href = (t: string) => `/tags/${encodeURIComponent(t)}`;
+---
+{tags.length > 0 && (
+  <ul class:list={['tag-list', cls]} aria-label={label}>
+    {tags.map((t) => (
+      <li>
+        <a class="chip" href={href(t)} aria-current={active === t ? 'page' : undefined}>
+          <span aria-hidden="true">#</span>{t}
+          {counts && counts[t] !== undefined && <span class="tag-count">{counts[t]}</span>}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
+<style>
+  .tag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip { gap: 0; text-transform: none; letter-spacing: 0.02em; }
+  .chip[aria-current='page'] { color: var(--gold); border-color: var(--gold); }
+  .tag-count { margin-left: 0.6em; color: var(--fg-3); font-variant-numeric: tabular-nums; }
+  .chip:hover .tag-count, .chip[aria-current='page'] .tag-count { color: inherit; }
+</style>
