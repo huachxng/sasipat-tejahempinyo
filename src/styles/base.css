@@ -14,6 +14,7 @@ body {
   overflow-x: clip;
 }
 img, svg, video, canvas { display: block; max-width: 100%; height: auto; }
+[hidden] { display: none !important; }
 a { color: var(--gold); text-decoration: none; text-underline-offset: 0.18em; transition: color var(--d-micro) var(--ease-out-quint); }
 a:hover { color: var(--gold-2); text-decoration: underline; }
 :focus-visible { outline: var(--focus); outline-offset: 3px; border-radius: 0; }
@@ -67,6 +68,8 @@ main { padding-top: var(--nav-h); }
 .prose code { font-family: var(--font-mono), monospace; font-size: 0.9em; background: var(--bg-2); padding: 0.1em 0.35em; }
 .prose pre { background: var(--bg-2) !important; border: 1px solid var(--rule); padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.9rem; }
 .prose pre code { background: none; padding: 0; }
+.prose a { text-decoration: underline; text-decoration-color: var(--gold-dim); }
+.prose a:hover { text-decoration-color: var(--gold-2); }
 .prose a.wl { text-decoration: underline; text-decoration-color: var(--gold-dim); }
 .prose a.wl:hover { text-decoration-color: var(--gold-2); }
 .prose .wl-missing { color: var(--fg-2); border-bottom: 1px dotted var(--fg-3); cursor: help; }

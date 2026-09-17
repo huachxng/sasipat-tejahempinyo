@@ -18,4 +18,6 @@ export const commonFields = {
 export const dateField = (label: string) =>
   z.coerce.date({ error: `${label} must be a date like 2026-09-16` });
 
-export const optionalDate = (label: string) => dateField(label).optional();
+/** Obsidian writes `endDate:` with no value when a template field is left blank; treat empty as absent. */
+export const optionalDate = (label: string) =>
+  z.preprocess((v) => (v === null || v === undefined || (typeof v === 'string' && v.trim() === '') ? undefined : v), dateField(label).optional());

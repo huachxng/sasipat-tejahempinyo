@@ -32,7 +32,7 @@ if (dataEl) {
   let pswp: PhotoSwipeType | null = null;
   let loading: Promise<typeof import('photoswipe')> | null = null;
 
-  const open = async (index: number) => {
+  const open = async (index: number, openerEl?: HTMLElement) => {
     loading ??= import('photoswipe');
     const { default: PhotoSwipe } = await loading;
     if (pswp) pswp.destroy();
@@ -43,7 +43,7 @@ if (dataEl) {
       bgOpacity: 1,
       padding: { top: 32, bottom: 56, left: 16, right: 16 },
       showHideAnimationType: motionOff() ? 'none' : 'zoom',
-      returnFocus: true,
+      returnFocus: false,
       wheelToZoom: true,
       closeTitle: 'Close (Esc)',
       zoomTitle: 'Zoom',
@@ -68,20 +68,23 @@ if (dataEl) {
         },
       });
     });
+    // Return focus ourselves: Safari does not focus a clicked button, so PhotoSwipe's own returnFocus lands on <body>.
+    const opener = openerEl ?? triggers.get(index);
     pswp.on('destroy', () => {
       pswp = null;
+      opener?.focus({ preventScroll: true });
     });
     pswp.init();
   };
 
   const wire = (el: HTMLElement, index: number) => {
     if (!slides[index]) return;
-    triggers.set(index, el);
+    if (!triggers.has(index)) triggers.set(index, el); // first registration wins (the visible cover, not a hidden duplicate)
     el.dataset.lbIndex = String(index);
     el.setAttribute('aria-label', `Open image ${index + 1} of ${slides.length}${slides[index].caption ? `: ${slides[index].caption}` : ''}`);
     el.addEventListener('click', (e) => {
       e.preventDefault();
-      void open(index);
+      void open(index, el);
     });
   };
 

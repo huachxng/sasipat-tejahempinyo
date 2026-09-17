@@ -77,9 +77,9 @@ describe('broken-frontmatter fixture', () => {
     expect(r.out).toContain('⚠ content/notes/Typo Prop.md:5 — unknown property "sumary" is ignored by the site');
     expect(r.out).toContain('fix: did you mean "summary"?');
   });
-  it('checks endDate against date and rejects a blank endDate', () => {
+  it('checks endDate against date and accepts a blank endDate as absent', () => {
     expect(r.out).toContain('✖ content/achievements/Bad Dates.md:5 — endDate must be on or after date');
-    expect(r.out).toContain('✖ content/achievements/Blank End Date.md:5 — "endDate" is empty');
+    expect(r.out).not.toContain('Blank End Date.md');
   });
   it('warns about dates more than a year ahead', () => {
     expect(r.out).toContain('⚠ content/notes/Far Future.md:4 — "date" is more than a year in the future (2099-01-01)');

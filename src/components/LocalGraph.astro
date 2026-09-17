@@ -22,7 +22,7 @@ const pos = nbs.map((_, i) => {
     <svg viewBox={`0 0 ${S} ${S}`} width={S} height={S} role="group" aria-label={`Notes connected to ${centre.t}`}>
       <g class="lg-e">{pos.map(([x, y]) => <line x1={C} y1={C} x2={x} y2={y} />)}</g>
       {nbs.map((n, i) => (
-        <a href={n.u} class:list={['lg-n', `is-${n.k}`]}>
+        <a href={n.u} class:list={['lg-n', `is-${n.k}`]} aria-label={n.t}>
           <circle cx={pos[i][0]} cy={pos[i][1]} r={rad(n.deg)} />
           <title>{n.t}</title>
         </a>

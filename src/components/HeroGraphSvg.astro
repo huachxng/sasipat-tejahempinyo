@@ -35,7 +35,7 @@ const order = g.nodes.map((n) => n.i).sort((a, b) => P[b].z - P[a].z); // back t
   {order.map((i) => {
     const n = g.nodes[i], p = P[i];
     return (
-      <a href={n.u} class:list={['hg-n', { 'is-gold': gold.has(i), 'is-tag': n.k === 'tag', 'is-ach': n.k === 'ach' }]} data-i={i} tabindex={hubs.has(i) ? undefined : -1} style={`opacity:${p.f}`}>
+      <a href={n.u} aria-label={n.t} class:list={['hg-n', { 'is-gold': gold.has(i), 'is-tag': n.k === 'tag', 'is-ach': n.k === 'ach' }]} data-i={i} tabindex={hubs.has(i) ? undefined : -1} style={`opacity:${p.f}`}>
         {n.k === 'tag' ? <circle cx={p.x} cy={p.y} r={(p.r * 0.78).toFixed(1)} style={`stroke-width:${(p.r * 0.19).toFixed(2)}`} /> : <circle cx={p.x} cy={p.y} r={p.r} />}
         <title>{n.t}</title>
       </a>

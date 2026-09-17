@@ -16,7 +16,7 @@ export function extractInlineTags(body: string): string[] {
     .replace(/^#{1,6}\s.*$/gm, ' ')
     .replace(/!?\[\[[^\]]*\]\]/g, ' ');
   const out = new Set<string>();
-  for (const m of text.matchAll(/(?<![\w#&/.])#([\p{L}\p{N}_/-]+)/gu)) {
+  for (const m of text.matchAll(/(?<![\w#&/.])#([\p{L}\p{M}\p{N}_/-]+)/gu)) {
     const tag = m[1].replace(/[/-]+$/, '');
     if (!tag || !/[\p{L}_]/u.test(tag)) continue;
     out.add(normalizeTag(tag));

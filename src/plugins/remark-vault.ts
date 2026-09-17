@@ -13,7 +13,7 @@ const TOKEN_RE = new RegExp(
     '(%%[\\s\\S]*?%%)', // 1 inline comment
     WIKILINK_RE.source.replace(/\(\?<[a-z]+>/g, '('), // 2 bang, 3 target, 4 hash, 5 alias
     '(==([^=\\n]+?)==)', // 6,7 highlight
-    '((?<![\\w#&/.])#([\\p{L}\\p{N}_/-]*[\\p{L}_][\\p{L}\\p{N}_/-]*))', // 8,9 tag
+    '((?<![\\w#&/.])#([\\p{L}\\p{M}\\p{N}_/-]*[\\p{L}_][\\p{L}\\p{M}\\p{N}_/-]*))', // 8,9 tag
   ].join('|'),
   'gu',
 );

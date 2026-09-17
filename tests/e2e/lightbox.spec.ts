@@ -27,6 +27,7 @@ test.describe('achievement lightbox', () => {
     await expect(pswp).toBeVisible({ timeout: 10_000 });
     const counter = page.locator('.pswp__counter');
     await expect(counter).toContainText(/1\s*\/\s*\d+/);
+    await page.waitForTimeout(600); // PhotoSwipe ignores navigation keys until its opening animation (333 ms) has finished
 
     await page.keyboard.press('ArrowRight');
     await expect(counter).toContainText(/2\s*\/\s*\d+/);

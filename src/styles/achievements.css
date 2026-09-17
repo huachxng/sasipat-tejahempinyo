@@ -15,7 +15,7 @@
 .ach-clear:hover { color: var(--gold-2); text-decoration: underline; }
 .ach-filters[data-filtered='false'] .ach-clear, .no-js .ach-clear { display: none; }
 .ach-cats { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.ach-cats .chip .count { opacity: 0.65; }
+.ach-cats .chip .count { opacity: 0.85; }
 .ach-cats .chip[aria-pressed='true'] .count { opacity: 0.8; }
 
 /* ---------- Timeline grid ---------- */
