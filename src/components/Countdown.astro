@@ -1,8 +1,9 @@
 ---
+import { chapterBySlug } from '../site.config.ts';
 // Sticky countdown numeral + year + gold rail (spec §8.2); phones get a fixed badge and a 2 px top bar.
 // Decorative: the whole block is aria-hidden; each entry exposes its own "Nº" to assistive tech.
 interface Props { entries: { id: string; year: number }[]; nowPrefix?: string }
-const { entries, nowPrefix = '01 / Achievements' } = Astro.props;
+const { entries, nowPrefix = `${chapterBySlug('achievements').num} / Achievements` } = Astro.props;
 const total = entries.length;
 const start = String(total).padStart(2, '0').split('');
 const firstYear = entries[0]?.year ?? '';

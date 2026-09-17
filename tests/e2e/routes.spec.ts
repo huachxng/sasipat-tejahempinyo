@@ -7,7 +7,7 @@ test.describe('every sitemap route', () => {
     const paths = await sitemapPaths(request);
     expect(paths.length, 'sitemap-index.xml must list pages').toBeGreaterThan(0);
     expect(paths).toContain('/');
-    for (const prefix of ['/achievements', '/notes', '/about', '/resume', '/contact']) expect(paths, `sitemap lists ${prefix}`).toContain(prefix);
+    for (const prefix of ['/achievements', '/notes', '/research', '/about', '/resume', '/contact']) expect(paths, `sitemap lists ${prefix}`).toContain(prefix);
     expect(paths.some((p) => p.startsWith('/tags/')), 'tag pages are excluded from the sitemap').toBe(false);
 
     const failures: string[] = [];

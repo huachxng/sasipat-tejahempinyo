@@ -16,4 +16,6 @@ This folder is your Obsidian vault. Everything on the website is built from it.
 9. **Renaming a public note?** Add the old name to `previousSlugs` so old links keep working.
 10. **Publish** = GitHub Desktop → look at the Changes list (this is exactly what becomes public) → write a one-line summary → **Commit to main** → **Push origin**. The site updates in 2–4 minutes. If something is wrong you get an email and a GitHub issue that names the file and the fix.
 
+11. **`data/`** holds `bis_panel_monthly.csv`, the file behind the Research chart. To update it, copy the new `output/bis_panel_monthly.csv` from the R project over it and keep the same columns (`month,V,L,S,C,BIS`).
+
 Optional before pushing: double-click `mac/Check Content.command` to see problems, or `mac/Preview Site.command` to see the site (drafts included) on your own computer.

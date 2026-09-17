@@ -14,7 +14,7 @@ import { getPublished, isDraft } from '../../lib/published.ts';
 import { getGraph } from '../../lib/graph.ts';
 import { isoDate, monthYear, readingTime } from '../../lib/dates.ts';
 import { entryMedia } from '../../lib/media.ts';
-import { BYLINE, SITE_URL } from '../../site.config.ts';
+import { BYLINE, SITE_URL, chapterBySlug } from '../../site.config.ts';
 import '../../styles/notes.css';
 
 export async function getStaticPaths() {
@@ -79,7 +79,7 @@ const jsonLd = [
 <Base title={`${title} — ${BYLINE.blog}`} description={post.data.summary} active="notes" type="article" image={og} published={date} modified={updated ?? date} jsonLd={jsonLd} draft={isDraft(post)}>
   <article class="entry container" data-pagefind-body data-pagefind-filter="type:Essay" data-pagefind-meta={`date:${dateIso}`} data-pagefind-sort={`date:${dateIso}`}>
     <header class="entry__head">
-      <p class="entry__eyebrow mono" data-pagefind-ignore><a href="/blog"><span class="num">02</span> Blog</a> · Essay <span class="num">{no}</span> · {monthYear(date)}</p>
+      <p class="entry__eyebrow mono" data-pagefind-ignore><a href="/blog"><span class="num">{chapterBySlug('notes').num}</span> Blog</a> · Essay <span class="num">{no}</span> · {monthYear(date)}</p>
       <h1 class="display t-2">{title}</h1>
       {post.data.thai && <p class="thai entry__thai">{post.data.thai}</p>}
       <div class="entry__meta" data-pagefind-ignore>

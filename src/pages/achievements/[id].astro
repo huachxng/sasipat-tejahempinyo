@@ -16,7 +16,7 @@ import { getGraph } from '../../lib/graph.ts';
 import { entryMedia, isCertificateName } from '../../lib/media.ts';
 import { imageEmbeds } from '../../lib/wikilinks.ts';
 import { dateRange, isoDate } from '../../lib/dates.ts';
-import { BYLINE, CATEGORIES, PERSON, SITE_URL } from '../../site.config.ts';
+import { BYLINE, CATEGORIES, PERSON, SITE_URL, chapterBySlug } from '../../site.config.ts';
 import { KIND_LABEL, byNewest, connectedFor, hrefOf, nodeIdOf, parseLink, titleOf, yearOf, yearTabs, type Achievement, type Slide } from './_shared.ts';
 import '../../styles/achievements.css';
 
@@ -97,7 +97,7 @@ const jsonLd = {
   image={og}
   published={d.date}
   jsonLd={jsonLd}
-  now={`01 / Achievements / ${year}`}
+  now={`${chapterBySlug('achievements').num} / Achievements / ${year}`}
   draft={isDraft(entry)}
   bodyClass="page-achievement"
 >
@@ -112,7 +112,7 @@ const jsonLd = {
   >
     <header class="container ach-detail-head">
       <nav class="ach-crumbs mono" aria-label="Breadcrumb">
-        <a href="/achievements">01 Achievements</a>
+        <a href="/achievements">{chapterBySlug('achievements').num} Achievements</a>
         <span aria-hidden="true">/</span>
         <a href={`/achievements?year=${yearParam}`}>{year}</a>
         <span aria-hidden="true">/</span>

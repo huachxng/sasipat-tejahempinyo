@@ -4,7 +4,8 @@ import { KNOWN } from './helpers.ts';
 test.describe('375 px viewport', () => {
   test.use({ viewport: { width: 375, height: 720 }, isMobile: true, hasTouch: true });
 
-  for (const path of ['/', '/achievements', KNOWN.note]) {
+  for (const path of ['/', '/achievements',
+  '/research', KNOWN.note]) {
     test(`${path} has no horizontal scroll`, async ({ page }) => {
       await page.goto(path, { waitUntil: 'load' });
       await page.waitForTimeout(500);

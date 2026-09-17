@@ -13,7 +13,7 @@ import { getPublished, isDraft } from '../../lib/published.ts';
 import { getGraph } from '../../lib/graph.ts';
 import { isoDate } from '../../lib/dates.ts';
 import { entryMedia } from '../../lib/media.ts';
-import { BYLINE, SITE_URL } from '../../site.config.ts';
+import { BYLINE, SITE_URL, chapterBySlug } from '../../site.config.ts';
 import '../../styles/notes.css';
 
 export async function getStaticPaths() {
@@ -67,7 +67,7 @@ const jsonLd = [
 <Base title={`${title} — ${BYLINE.notes}`} description={note.data.summary} active="notes" type="article" image={og} published={note.data.date} modified={updated} jsonLd={jsonLd} draft={isDraft(note)}>
   <article class="entry container" data-pagefind-body data-pagefind-filter="type:Note" data-pagefind-meta={updatedIso ? `date:${updatedIso}` : undefined} data-pagefind-sort={updatedIso ? `date:${updatedIso}` : undefined}>
     <header class="entry__head">
-      <p class="entry__eyebrow mono" data-pagefind-ignore><a href="/notes"><span class="num">02</span> Notes</a></p>
+      <p class="entry__eyebrow mono" data-pagefind-ignore><a href="/notes"><span class="num">{chapterBySlug('notes').num}</span> Notes</a></p>
       <h1 class="display t-2">{title}</h1>
       {note.data.thai && <p class="thai entry__thai">{note.data.thai}</p>}
       <div class="entry__meta" data-pagefind-ignore>

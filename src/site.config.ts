@@ -25,15 +25,19 @@ export const BYLINE = {
   profile: PERSON.displayName,
 } as const;
 
-export type ChapterSlug = 'achievements' | 'notes' | 'about' | 'resume' | 'contact';
+export type ChapterSlug = 'achievements' | 'notes' | 'research' | 'about' | 'resume' | 'contact';
 export interface Chapter { num: string; slug: ChapterSlug; title: string; href: string; dek: string }
 export const CHAPTERS: Chapter[] = [
   { num: '01', slug: 'achievements', title: 'Achievements', href: '/achievements', dek: 'Competitions, research, ventures and service, newest first.' },
   { num: '02', slug: 'notes', title: 'Notes & Blog', href: '/notes', dek: 'Connected notes on markets, data and archery, plus longer essays.' },
-  { num: '03', slug: 'about', title: 'About', href: '/about', dek: 'Who is writing, and under which names.' },
-  { num: '04', slug: 'resume', title: 'Resume', href: '/resume', dek: 'One page, generated from the same entries as the timeline.' },
-  { num: '05', slug: 'contact', title: 'Contact', href: '/contact', dek: 'Email and links.' },
+  { num: '03', slug: 'research', title: 'Research', href: '/research', dek: 'The Bubble Intensity Score: one number, four pillars, three episodes.' },
+  { num: '04', slug: 'about', title: 'About', href: '/about', dek: 'Who is writing, and under which names.' },
+  { num: '05', slug: 'resume', title: 'Resume', href: '/resume', dek: 'One page, generated from the same entries as the timeline.' },
+  { num: '06', slug: 'contact', title: 'Contact', href: '/contact', dek: 'Email and links.' },
 ];
+/** Chapter openers: which entry supplies the Achievements scene photo. */
+export const OPENERS = { achievements: { entryId: 'thailand-youth-national-archery-team-wayc-2025' } } as const;
+
 export const chapterBySlug = (slug: ChapterSlug) => CHAPTERS.find((c) => c.slug === slug)!;
 
 export const CATEGORY_KEYS = ['academics', 'research', 'ventures', 'leadership', 'athletics', 'arts', 'mathematics', 'camps'] as const;

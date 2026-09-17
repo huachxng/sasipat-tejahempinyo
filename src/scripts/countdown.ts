@@ -17,7 +17,7 @@ if (timeline && cd) {
   const badgeTotal = badge?.querySelector<HTMLElement>('[data-badge-total]') ?? null;
   const bar = document.querySelector<HTMLElement>('[data-countdown-bar]');
   const nowText = document.querySelector<HTMLElement>('[data-now-text]');
-  const nowPrefix = cd.dataset.nowPrefix ?? '01 / Achievements';
+  const nowPrefix = cd.dataset.nowPrefix ?? 'Achievements';
   const all = [...timeline.querySelectorAll<HTMLElement>('article.entry')];
   const markerFor = new Map(markers.map((m) => [m.dataset.for ?? '', m]));
 

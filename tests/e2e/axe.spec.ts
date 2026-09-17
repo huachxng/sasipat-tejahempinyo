@@ -8,6 +8,7 @@ const PAGES: [string, string | null][] = [
   ['an achievement', '/achievements/'],
   ['/notes', null],
   ['a post', '/blog/'],
+  ['/research', null],
   ['/resume', null],
 ];
 

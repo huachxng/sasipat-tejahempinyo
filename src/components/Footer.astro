@@ -23,12 +23,16 @@ const built = new Date().toISOString().slice(0, 10);
     </div>
     <div class="col">
       <p class="label">Settings</p>
-      <button type="button" class="chip" data-motion-toggle aria-pressed="false">Motion: on</button>
+      <div class="settings">
+        <button type="button" class="chip" data-motion-toggle aria-pressed="false">Motion: on</button>
+        <button type="button" class="chip" data-sound-toggle aria-pressed="false">Sound: off</button>
+      </div>
       <p class="muted small built">Built from Markdown · updated {built}</p>
     </div>
   </div>
 </footer>
 <script src="../scripts/motion.ts"></script>
+<script src="../scripts/sound.ts"></script>
 <style>
   .site-footer { padding-block: clamp(48px, 8vh, 96px) 2rem; margin-top: clamp(64px, 10vh, 160px); }
   .footer-inner { display: grid; gap: 2rem var(--gutter); grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); }
@@ -40,6 +44,7 @@ const built = new Date().toISOString().slice(0, 10);
   .links a { color: var(--fg); }
   .links a:hover { color: var(--gold); }
   .num { font-size: 11px; color: var(--gold); }
+  .settings { display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .built { margin-top: 1rem; }
   p { margin: 0; }
 </style>

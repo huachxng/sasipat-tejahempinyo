@@ -38,7 +38,10 @@ const nowText = now ?? profile.data.now[0] ?? 'Now — senior year at BASIS Bang
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script is:inline>
       document.documentElement.classList.remove('no-js');
-      try { if (localStorage.getItem('motion') === 'off') document.documentElement.dataset.motion = 'off'; } catch (e) {}
+      try {
+        if (localStorage.getItem('motion') === 'off') document.documentElement.dataset.motion = 'off';
+        else if (localStorage.getItem('sound') === 'on' && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.dataset.sound = 'on';
+      } catch (e) {}
     </script>
     <Seo {title} {description} {type} {image} {noindex} {published} {modified} {jsonLd} />
     <Font cssVariable="--font-display" preload />

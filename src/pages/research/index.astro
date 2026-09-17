@@ -1,0 +1,13 @@
+---
+// Placeholder until the research builder lands the chart page.
+import Base from '../../layouts/Base.astro';
+import ChapterHeader from '../../components/ChapterHeader.astro';
+import ChapterNext from '../../components/ChapterNext.astro';
+import { chapterBySlug } from '../../site.config.ts';
+const c = chapterBySlug('research');
+---
+<Base title="Research — Sasipat (Hua) Tejahempinyo" active="research" image="/og/research.png" now={`${c.num} / Research / BIS v1.0`} bodyClass="page-research">
+  <ChapterHeader slug="research" />
+  <section class="container section--tight"><p class="mono muted">The Bubble Intensity Score chart is being built.</p></section>
+  <ChapterNext current="research" />
+</Base>
