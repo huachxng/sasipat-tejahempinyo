@@ -50,6 +50,10 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Playwright + axe
+        # astro preview detaches itself on non-interactive shells, so serve the built site statically instead
+        env:
+          E2E_BASE_URL: http://localhost:4321
+          E2E_SERVER_CMD: npx --yes serve@14 dist -l 4321 --no-clipboard --no-port-switching
         run: npx playwright test
 
       - name: Upload Playwright report
@@ -61,5 +65,5 @@ jobs:
           retention-days: 7
 
       - name: Lighthouse CI (mobile, /, /achievements, /notes)
-        continue-on-error: true
+        continue-on-error: true # informational until real-content budgets are tuned
         run: npx --yes @lhci/cli@0.15.1 autorun

@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "startServerCommand": "npx astro preview --port 4321",
+      "startServerCommand": "npx --yes serve@14 dist -l 4321 --no-clipboard --no-port-switching",
       "startServerReadyPattern": "Local",
       "startServerReadyTimeout": 60000,
       "url": ["http://localhost:4321/", "http://localhost:4321/achievements", "http://localhost:4321/notes"],
