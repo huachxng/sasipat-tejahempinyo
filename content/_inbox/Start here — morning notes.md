@@ -9,8 +9,13 @@
 - 03 About (names block, your bio), 04 Resume (page + `resume.pdf`, 29 entries, 2 pages), 05 Contact (s.tejahempinyo@gmail.com, GitHub).
 - Safety rails: nothing publishes without `publish: true`; the build refuses ID numbers, passport data, PDFs and videos; `content/_private/` never leaves your Mac.
 
-## Six things only you can do (about 12 minutes)
-1. **Vercel push-to-deploy**: vercel.com → project `sasipat-tejahempinyo` → Settings → Git → Connect `huachxng/sasipat-tejahempinyo` (installs the Vercel GitHub app). Until then I deploy from the terminal.
+## Setup checklist (updated 2026-09-17 10:35)
+
+Done: Vercel push-to-deploy ✅ · giscus comments ✅ · CI workflows ✅ (green) · GitHub Desktop ✅ · Obsidian vault opened ✅
+
+Still open:
+1. ~~Vercel push-to-deploy~~ done.
+   **Vercel push-to-deploy**: vercel.com → project `sasipat-tejahempinyo` → Settings → Git → Connect `huachxng/sasipat-tejahempinyo` (installs the Vercel GitHub app). Until then I deploy from the terminal.
 2. **Comments**: install https://github.com/apps/giscus on *only* this repository, then tell me. Discussions are already enabled and the ids are recorded; I flip one flag.
 3. **CI**: in the prompt type `! gh auth refresh -h github.com -s workflow` and approve in the browser. Then I move `.github/workflows-pending` back and the content checks + tests run on every push.
 4. **Publish button**: `! brew install --cask github`, open GitHub Desktop, sign in as huachxng, File → Add Local Repository → `~/Sites/sasipat-tejahempinyo`.
