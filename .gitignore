@@ -21,3 +21,5 @@ content/**/*.m4v
 content/**/*.heic
 content/**/*.zip
 .env*
+# Obsidian must open content/, never the repo root
+/.obsidian/

@@ -8,7 +8,10 @@
   "strictLineBreaks": false,
   "propertiesInDocument": "visible",
   "showUnsupportedFiles": false,
-  "userIgnoreFilters": ["_templates/", ".obsidian/"],
+  "userIgnoreFilters": [
+    "_templates/",
+    ".obsidian/"
+  ],
   "promptDelete": true,
   "trashOption": "system"
 }
