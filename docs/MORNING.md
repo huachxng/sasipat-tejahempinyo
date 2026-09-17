@@ -24,7 +24,7 @@ Still open:
 
 ## Please review (in Obsidian)
 - `_inbox/Review checklist.md` — every fact I could not verify, every held-back image, and the photo questions. Fix directly in the notes; anything with `%% … %%` around it is a private comment that never renders.
-- Highest-value confirmations: internship firm + mentor (currently unnamed), World Archery Youth Championships results, NHS presidency dates, ECONBRIEF101 vs "1-Minute Econ" channel name and URL, podcast EP1 release date/link, MEEKVEGGIES current status, whether the AP Economics TA role should appear (the August brag sheet says it was cancelled, so it is out).
+- Highest-value confirmations: World Archery Youth Championships results, NHS presidency dates, ECONBRIEF101 vs "1-Minute Econ" channel name and URL, podcast EP1 release date/link, MEEKVEGGIES current status, whether the AP Economics TA role should appear (the August brag sheet says it was cancelled, so it is out).
 - Held back on purpose: 4 photos with arrows drawn on them (band ×2, FE Bootcamp line-up, TEO exam hall) — send clean originals; 3 certificates showing ID numbers (both AMO certificates, the World Archery accreditation card) — say yes and I crop the numbers out; the NAAT selection letter (contains a signature and office phone).
 - No usable headshot exists in your folder (the file named as one is your TEO certificate). Drop a portrait into `content/media/` and tell me; About and the hero have a slot for it.
 

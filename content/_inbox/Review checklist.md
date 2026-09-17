@@ -3,7 +3,6 @@
 Everything below was drafted from your documents. Fix anything wrong directly in the note, then push.
 
 - [ ] **Kasian Sultan — Bilingual Retirement-Math and Tax Guide** (medium): Confirm the launch month (August 2026 is inferred from 'Grade 12' in Brag Sheet v2), that the URL is live and public, and that 'Kasian Sultan' is the final name.
-- [ ] **Quantitative Research Intern (Project-Based), Buy-Side Investment Firm** (medium): Confirm the firm name, the mentor's name and title, exact start and end dates, and whether the firm may be named publicly (all sources say the name was never recorded).
 - [ ] **Stanford Summer Session 2026 — CS106A and STATS 110** (high): Decide whether to publish course grades (final grades are not in the sources; only 'assignments graded ✓+' is recorded).
 - [ ] **Thailand Economics Olympiad 2026 — Qualified for Round 2 (Top 30)** (high): Confirm the Round 2 result (not in the sources). The Round 2 certificate is the file misnamed 'Sasipat Tejahempinyo.png' in the folder root and in 'teo&ieo'.
 - [ ] **Career Pathway: Your Future Guide — Podcast (EP1: Quantitative Finance)** (medium): Confirm the EP1 release date and platform link (planning files run Oct 2025 – Mar 2026; a screenshot is dated 21 Feb 2026) and that the podcast name is 'Career Pathway: Your Future Guide' (CPYFG).

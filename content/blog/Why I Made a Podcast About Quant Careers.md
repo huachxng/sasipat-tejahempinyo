@@ -24,9 +24,9 @@ That is the whole reason for Career Pathway, the podcast I host and produce unde
 
 ## What I did first
 
-Before recording anything, I tried to close the gap the slow way. This summer I took CS106A and STATS 110 at Stanford Summer Session, chosen as the technical foundation for this kind of work. I started an eleven-week project-based internship on the buy side under a mentor who works in risk management: portfolio construction and optimisation, then value at risk, maximum drawdown and factor exposure, then a backtest, then a written risk report, due in early October. And I rebuilt my paper's index in R and regression-tested it against the Python prototype, which is the story in [[Reproducible Research in R]].
+Before recording anything, I tried to close the gap the slow way. This summer I took CS106A and STATS 110 at Stanford Summer Session, chosen as the technical foundation for this kind of work. And I rebuilt my paper's index in R and regression-tested it against the Python prototype, which is the story in [[Reproducible Research in R]].
 
-Each of those answered a piece. The courses answered "what maths". The project is answering "what does the work product look like". The paper answered "can I do a small version of this unaided". What none of them answered was the human part: what the day is like, what people wish they had known earlier, what to ignore.
+Each of those answered a piece. The courses answered "what maths". The paper answered "can I do a small version of this unaided". What none of them answered was the human part: what the day is like, what people wish they had known earlier, what to ignore.
 
 ## What I wanted the episode to answer
 
@@ -36,7 +36,7 @@ I went into EP1 with a short list of questions I could not answer from a book. W
 
 ## What making it changed for me
 
-Preparing one episode meant writing my questions down precisely, which is harder than asking them casually. It also made me notice that I had been treating the career as a destination rather than a set of daily habits. The internship project is where I am trying to learn those habits now; the notes in [[Quant Career Pathway]] track what I find out.
+Preparing one episode meant writing my questions down precisely, which is harder than asking them casually. It also made me notice that I had been treating the career as a destination rather than a set of daily habits. The notes in [[Quant Career Pathway]] track what I find out about those habits.
 
 %% TODO: add anything specific you learned about production (equipment, editing time, what you would do differently) if you want it on the record. %%
 
