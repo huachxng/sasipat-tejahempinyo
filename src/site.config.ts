@@ -67,9 +67,9 @@ export const RESUME_SECTION_CAP = 8;
 // Fill them in below ONLY after the giscus GitHub App is installed on the repo, otherwise visitors see a giscus error box.
 export const GISCUS = {
   repo: REPO,
-  repoId: '',
-  category: 'Comments',
-  categoryId: '',
+  repoId: 'R_kgDOUdpVhQ',
+  category: 'Announcements',
+  categoryId: 'DIC_kwDOUdpVhc4DFvw9',
 };
 
 export const GRAPH = {
