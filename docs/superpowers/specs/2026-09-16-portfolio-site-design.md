@@ -321,7 +321,7 @@ Per frame: rotate each `p3` by `Ry(yaw)·Rx(pitch)`, perspective scale `s = 2.8 
 - **Keyboard / AT**: focusing a hub in the hidden list applies the hover state on the canvas (or gold on the SVG); Enter follows the link.
 
 ### 7.5 Fallback matrix
-No JS / reduced motion / motion toggle off / saveData → inline SVG poster (static, hover gold, links work). Phones → canvas at a DPR cap of 1.5 (cap 1 if the week-2 measurement requires it), 30 fps, top-of-hero layout. Any exception in the module → SVG stays (the canvas is only revealed after the first successful frame). There is no WebGL branch to test because nothing uses WebGL.
+No JS / reduced motion / motion toggle off / saveData → inline SVG poster (static, hover gold, links work). Phones → canvas at a DPR cap of 1.5 (cap 1 if the week-2 measurement requires it), 30 fps, top-of-hero layout. Any exception in the module → SVG stays (the canvas is only revealed after the first successful frame). v0.2 (2026-09-17): a hand-written WebGL2 renderer (`src/scripts/graph-gl.ts`, ~3.7 KB gz, lazy) now runs when WebGL2 is available; Canvas 2D remains the fallback and the SVG poster the no-JS/reduced-motion frame. See docs/HANDOFF-hero-gl.md.
 
 ### 7.6 Rest of the home page
 Chapter index: five rows at `--t-1` (`01 Achievements — 34 entries`, `02 Notes & Blog — 58 notes · 7 essays` …) with a one-line dek each; row hover turns the numeral gold and slides the arrow 8 px. Featured strip: up to 4 `featured: true` achievement covers with mosaic reveal. Latest: 3 most recent posts/notes. Footer: email, links, RSS, motion toggle, "Built from Markdown · updated <build date>".

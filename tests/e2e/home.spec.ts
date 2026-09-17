@@ -1,4 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+/** Whether this browser would give the hero a real (non-software) WebGL2 context, i.e. which renderer hero-graph.ts picks. */
+const webgl2Available = (page: Page) => page.evaluate(() => !!document.createElement('canvas').getContext('webgl2', { failIfMajorPerformanceCaveat: true }));
 
 test.describe('home hero', () => {
   test('shows the inline SVG poster before any JavaScript runs', async ({ browser }) => {
@@ -22,16 +25,58 @@ test.describe('home hero', () => {
       .poll(async () => page.locator('.hero svg').first().evaluate((el) => Number(getComputedStyle(el).opacity)), { timeout: 5_000 })
       .toBeLessThan(0.05);
     await expect(page.locator('.hero').getByRole('heading', { name: /most connected notes/i })).toBeAttached();
+    const hero = page.locator('[data-hero]');
+    await expect(hero).toHaveAttribute('data-renderer', /^(gl|2d)$/);
+    // CI Chromium runs SwiftShader, so this usually exercises the 2D path there; developer machines with a GPU take the GL path.
+    await expect(hero).toHaveAttribute('data-renderer', (await webgl2Available(page)) ? 'gl' : '2d');
+  });
+
+  test('falls back to Canvas 2D when WebGL2 is unavailable', async ({ page }) => {
+    await page.addInitScript(() => {
+      const orig = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, type: string, ...rest: unknown[]) {
+        return type === 'webgl2' ? null : (orig as (this: HTMLCanvasElement, t: string, ...r: unknown[]) => unknown).call(this, type, ...rest);
+      } as typeof orig;
+    });
+    await page.goto('/', { waitUntil: 'load' });
+    await expect(page.locator('canvas.hero-gl')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-hero]')).toHaveAttribute('data-renderer', '2d');
+  });
+
+  test.describe('WebGL context loss', () => {
+    test('survives a restored loss and falls back to Canvas 2D after an unrestored one', async ({ page, browserName }) => {
+      test.skip(browserName !== 'chromium', 'WEBGL_lose_context is exercised on Chromium');
+      await page.goto('/', { waitUntil: 'load' });
+      const hero = page.locator('[data-hero]');
+      await expect(hero).toHaveAttribute('data-renderer', /^(gl|2d)$/, { timeout: 10_000 });
+      test.skip((await hero.getAttribute('data-renderer')) !== 'gl', 'this browser took the Canvas path (no real GPU)');
+      await page.evaluate(() => {
+        const gl = document.querySelector<HTMLCanvasElement>('canvas.hero-gl')!.getContext('webgl2')!;
+        const ext = gl.getExtension('WEBGL_lose_context')!;
+        ext.loseContext();
+        setTimeout(() => ext.restoreContext(), 200);
+      });
+      await page.waitForTimeout(800);
+      await expect(page.locator('canvas.hero-gl')).toBeVisible();
+      await expect(hero).toHaveAttribute('data-renderer', 'gl');
+      await page.evaluate(() => document.querySelector<HTMLCanvasElement>('canvas.hero-gl')!.getContext('webgl2')!.getExtension('WEBGL_lose_context')!.loseContext());
+      await expect(hero).toHaveAttribute('data-renderer', '2d', { timeout: 5_000 });
+      await expect(page.locator('canvas.hero-gl')).toBeVisible();
+    });
   });
 
   test.describe('with prefers-reduced-motion', () => {
     test.use({ reducedMotion: 'reduce' });
-    test('never mounts the canvas or mosaic canvases', async ({ page }) => {
+    test('never mounts the canvas or mosaic canvases, fetches no graph data and no GL chunk', async ({ page }) => {
+      const urls: string[] = [];
+      page.on('request', (r) => urls.push(r.url()));
       await page.goto('/', { waitUntil: 'load' });
       await page.waitForTimeout(3_000);
       await expect(page.locator('canvas.hero-gl')).toBeHidden();
       expect(await page.locator('canvas:visible').count()).toBe(0);
       await expect(page.locator('.hero svg').first()).toBeVisible();
+      expect(urls.some((u) => u.includes('/graph.json')), 'graph.json is never fetched').toBe(false);
+      expect(urls.some((u) => u.includes('graph-gl')), 'the WebGL chunk is never requested').toBe(false);
     });
   });
 
@@ -41,11 +86,14 @@ test.describe('home hero', () => {
         localStorage.setItem('motion', 'off');
       } catch {}
     });
+    const urls: string[] = [];
+    page.on('request', (r) => urls.push(r.url()));
     await page.goto('/', { waitUntil: 'load' });
     await expect(page.locator('html')).toHaveAttribute('data-motion', 'off');
     await page.waitForTimeout(3_000);
     await expect(page.locator('canvas.hero-gl')).toBeHidden();
     expect(await page.locator('canvas:visible').count()).toBe(0);
+    expect(urls.some((u) => u.includes('/graph.json') || u.includes('graph-gl'))).toBe(false);
   });
 
   test('keyboard order: skip link, nav, hub list, chapter index', async ({ page, browserName }) => {

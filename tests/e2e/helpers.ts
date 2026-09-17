@@ -4,6 +4,8 @@ import type { APIRequestContext, Page } from '@playwright/test';
 export const KNOWN = {
   achievement: '/achievements/one-day-mba-2026',
   achievementWithGallery: '/achievements/navy-archer-open-2024',
+  /** The one archery entry with a scores line (target face + record panel). */
+  archery: '/achievements/kasetsart-open-archery-2025',
   note: '/notes/bubble-intensity-score',
   post: '/blog/what-replicating-a-bubble-indicator-taught-me-about-data',
 };

@@ -1,0 +1,10 @@
+---
+// The interactive Bubble Intensity Score chart. All markup comes from `bisChartHtml` (plain TS, so a future
+// remark fence can emit the same figure); this component only mounts it and loads the client script.
+import { bisChartHtml, loadBis, type BisChartOptions } from '../lib/bis.ts';
+interface Props extends BisChartOptions {}
+const { id = 'bis', ...opts } = Astro.props;
+const html = bisChartHtml(loadBis(), { id, ...opts });
+---
+<Fragment set:html={html} />
+<script src="../scripts/bis-chart.ts"></script>

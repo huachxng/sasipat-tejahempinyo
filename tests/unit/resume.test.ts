@@ -142,3 +142,23 @@ describe('helpers', () => {
     expect(parseLink('   ')).toBeUndefined();
   });
 });
+
+describe('archery score fallback', () => {
+  const scores = ['Elimination | 6-4 | vs seed 3', 'Ranking round | 560/720 | 72 arrows | 70 m'];
+  const line = (over: Partial<Data>) =>
+    buildResumeModel([ach('kasetsart', { category: 'athletics', org: 'Kasetsart University', result: '1st runner-up, Recurve Women U25', ...over })], profile)
+      .sections[0].items[0].line;
+
+  it('appends the best score when there is no resumeLine', () => {
+    expect(line({ scores })).toBe('kasetsart — Kasetsart University, 1st runner-up, Recurve Women U25 (560/720, 72 arrows, 70 m)');
+  });
+  it('does not repeat a total that result already quotes', () => {
+    expect(line({ scores, result: '1st runner-up (560 points / 72 arrows)' })).toBe('kasetsart — Kasetsart University, 1st runner-up (560 points / 72 arrows)');
+    expect(line({ scores, result: 'scored 1560' })).toContain('(560/720');
+  });
+  it('resumeLine still wins, and unreadable or match-only scores add nothing', () => {
+    expect(line({ scores, resumeLine: 'Custom line.' })).toBe('Custom line.');
+    expect(line({ scores: ['personal best', 'Elimination | 6-4'] })).toBe('kasetsart — Kasetsart University, 1st runner-up, Recurve Women U25');
+    expect(line({ scores: [] })).toBe('kasetsart — Kasetsart University, 1st runner-up, Recurve Women U25');
+  });
+});

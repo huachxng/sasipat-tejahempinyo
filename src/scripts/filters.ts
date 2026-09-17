@@ -56,6 +56,7 @@ if (root && timeline) {
   };
 
   const apply = (animate: boolean) => {
+    if (animate) dispatchEvent(new CustomEvent('sfx', { detail: 'tap' })); // opt-in sound tick on user-driven filter changes only
     const run = () => {
       paint();
       dispatchEvent(new CustomEvent('ach:filter'));

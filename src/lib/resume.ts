@@ -11,6 +11,7 @@ import {
   type ResumeSection,
 } from '../site.config.ts';
 import { dateRange } from './dates.ts';
+import { bestScore, formatScoreForResume } from './archery.ts';
 
 /** The fields of an achievement entry the model reads (a CollectionEntry<'achievements'> satisfies this). */
 export interface ResumeAchievementInput {
@@ -26,6 +27,8 @@ export interface ResumeAchievementInput {
     resume?: boolean;
     resumeLine?: string;
     resumeSection?: ResumeSection;
+    /** Archery score lines ("Round | score | details"); the best one is appended to the default line. */
+    scores?: string[];
   };
 }
 
@@ -136,6 +139,14 @@ const cleanLine = (s: string) => collapse(s.replace(/\(\s*\)/g, ''));
 const defaultLine = (title: string, org?: string, result?: string) =>
   title + (org ? ` — ${org}` : '') + (result ? `${org ? ', ' : ' — '}${result}` : '');
 
+/** " (560/720, 72 arrows, 70 m)" from the best archery score, unless `result` already quotes the total. */
+function scoreSuffix(scores: string[] | undefined, result: string | undefined): string {
+  const best = scores?.length ? bestScore(scores) : undefined;
+  if (!best || best.total === undefined) return '';
+  if (result && new RegExp(`(?<!\\d)${best.total}(?!\\d)`).test(result)) return '';
+  return ` (${formatScoreForResume(best)})`;
+}
+
 const time = (d?: Date) => (d ? d.getTime() : 0);
 const byDateDesc = (a: ResumeAchievementInput, b: ResumeAchievementInput) =>
   time(b.data.date) - time(a.data.date) ||
@@ -151,7 +162,7 @@ export function toResumeItem(a: ResumeAchievementInput): ResumeItem {
   return {
     id: a.id,
     title,
-    line: collapse(d.resumeLine ?? defaultLine(title, d.org, d.result)),
+    line: collapse(d.resumeLine ?? defaultLine(title, d.org, d.result) + scoreSuffix(d.scores, d.result)),
     org: d.org,
     dateText: dateRange(d.date, d.endDate, d.dateText),
     href: `/achievements/${a.id}`,

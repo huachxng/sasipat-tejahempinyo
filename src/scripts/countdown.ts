@@ -80,6 +80,7 @@ if (timeline && cd) {
     ensureSlots(Math.max(2, text.length));
     const s = slots();
     for (let i = 0; i < s.length; i++) roll(s[i], text[i] ?? '0', dir);
+    if (n !== shown && shown >= 0) dispatchEvent(new CustomEvent('sfx', { detail: 'tap' })); // opt-in sound tick, not on the initial index
     shown = n;
     if (badgeNum) badgeNum.textContent = text;
   };

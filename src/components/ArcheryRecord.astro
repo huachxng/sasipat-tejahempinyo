@@ -1,0 +1,90 @@
+---
+// "Archery record": every published athletics entry on one build-time strip (zero JS). The SVG is
+// decoration of the accessible <ol> below it, the same pattern as the Countdown: AT and no-CSS readers
+// get the list; the current page's row carries aria-current="page". Excluded from Pagefind.
+import type { Achievement } from '../pages/achievements/_shared.ts';
+import { archeryPresentation, averagePerArrow, maxOf, ordinal, shortTitle } from '../lib/archery.ts';
+import { dateRange, isoDate } from '../lib/dates.ts';
+
+interface Props {
+  /** Published athletics entries, oldest → newest. */
+  entries: Achievement[];
+  currentId?: string;
+}
+const { entries, currentId } = Astro.props;
+
+const DAY = 86_400_000;
+const W = 600, H = 150;
+const X0 = 12, X1 = W - 12;
+const BAND_TOP = 10, BAND_BOTTOM = 95; // average per arrow 10.0 → 6.0
+const ROW_Y: Record<'1' | '2' | '3' | 'competed', number> = { '1': 110, '2': 120, '3': 130, competed: 140 };
+const BASE_Y = H - 0.5;
+
+const times = entries.map((e) => e.data.date.getTime());
+const tMin = Math.min(...times) - 60 * DAY;
+const tMax = Math.max(...times) + 60 * DAY;
+const x = (t: number) => (tMax === tMin ? (X0 + X1) / 2 : X0 + ((t - tMin) / (tMax - tMin)) * (X1 - X0));
+const yAvg = (avg: number) => BAND_BOTTOM - ((Math.min(10, Math.max(6, avg)) - 6) / 4) * (BAND_BOTTOM - BAND_TOP);
+
+const rows = entries.map((e) => {
+  const p = archeryPresentation(e.data);
+  const title = shortTitle(e.data.title ?? e.id);
+  const placing = typeof e.data.placing === 'number' ? e.data.placing : undefined;
+  let text: string;
+  let kind: 'avg' | 'placing' | 'competed';
+  let cy: number;
+  if (p.kind === 'target') {
+    const max = maxOf(p.score);
+    text = [placing && ordinal(placing), `${p.score.total}${max !== undefined ? ` / ${max}` : ''}`, `avg ${p.avg.toFixed(1)}`].filter(Boolean).join(' · ');
+    kind = 'avg';
+    cy = yAvg(p.avg);
+  } else if (placing) {
+    text = ordinal(placing);
+    kind = 'placing';
+    cy = ROW_Y[String(placing) as '1' | '2' | '3'];
+  } else {
+    text = 'competed';
+    kind = 'competed';
+    cy = ROW_Y.competed;
+  }
+  return { e, title, text, kind, cx: x(e.data.date.getTime()), cy, current: e.id === currentId, href: `/achievements/${e.id}`, avg: p.kind === 'target' ? averagePerArrow(p.score) : undefined };
+});
+const hasAvg = rows.some((r) => r.kind === 'avg');
+const podiums = entries.filter((e) => typeof e.data.placing === 'number').length;
+const years = [...new Set(entries.map((e) => e.data.date.getUTCFullYear()))].sort();
+const span = years.length > 1 ? `${years[0]}–${years[years.length - 1]}` : String(years[0] ?? '');
+const summary = [`${entries.length} competition${entries.length === 1 ? '' : 's'}`, span, `${podiums} podium${podiums === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+---
+<section class="container ach-record" id="archery-record" aria-labelledby="ach-record-heading" data-archery-record data-pagefind-ignore>
+  <div class="ach-record-inner">
+    <div class="ach-record-head">
+      <h2 class="label" id="ach-record-heading">Archery record</h2>
+      <p class="ach-record-sum mono">{summary}</p>
+    </div>
+    <svg class="ach-record-chart" viewBox={`0 0 ${W} ${H}`} width="100%" aria-hidden="true" focusable="false">
+      {hasAvg && [7, 8, 9].map((v) => <line class="rec-rule" x1={X0} x2={X1} y1={yAvg(v)} y2={yAvg(v)} />)}
+      {(['1', '2', '3', 'competed'] as const).map((k) => <line class="rec-rule rec-rule--dotted" x1={X0} x2={X1} y1={ROW_Y[k]} y2={ROW_Y[k]} />)}
+      <line class="rec-base" x1="0" x2={W} y1={BASE_Y} y2={BASE_Y} />
+      {rows.map((r) => (
+        <g class:list={['rec-mark', `rec-mark--${r.kind}`, { 'is-current': r.current }]}>
+          <line class="rec-tick" x1={r.cx.toFixed(1)} x2={r.cx.toFixed(1)} y1={(r.cy + 4).toFixed(1)} y2={BASE_Y} />
+          {r.current && <rect class="rec-current" x={(r.cx - 7).toFixed(1)} y={(r.cy - 7).toFixed(1)} width="14" height="14" />}
+          <rect class="rec-square" x={(r.cx - 4).toFixed(1)} y={(r.cy - 4).toFixed(1)} width="8" height="8" />
+        </g>
+      ))}
+    </svg>
+    <div class="ach-record-years mono" aria-hidden="true">
+      <span>{years[0]}</span>
+      {years.length > 1 && <span>{years[years.length - 1]}</span>}
+    </div>
+    <ol class="ach-record-list mono">
+      {rows.map((r) => (
+        <li>
+          <time datetime={isoDate(r.e.data.date)}>{dateRange(r.e.data.date, r.e.data.endDate, r.e.data.dateText)}</time>
+          <a href={r.href} aria-current={r.current ? 'page' : undefined}>{r.title}</a>
+          <span class="ach-record-result">{r.text}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

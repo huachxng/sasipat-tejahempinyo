@@ -28,6 +28,11 @@ describe('clean fixture vault', () => {
     expect(r.out).toContain('content is ready to publish');
     expect(r.status).toBe(0);
   });
+  it('accepts well-formed archery scores and placing without a warning', () => {
+    expect(r.out).not.toMatch(/scores:/);
+    expect(r.out).not.toMatch(/placing/);
+    expect(r.out).not.toContain('Ach 1.md');
+  });
   it('warns about the missing link with suggestions, the unpublished target and the block ref', () => {
     expect(r.out).toMatch(/⚠ content\/notes\/Alpha\.md:\d+ — \[\[Nowhere To Be Found\]\] does not match any note and will render as plain text/);
     expect(r.out).toMatch(/fix: did you mean \[\[[^\]]+\]\]/);
@@ -88,6 +93,20 @@ describe('broken-frontmatter fixture', () => {
     expect(r.out).toContain('✖ content/achievements/Bad Yaml.md:2 — the properties block is not valid YAML');
     expect(r.out).toContain('✖ content/notes/Bad Publish.md:2 — publish must be true or false (tick the checkbox)');
     expect(r.out).toContain('✖ content/achievements/Wrong Category.md:5 — category is missing or misspelled. Choose one of: academics');
+  });
+  it('warns about an unreadable scores line with the expected form and about impossible numbers', () => {
+    expect(r.out).toContain('⚠ content/achievements/Bad Score.md:6 — scores: "personal best" is not a score the site can read, so this line is skipped');
+    expect(r.out).toContain('fix: write it as "Round | score | details", for example "Ranking round | 560/720 | 72 arrows | 70 m" or "Elimination | 6-4 | vs seed 3"');
+    expect(r.out).toContain('⚠ content/achievements/Bad Score.md:6 — scores: "Ranking round | 560/500 | 50 arrows" — the total (560) is higher than the maximum (500)');
+    expect(r.out).toContain('fix: check the numbers; the maximum is arrows × 10 (72 arrows → 720)');
+  });
+  it('makes a placing outside 1–3 an error with the 1–3 message', () => {
+    expect(r.out).toContain('✖ content/achievements/Bad Score.md:7 — placing must be a whole number from 1 to 3 (1 = winner). Leave it out for anything below the podium');
+  });
+  it('warns when scores or placing sit on a non-athletics entry', () => {
+    expect(r.out).toContain('⚠ content/achievements/Scores Elsewhere.md:6 — "scores" is only shown on Athletics / Archery entries and is ignored here');
+    expect(r.out).toContain('⚠ content/achievements/Scores Elsewhere.md:7 — "placing" is only shown on Athletics / Archery entries and is ignored here');
+    expect(r.out).toContain('fix: set category to athletics, or remove the property');
   });
   it('ends every problem with a fix line', () => {
     const lines = r.out.split('\n');
@@ -178,5 +197,20 @@ describe('generated image problems', () => {
     expect(r.out).toMatch(/✖ content\/media\/huge\.png — image is 8\.\d MB \(limit 8 MB\)/);
     expect(r.out).toContain('fix: run `npm run shrink`');
     expect(r.out).toContain('⚠ content/media/gps.jpg — the photo still carries GPS location data (EXIF)');
+  });
+});
+
+describe('data/bis_panel_monthly.csv', () => {
+  it('reports an invalid CSV with the line number and exits 1', () => {
+    const r = run(join(FIXTURES, 'broken-data'));
+    expect(r.status).toBe(1);
+    expect(r.out).toMatch(/✖ content\/data\/bis_panel_monthly\.csv:\d+ — 1 month is missing between 1995-06 and 1995-08/);
+    expect(r.out).toContain('fix: the panel must have one row for every month');
+  });
+  it('only warns when the file is absent, so the clean fixture still exits 0', () => {
+    const r = run(join(FIXTURES, 'vault'));
+    expect(r.status).toBe(0);
+    expect(r.out).toContain('0 errors, ');
+    expect(r.out).toMatch(/⚠ content\/data\/bis_panel_monthly\.csv — the Research chart has no data yet/);
   });
 });

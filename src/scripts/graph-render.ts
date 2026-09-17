@@ -1,4 +1,5 @@
-// Shared Canvas 2D graph renderer: the home hero uses mode '3d' (p3, perspective camera), /notes uses mode '2d' (p2, fit to box).
+// Shared Canvas 2D graph renderer: the home hero uses mode '3d' (p3, perspective camera; graph-gl.ts is the WebGL2 upgrade
+// and shares the helpers below), /notes uses mode '2d' (p2, fit to box).
 // The pure projection helpers at the top have no DOM access: HeroGraphSvg.astro imports them on the server so the inline SVG
 // poster and the canvas's first frame are pixel-identical (same camera, same coordinate space, same radii).
 
@@ -33,6 +34,56 @@ export const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)
 const bin = (a: number) => Math.min(7, Math.floor(a * 8));
 
 export interface Cam { yaw: number; pitch: number; scale: number; px: number; edgeMul: number }
+
+/* ---------- helpers shared by the Canvas 2D and WebGL renderers (DOM-free) ---------- */
+/** Emphasis tween times (s): hover glow in / out. */
+export const EM_IN = 0.2, EM_OUT = 0.15;
+/** Advance every node's emphasis towards 1 (the highlighted node) or 0. Returns true while any node is still tweening. */
+export function stepEmphasis(em: Float32Array, hl: number, dt: number): boolean {
+  let anim = false;
+  for (let i = 0; i < em.length; i++) {
+    const t = i === hl ? 1 : 0, v = em[i];
+    if (v !== t) { em[i] = t ? Math.min(1, v + dt / EM_IN) : Math.max(0, v - dt / EM_OUT); anim = true; }
+  }
+  return anim;
+}
+/** Edge alpha: class alpha × mean fog × entrance multiplier, ×(1 − .65·dim) when a node is lit and this edge is not incident, ×.35 when a search query does not match both ends. */
+export function edgeAlpha(cls: number, fs: number, ft: number, edgeMul: number, dim: number, inc: boolean, matched: boolean): number {
+  let a = EDGE_ALPHA[cls] * (fs + ft) * 0.5 * edgeMul;
+  if (dim && !inc) a *= 1 - 0.65 * dim;
+  if (!matched) a *= 0.35;
+  return a;
+}
+/** 3D projection of every node into canvas CSS px (`unit` = px per box unit, see `createRenderer.resize`). Fills X/Y (px), Z (unit space), F (fog), R (px, before emphasis). */
+export function projectScene(g: GraphJson, cam: Cam, w: number, h: number, unit: number, X: Float32Array, Y: Float32Array, Z: Float32Array, F: Float32Array, R: Float32Array): void {
+  const Rpx = VB.r * unit * cam.scale;
+  const cx = w / 2 + cam.px, cy = h / 2;
+  const nodes = g.nodes;
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i];
+    const [x, y, z, s] = project(n.p3, cam.yaw, cam.pitch);
+    X[i] = cx + x * Rpx; Y[i] = cy + y * Rpx; Z[i] = z; F[i] = fog(z);
+    R[i] = nodeRadius(n.deg) * s * unit * cam.scale;
+  }
+}
+/** `#rrggbb` → [r, g, b] in 0..1 (falls back to gold for anything else). */
+export function hexToRgb01(hex: string): [number, number, number] {
+  const h = /^#[0-9a-f]{6}$/i.test(hex) ? hex : '#e8b84a';
+  return [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 16) / 255, parseInt(h.slice(5, 7), 16) / 255];
+}
+export interface Tokens { fg: string; fg2: string; gold: string; gold2: string; goldDim: string; edge: string; mono: string }
+/** Design tokens the renderers paint with (read from `:root`; browser only). */
+export function readTokens(): Tokens {
+  const cs = getComputedStyle(document.documentElement);
+  const t = (n: string, f: string) => cs.getPropertyValue(n).trim() || f;
+  return { fg: t('--fg', '#f2f0ea'), fg2: t('--fg-2', '#a8a59d'), gold: t('--gold', '#e8b84a'), gold2: t('--gold-2', '#f6d36b'), goldDim: t('--gold-dim', '#8a6d2b'), edge: t('--edge', '#3a3a40'), mono: t('--font-mono', 'monospace') };
+}
+/** Open a node: the `sfx` release sound first; when sound is on the navigation waits 80 ms so the thock is not cut by unload. */
+export function openNode(url: string): void {
+  dispatchEvent(new CustomEvent('sfx', { detail: 'release' }));
+  if (document.documentElement.dataset.sound === 'on') setTimeout(() => location.assign(url), 80);
+  else location.assign(url);
+}
 export interface Renderer {
   g: GraphJson;
   cam: Cam;
@@ -53,8 +104,6 @@ export interface Renderer {
   /** Last projected position of node i in canvas CSS px. */
   pos(i: number): [number, number];
 }
-
-const token = (cs: CSSStyleDeclaration, name: string, fallback: string) => cs.getPropertyValue(name).trim() || fallback;
 
 /** Sprite atlas (64 px cells): 0 off-white disc, 1 warm-grey disc, 2 gold disc, 3 gold-2 disc, 4 gold-dim ring, 5 gold ring, 6 additive glow. */
 function makeAtlas(colors: string[], glow: string): HTMLCanvasElement {
@@ -92,12 +141,8 @@ function makeAtlas(colors: string[], glow: string): HTMLCanvasElement {
 
 export function createRenderer(canvas: HTMLCanvasElement, g: GraphJson, mode: '3d' | '2d'): Renderer {
   const ctx = canvas.getContext('2d', { alpha: true })!;
-  const cs = getComputedStyle(document.documentElement);
-  const hex = (n: string, f: string) => token(cs, n, f);
-  const fg = hex('--fg', '#f2f0ea'), fg2 = hex('--fg-2', '#a8a59d'), gold = hex('--gold', '#e8b84a'), gold2 = hex('--gold-2', '#f6d36b'), goldDim = hex('--gold-dim', '#8a6d2b'), edgeCol = hex('--edge', '#3a3a40');
-  const mono = hex('--font-mono', 'monospace');
-  const gh = /^#[0-9a-f]{6}$/i.test(gold) ? gold : '#e8b84a';
-  const atlas = makeAtlas([fg, fg2, gold, gold2, goldDim, gold], `rgb(${parseInt(gh.slice(1, 3), 16)},${parseInt(gh.slice(3, 5), 16)},${parseInt(gh.slice(5, 7), 16)})`);
+  const { fg, fg2, gold, gold2, goldDim, edge: edgeCol, mono } = readTokens();
+  const atlas = makeAtlas([fg, fg2, gold, gold2, goldDim, gold], `rgb(${hexToRgb01(gold).map((v) => Math.round(v * 255)).join(',')})`);
   const S = 64;
   const N = g.nodes.length, E = g.edges.length;
   const coarse = matchMedia('(pointer: coarse)').matches;
@@ -149,32 +194,20 @@ export function createRenderer(canvas: HTMLCanvasElement, g: GraphJson, mode: '3
       const nodes = g.nodes;
       const hl = r.hl;
       if (hl >= 0) prev = hl;
-      // emphasis tweens: 200 ms in, 150 ms out
-      let anim = false;
-      for (let i = 0; i < N; i++) {
-        const t = i === hl ? 1 : 0, v = em[i];
-        if (v !== t) {
-          em[i] = t ? Math.min(1, v + dt / 0.2) : Math.max(0, v - dt / 0.15);
-          anim = true;
-        }
-      }
+      const anim = stepEmphasis(em, hl, dt);
       const act = hl >= 0 ? hl : prev; // node whose neighbourhood is (still) lit
       const dim = act >= 0 ? em[act] : 0;
       // project
-      const Rpx = mode === '3d' ? VB.r * unit * cam.scale : unit;
-      const cx = r.w / 2 + cam.px, cy = r.h / 2;
-      for (let i = 0; i < N; i++) {
-        const n = nodes[i];
-        if (mode === '3d') {
-          const [x, y, z, s] = project(n.p3, cam.yaw, cam.pitch);
-          X[i] = cx + x * Rpx; Y[i] = cy + y * Rpx; Z[i] = z; F[i] = fog(z);
-          R[i] = nodeRadius(n.deg) * s * unit * cam.scale;
-        } else {
-          X[i] = cx + (n.p2[0] - (minx + maxx) / 2) * Rpx; Y[i] = cy + (n.p2[1] - (miny + maxy) / 2) * Rpx; Z[i] = 0; F[i] = 1;
+      if (mode === '3d') projectScene(g, cam, r.w, r.h, unit, X, Y, Z, F, R);
+      else {
+        const cx = r.w / 2 + cam.px, cy = r.h / 2;
+        for (let i = 0; i < N; i++) {
+          const n = nodes[i];
+          X[i] = cx + (n.p2[0] - (minx + maxx) / 2) * unit; Y[i] = cy + (n.p2[1] - (miny + maxy) / 2) * unit; Z[i] = 0; F[i] = 1;
           R[i] = nodeRadius(n.deg) * 1.1;
         }
-        R[i] *= 1 + 0.6 * em[i];
       }
+      for (let i = 0; i < N; i++) R[i] *= 1 + 0.6 * em[i];
       if (mode === '3d') order.sort((a, b) => Z[b] - Z[a]);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, r.w, r.h);
@@ -186,9 +219,7 @@ export function createRenderer(canvas: HTMLCanvasElement, g: GraphJson, mode: '3
         const e = g.edges[j];
         if (hid[e.s] || hid[e.t] || (!r.tagEdges && e.k === 'tag')) { ekey[j] = -1; continue; }
         const inc = act >= 0 && (e.s === act || e.t === act);
-        let a = EDGE_ALPHA[ecls[j]] * (F[e.s] + F[e.t]) * 0.5 * cam.edgeMul;
-        if (dim && !inc) a *= 1 - 0.65 * dim;
-        if (m && !(m[e.s] && m[e.t])) a *= 0.35;
+        const a = edgeAlpha(ecls[j], F[e.s], F[e.t], cam.edgeMul, dim, inc, !m || !!(m[e.s] && m[e.t]));
         ekey[j] = inc && dim ? 24 : ecls[j] * 8 + bin(Math.min(1, a));
       }
       ctx.strokeStyle = edgeCol;
@@ -354,10 +385,10 @@ export function bindPointer(r: Renderer, canvas: HTMLCanvasElement, chip: Chip, 
     const [x, y] = local(e);
     if (e.pointerType === 'touch') {
       const i = r.pick(x, y, 24);
-      if (i >= 0 && i === selected) location.assign(r.g.nodes[i].u);
+      if (i >= 0 && i === selected) openNode(r.g.nodes[i].u);
       else if (i >= 0) { selected = i; api.hover(i, true); }
       else api.release();
-    } else if (hovered >= 0) location.assign(r.g.nodes[hovered].u);
+    } else if (hovered >= 0) openNode(r.g.nodes[hovered].u);
   });
   canvas.addEventListener('pointercancel', () => { if (down?.drag) o.onDragEnd?.(); down = null; });
   canvas.addEventListener('pointerleave', (e) => { if (e.pointerType !== 'touch' && !tap) api.hover(-1); });

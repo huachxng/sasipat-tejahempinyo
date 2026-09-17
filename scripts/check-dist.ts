@@ -8,6 +8,7 @@
  *   - any PDF other than resume.pdf, any video, any file over 2 MB
  *   - an internal href/src that does not resolve to a file in dist (build.format 'file': /notes/x → notes/x.html)
  *   - home-page JavaScript over 60 KB gzipped, or any single client chunk over 30 KB gzipped
+ *   - a named chunk over its own budget (graph-gl 15 KB, sound 2 KB gzipped)
  *
  * Flags: --dist <dir> (default dist) · --cache <file> · --site <url>
  * Exit 1 on any error. Design: spec §11 step 3 and §8.5 (4).
@@ -32,6 +33,8 @@ const KB = 1024;
 const MB = 1024 * KB;
 const HOME_JS_LIMIT = 60 * KB;
 const CHUNK_LIMIT = 30 * KB;
+/** Lazy / opt-in chunks with their own budget (matched by basename prefix; the generic CHUNK_LIMIT still applies). */
+const NAMED_CHUNK_LIMITS: Record<string, number> = { 'graph-gl': 15 * KB, sound: 2 * KB };
 const CSS_LIMIT = 40 * KB;
 const ASSET_LIMIT = 2 * MB;
 
@@ -112,6 +115,7 @@ for (const f of textFiles) {
   for (const m of text.matchAll(PII_TEXT_SOFT)) warning(`${relName(f.rel)}:${lineAt(text, m.index ?? 0)}`, `contains "${m[0]}": "…${snippet(text, m.index ?? 0)}…"`, 'fine if it is an ordinary use of the word; never attach a school transcript');
 }
 for (const f of files) {
+  if (f.rel.startsWith('pagefind/')) continue; // generated search index; its hashed names are not user file names
   const base = posix.basename(f.rel);
   const hit = PII_FILENAME.exec(base);
   if (hit) error(relName(f.rel), `the file name contains "${hit[0]}"`, 'rename the source file in content/media (or public/)');
@@ -202,6 +206,21 @@ info.push(`${refsChecked} internal references checked across ${html.length} page
 
 // ---------------------------------------------------------------------------------------------- 5. budgets
 const gz = (buf: Buffer | string) => gzipSync(buf).length;
+const homeLoaded = new Set<string>();
+if (fileSet.has('index.html')) {
+  const home = readFileSync(join(DIST, 'index.html'), 'utf8');
+  const queue = files.filter((f) => f.ext === '.js' && home.includes(f.rel)).map((f) => f.rel);
+  while (queue.length) {
+    const rel = queue.shift()!;
+    if (homeLoaded.has(rel)) continue;
+    homeLoaded.add(rel);
+    const code = readFileSync(join(DIST, rel), 'utf8');
+    for (const m of code.matchAll(/(?:^|[;{}\s)])import\s*"([^"]+\.js)"|from\s*"([^"]+\.js)"/g)) {
+      const dep = posix.normalize(posix.join(posix.dirname(rel), m[1] ?? m[2]));
+      if (fileSet.has(dep)) queue.push(dep);
+    }
+  }
+}
 if (fileSet.has('index.html')) {
   const root = parseHtml(readFileSync(join(DIST, 'index.html'), 'utf8'));
   const rows: [string, number][] = [];
@@ -215,13 +234,29 @@ if (fileSet.has('index.html')) {
   };
   for (const el of root.querySelectorAll('script[src]')) addFile(el.getAttribute('src')!);
   for (const el of root.querySelectorAll('link[rel="modulepreload"][href]')) addFile(el.getAttribute('href')!);
+  // follow static imports of those entries (dynamic import() chunks stay lazy): e.g. graph-render behind hero-graph
+  const queue = [...seen];
+  while (queue.length) {
+    const rel = queue.shift()!;
+    if (!rel.endsWith('.js')) continue;
+    homeLoaded.add(rel);
+    const code = readFileSync(join(DIST, rel), 'utf8');
+    for (const m of code.matchAll(/(?:^|[;{}\s)])import\s*"([^"]+\.js)"|from\s*"([^"]+\.js)"/g)) {
+      const dep = posix.normalize(posix.join(posix.dirname(rel), m[1] ?? m[2]));
+      if (fileSet.has(dep) && !seen.has(dep)) { addFile(`/${dep}`); queue.push(dep); }
+    }
+  }
   let inlineIdx = 0;
   for (const el of root.querySelectorAll('script:not([src])')) {
     const type = el.getAttribute('type');
     if (type && type !== 'module' && type !== 'text/javascript') continue; // JSON-LD, speculation rules…
     const code = el.innerHTML;
     if (!code.trim()) continue;
-    rows.push([`index.html <script> #${++inlineIdx}`, gz(code)]);
+    const n = gz(code);
+    // sound.ts is small enough that Astro inlines it; name it so its 2 KB budget stays visible and enforced
+    const named = /data-sound-toggle/.test(code) && /AudioContext/.test(code) ? 'sound' : null;
+    rows.push([`index.html <script> #${++inlineIdx}${named ? ` (${named}.ts)` : ''}`, n]);
+    if (named && n > NAMED_CHUNK_LIMITS[named]) error(relName('index.html'), `the inline ${named}.ts script is ${kb(n)} gzipped (limit ${kb(NAMED_CHUNK_LIMITS[named])})`, `trim src/scripts/${named}.ts; its budget is deliberate`);
   }
   const total = rows.reduce((s, [, n]) => s + n, 0);
   info.push(`home JS: ${kb(total)} gzipped across ${rows.length} script${rows.length === 1 ? '' : 's'} (limit ${kb(HOME_JS_LIMIT)})`);
@@ -240,11 +275,20 @@ if (fileSet.has('index.html')) {
 } else {
   error(relName('index.html'), 'the home page is missing from the build output', 'src/pages/index.astro must exist and build');
 }
+const lazy: string[] = [];
 for (const f of files) {
   if (f.ext !== '.js' || !f.rel.startsWith('_astro/')) continue;
   const n = gz(readFileSync(f.abs));
   if (n > CHUNK_LIMIT) error(relName(f.rel), `client chunk is ${kb(n)} gzipped (limit ${kb(CHUNK_LIMIT)})`, 'split the module or drop the dependency that inflates it');
+  const base = posix.basename(f.rel);
+  const named = Object.keys(NAMED_CHUNK_LIMITS).find((k) => base.startsWith(`${k}.`));
+  if (named) {
+    info.push(`chunk ${named}: ${kb(n)} gzipped (limit ${kb(NAMED_CHUNK_LIMITS[named])})`);
+    if (n > NAMED_CHUNK_LIMITS[named]) error(relName(f.rel), `the ${named} chunk is ${kb(n)} gzipped (limit ${kb(NAMED_CHUNK_LIMITS[named])})`, `trim src/scripts/${named}.ts; its budget is deliberate`);
+  }
+  if (!homeLoaded.has(f.rel)) lazy.push(`${kb(n).padStart(9)}  ${f.rel}`);
 }
+if (lazy.length) info.push(`chunks not loaded by index.html (lazy or other pages):`, ...lazy.map((l) => `  ${l}`));
 
 // ---------------------------------------------------------------------------------------------- report
 const errors = problems.filter((p) => p.level === 'error');

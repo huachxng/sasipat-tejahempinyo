@@ -13,6 +13,9 @@ resume: true
 resumeLine: "Ratchaburi Championship 2024 (4–6 May 2024) — 2nd runner-up, Recurve U18 Women 18 m (indoor)."
 cover: ratchaburi-championship-2024-01.jpg
 certificate: ratchaburi-championship-2024-certificate.jpg
+placing: 3
+division: "Recurve Under-18 Women"
+distance: "18 m"
 ---
 
 At the Ratchaburi Championship 2024, an indoor 18 m event organized by Ratchaburi Archery Club with the National Archery Association of Thailand from 4 to 6 May 2024, I placed 2nd runner-up in Recurve Under-18 Women. The certificate is in my portfolio.

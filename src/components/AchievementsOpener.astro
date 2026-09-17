@@ -1,6 +1,75 @@
 ---
-// STUB — replaced by the openers builder. Props: entries, total, firstYear, lastYear. Renders the chapter header for now.
+// Chapter 01 opener (plan §3): a pinned scene where the WAYC cover reveals from a centre band, turns from monochrome to
+// colour, and the numeral pre-rolls 00 → N, all driven by `--scene-p` from scroll-scene.ts. ChapterHeader stays inside
+// the stage so the h1 and `view-transition-name: chapter-01` are unchanged. Without JS or with motion off it is a
+// static frame: photo fully revealed (mono), numeral = N, no pin. The slot (intro copy) renders after the scene.
+import { Image } from 'astro:assets';
 import ChapterHeader from './ChapterHeader.astro';
-interface Props { entries?: unknown[]; total?: number; firstYear?: number; lastYear?: number }
+import { entryMedia, isCertificateName } from '../lib/media.ts';
+import { OPENERS } from '../site.config.ts';
+import type { Achievement } from '../pages/achievements/_shared.ts';
+import type { ImageMetadata } from 'astro';
+import '../styles/scene.css';
+
+interface Props { entries: Achievement[]; total: number; firstYear: number; lastYear: number }
+const { entries, total, firstYear, lastYear } = Astro.props;
+
+interface Cover { meta: ImageMetadata; alt: string }
+const photoOf = (e: Achievement): Cover | null => {
+  const m = entryMedia(e.data, e.body ?? '');
+  if (!m.cover || isCertificateName(m.cover.name)) return null;
+  return { meta: m.cover.meta, alt: m.gallery.find((g) => g.name === m.cover!.name)?.alt ?? '' };
+};
+const picked = entries.find((e) => e.id === OPENERS.achievements.entryId);
+const cover =
+  (picked && photoOf(picked)) ??
+  entries.filter((e) => e.data.featured).map(photoOf).find((c): c is Cover => c !== null) ??
+  null;
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
-<ChapterHeader slug="achievements"><slot /></ChapterHeader>
+<section class:list={['scene', 'scene--ach', { 'has-photo': !!cover }]} data-scene="achievements" data-total={total}>
+  <div class="scene-stage">
+    {cover && (
+      <div class="ach-open-img" aria-hidden="true">
+        <div class="ach-open-clip">
+          <Image
+            src={cover.meta}
+            alt=""
+            layout="none"
+            widths={[768, 1280, 1920]}
+            sizes="(min-width: 1024px) 55vw, 100vw"
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+            quality={70}
+            format="webp"
+          />
+        </div>
+      </div>
+    )}
+    <div class="ach-open-type">
+      <ChapterHeader slug="achievements" />
+      <div class="ach-open-num">
+        <p class="ach-open-count numeral" aria-hidden="true"><span data-open-num>{pad(total)}</span></p>
+        <p class="ach-open-label mono"><span class="sr-only">{total} entries, </span>{firstYear}–{lastYear}</p>
+      </div>
+      {cover?.alt && <p class="ach-open-cap mono">{cover.alt}</p>}
+    </div>
+  </div>
+  <script is:inline>
+    // Pre-arm before first paint (same conditions as scroll-scene.ts) so the photo never flashes fully revealed
+    // and the numeral never flashes N → 00. No JS / reduced motion / motion off leave the static frame untouched.
+    try {
+      var h = document.documentElement;
+      if (!(matchMedia('(prefers-reduced-motion: reduce)').matches || h.dataset.motion === 'off') && 'IntersectionObserver' in window) {
+        var s = document.currentScript.parentElement;
+        s.classList.add('is-armed');
+        s.style.setProperty('--scene-p', '0');
+        var n = s.querySelector('[data-open-num]');
+        if (n) n.textContent = '00';
+      }
+    } catch (e) {}
+  </script>
+</section>
+<div class="container ach-open-intro"><slot /></div>
+<script src="../scripts/scroll-scene.ts"></script>

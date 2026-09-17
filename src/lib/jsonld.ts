@@ -114,3 +114,40 @@ export function article(a: ArticleInput): JsonLd {
   if (a.wordCount) out.wordCount = a.wordCount;
   return out;
 }
+
+export interface DatasetInput {
+  /** first and last month in the panel, YYYY-MM */
+  first: string;
+  last: string;
+  /** SSRN (or other canonical) URL once known */
+  sameAs?: string;
+  license?: string;
+}
+
+/** schema.org Dataset for the Bubble Intensity Score panel on `/research` (CSV at `/data/bis_panel_monthly.csv`). */
+export function dataset(d: DatasetInput): JsonLd {
+  const out: JsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'Bubble Intensity Score — monthly panel, v1.0',
+    description: `Monthly composite (BIS) and four pillar z-scores (V valuation, L leverage, S sentiment, C concentration), ${d.first} to ${d.last}, computed from public data.`,
+    url: absUrl('/research'),
+    creator: { '@type': 'Person', '@id': PERSON_ID, name: PERSON.legalName },
+    temporalCoverage: `${d.first}/${d.last}`,
+    dateModified: `${d.last}-01`,
+    measurementTechnique: 'Trailing 120-month z-scores, equal-weighted mean of four pillars',
+    variableMeasured: [
+      { '@type': 'PropertyValue', name: 'BIS', description: 'Composite bubble intensity (z-score units)' },
+      { '@type': 'PropertyValue', name: 'V', description: 'Valuation pillar: Shiller CAPE z-score' },
+      { '@type': 'PropertyValue', name: 'L', description: 'Leverage pillar: nonfinancial corporate debt growth and NFCI leverage z-scores' },
+      { '@type': 'PropertyValue', name: 'S', description: 'Sentiment pillar: inverted VIX and inverted geopolitical-risk z-scores' },
+      { '@type': 'PropertyValue', name: 'C', description: 'Concentration pillar: Nasdaq Composite relative to the S&P 500, z-score' },
+    ],
+    distribution: [{ '@type': 'DataDownload', encodingFormat: 'text/csv', contentUrl: absUrl('/data/bis_panel_monthly.csv') }],
+    isBasedOn: ['CBOE VIX', 'Chicago Fed NFCI leverage subindex', 'Federal Reserve Z.1', 'Shiller CAPE', 'Caldara & Iacoviello (2022) Geopolitical Risk Index'],
+    keywords: ['asset bubbles', 'composite index', 'z-scores', 'AI bubble'],
+    license: d.license ?? 'https://creativecommons.org/licenses/by/4.0/',
+  };
+  if (d.sameAs) out.sameAs = d.sameAs;
+  return out;
+}

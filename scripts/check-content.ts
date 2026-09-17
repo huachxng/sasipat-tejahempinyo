@@ -24,7 +24,9 @@ import { noteSchema } from '../src/schemas/note.ts';
 import { postSchema } from '../src/schemas/post.ts';
 import { achievementSchema } from '../src/schemas/achievement.ts';
 import { profileSchema } from '../src/schemas/profile.ts';
+import { parseScore, scoreProblems } from '../src/lib/archery.ts';
 import { CATEGORY_KEYS } from '../src/site.config.ts';
+import { validateBisCsv } from '../src/lib/bis.ts';
 
 // ---------------------------------------------------------------------------------------------- setup
 
@@ -289,6 +291,32 @@ for (const e of vault.entries) {
     warning(e.path, `unknown property "${key}" is ignored by the site`, suggestion ? `did you mean "${suggestion}"? Rename it in the Properties panel` : 'remove it, or check content/_templates for the supported properties', fmLine(key));
   }
 
+  // archery scores (achievements only): a line the site cannot read is skipped on the page, never a build error
+  if (e.collection === 'achievements') {
+    const category = typeof data.category === 'string' ? data.category.trim().toLowerCase() : undefined;
+    const rawLines = raw.split(/\r?\n/);
+    const lineOfItem = (item: string) => {
+      const i = rawLines.findIndex((l) => l.includes(item));
+      return i >= 0 ? i + 2 : fmLine('scores');
+    };
+    const scoreItems = Array.isArray(data.scores) ? data.scores.map((s) => (typeof s === 'number' ? String(s) : s)).filter((s): s is string => typeof s === 'string' && s.trim() !== '') : [];
+    for (const item of scoreItems) {
+      const line = lineOfItem(item);
+      if (parseScore(item) === null) {
+        warning(e.path, `scores: "${item}" is not a score the site can read, so this line is skipped`, 'write it as "Round | score | details", for example "Ranking round | 560/720 | 72 arrows | 70 m" or "Elimination | 6-4 | vs seed 3"', line);
+        continue;
+      }
+      for (const problem of scoreProblems(item)) warning(e.path, `scores: "${item}" — ${problem}`, 'check the numbers; the maximum is arrows × 10 (72 arrows → 720)', line);
+    }
+    if (category && category !== 'athletics') {
+      for (const field of ['scores', 'placing']) {
+        const v = data[field];
+        if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0)) continue;
+        warning(e.path, `"${field}" is only shown on Athletics / Archery entries and is ignored here`, 'set category to athletics, or remove the property', fmLine(field));
+      }
+    }
+  }
+
   // future dates
   for (const field of ['date', 'endDate', 'updated']) {
     const v = data[field];
@@ -404,6 +432,19 @@ for (const e of vault.entries) {
         const suggestion = known.filter((k) => levenshtein(k.toLowerCase(), key.toLowerCase()) <= 2)[0];
         warning(profilePath, `unknown property "${key}" is ignored by the site`, suggestion ? `did you mean "${suggestion}"?` : 'remove it');
       }
+    }
+  }
+}
+
+// data/bis_panel_monthly.csv (the Research chart). Missing is only a warning so fixture vaults and unrelated pushes
+// are not blocked; the real build still fails on /research with a one-line fix.
+{
+  const csvPath = join(VAULT_ROOT, 'data', 'bis_panel_monthly.csv');
+  if (!existsSync(csvPath)) {
+    warning(csvPath, 'the Research chart has no data yet; the site build will fail on /research until the file is added', 'copy output/bis_panel_monthly.csv from the R project into content/data/');
+  } else {
+    for (const p of validateBisCsv(readFileSync(csvPath, 'utf8'))) {
+      (p.level === 'error' ? error : warning)(csvPath, p.message, p.fix, p.line);
     }
   }
 }

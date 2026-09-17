@@ -11,6 +11,8 @@ import Mosaic from '../../components/Mosaic.astro';
 import Gallery from '../../components/Gallery.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import LocalGraph from '../../components/LocalGraph.astro';
+import ArcheryTarget from '../../components/ArcheryTarget.astro';
+import ArcheryRecord from '../../components/ArcheryRecord.astro';
 import { getPublished, isDraft } from '../../lib/published.ts';
 import { getGraph } from '../../lib/graph.ts';
 import { entryMedia, isCertificateName } from '../../lib/media.ts';
@@ -23,13 +25,16 @@ import '../../styles/achievements.css';
 export async function getStaticPaths() {
   const entries = (await getPublished('achievements')).sort(byNewest);
   const { earlierBefore } = yearTabs(entries);
+  // Archery record: every athletics entry, oldest first; passed only to athletics pages.
+  const athletics = entries.filter((e) => e.data.category === 'athletics').sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
   return entries.map((entry, i) => ({
     params: { id: entry.id },
-    props: { entry, newer: entries[i - 1] ?? null, older: entries[i + 1] ?? null, count: entries.length - i, earlierBefore },
+    props: { entry, newer: entries[i - 1] ?? null, older: entries[i + 1] ?? null, count: entries.length - i, earlierBefore, athletics: entry.data.category === 'athletics' ? athletics : [] },
   }));
 }
-interface Props { entry: Achievement; newer: Achievement | null; older: Achievement | null; count: number; earlierBefore: number }
-const { entry, newer, older, count, earlierBefore } = Astro.props;
+interface Props { entry: Achievement; newer: Achievement | null; older: Achievement | null; count: number; earlierBefore: number; athletics: Achievement[] }
+const { entry, newer, older, count, earlierBefore, athletics } = Astro.props;
+const showRecord = athletics.length >= 2;
 const { Content } = await render(entry);
 const d = entry.data;
 const title = titleOf(entry);
@@ -154,6 +159,7 @@ const jsonLd = {
             </>
           )}
         </dl>
+        {d.category === 'athletics' && <ArcheryTarget data={d} title={title} recordHref={showRecord ? '#archery-record' : undefined} />}
         <div class="ach-share">
           <Byline name={BYLINE.achievements} kind="Achievement" date={when} />
           <button type="button" class="chip" data-share data-title={title}>Share</button>
@@ -168,6 +174,8 @@ const jsonLd = {
         <Gallery certificates={media.certificates} title={title} startIndex={certStart} fullSrcs={slides.slice(certStart).map((s) => s.src)} />
       </div>
     </div>
+
+    {showRecord && <ArcheryRecord entries={athletics} currentId={entry.id} />}
 
     {(backlinks.length > 0 || related.length > 0) && (
       <section class="container ach-connected" aria-labelledby="ach-connected-heading" data-pagefind-ignore>

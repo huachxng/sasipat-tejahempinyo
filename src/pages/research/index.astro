@@ -1,13 +1,145 @@
 ---
-// Placeholder until the research builder lands the chart page.
+// Chapter 03 — Research: the Bubble Intensity Score. Opener (openers builder), interactive chart, method, three-way
+// table, links, sources and a Dataset JSON-LD. Plan: docs/superpowers/plans/2026-09-17-research-openers.md §5.
 import Base from '../../layouts/Base.astro';
-import ChapterHeader from '../../components/ChapterHeader.astro';
+import ResearchOpener from '../../components/ResearchOpener.astro';
+import BisChart from '../../components/BisChart.astro';
 import ChapterNext from '../../components/ChapterNext.astro';
-import { chapterBySlug } from '../../site.config.ts';
+import { getPublished } from '../../lib/published.ts';
+import { resolveWikilink } from '../../lib/wikilinks.ts';
+import { dataset } from '../../lib/jsonld.ts';
+import { BIS_DANGER, BIS_WARNINGS, PILLARS, PILLAR_NAMES, fmtZ, loadBis, monthName, threeWay } from '../../lib/bis.ts';
+import { parseLink } from '../achievements/_shared.ts';
+import { PERSON, chapterBySlug } from '../../site.config.ts';
+import '../../styles/scene.css';
+import '../../styles/research.css';
+
 const c = chapterBySlug('research');
+const data = loadBis();
+const table = threeWay(data);
+const hot = (v: number | null) => v !== null && v >= BIS_DANGER;
+const firstYear = data.plot[0].month.slice(0, 4);
+const lastYear = data.last.slice(0, 4);
+
+// Notes: resolved like wikilinks so an unpublished note falls back to plain text (never a hardcoded /notes/… URL).
+const NOTE_LINKS = ['Bubble Intensity Score', 'AI Bubble Research', 'Reproducible Research in R'];
+const notes = NOTE_LINKS.map((target) => {
+  const r = resolveWikilink(target);
+  return r.ok ? { title: r.entry.title, href: r.href } : { title: target };
+});
+
+// The achievement entry and its SSRN link (chip only when a link host contains "ssrn").
+const ACH_ID = 'ai-bubble-mere-future-crisis-research';
+const ach = (await getPublished('achievements')).find((e) => e.id === ACH_ID);
+const achLinks = (ach?.data.links ?? []).map(parseLink).filter((l): l is NonNullable<typeof l> => Boolean(l));
+const ssrn = achLinks.find((l) => l.host.includes('ssrn'));
+const SSRN_PLACEHOLDER = 'SSRN working paper: October 2026';
+
+const description = `The Bubble Intensity Score: a monthly composite of four pillar z-scores (valuation, leverage, sentiment, concentration), ${firstYear}–${lastYear}, with the dot-com, 2008 and AI episodes compared.`;
+const jsonLd = dataset({ first: data.first, last: data.last, sameAs: ssrn?.href });
 ---
-<Base title="Research — Sasipat (Hua) Tejahempinyo" active="research" image="/og/research.png" now={`${c.num} / Research / BIS v1.0`} bodyClass="page-research">
-  <ChapterHeader slug="research" />
-  <section class="container section--tight"><p class="mono muted">The Bubble Intensity Score chart is being built.</p></section>
+<Base title={`Research — ${PERSON.displayName}`} {description} active="research" image="/og/research.png" now={`${c.num} / Research / BIS v1.0`} bodyClass="page-research" {jsonLd}>
+  <ResearchOpener />
+
+  <section class="bis-section container ruled" aria-labelledby="bis-title">
+    <BisChart id="bis" />
+  </section>
+
+  <section class="research-body ruled">
+    <div class="container research-grid">
+      <div class="research-main">
+        <section class="prose research-method" data-pagefind-body data-pagefind-filter="type:Research" aria-labelledby="method-title">
+          <h2 id="method-title"><span class="k">Method</span>Four pillars</h2>
+          <p>
+            Each month gets one score from four public series. <span class="pill pill--v">V Valuation</span> is the Shiller cyclically adjusted price-to-earnings ratio.
+            <span class="pill pill--l">L Leverage</span> averages the growth of nonfinancial corporate debt with the leverage subindex of the Chicago Fed's National Financial Conditions Index.
+            <span class="pill pill--s">S Sentiment</span> averages the inverted VIX with the inverted Geopolitical Risk index, so calm and complacent months read high.
+            <span class="pill pill--c">C Concentration</span> is the Nasdaq Composite relative to the S&amp;P 500, a proxy for how much of the market is one story.
+          </p>
+          <h2><span class="k">Method</span>Z-scores</h2>
+          <p>
+            Every pillar is standardised against its own trailing 120-month window (mean and population standard deviation, with at least 36 months before a score is produced), so a reading of +2 means "two standard deviations above the last ten years of itself". The Bubble Intensity Score is the equal-weighted mean of the four pillar z-scores; when a pillar has no data yet the mean is taken over the pillars that exist. Everything is computed from a single R pipeline and checked against an independent Python prototype until the anchor months agreed.
+          </p>
+          <h2><span class="k">Method</span>The danger line</h2>
+          <p>
+            The threshold at +{BIS_DANGER.toFixed(1)} was written down before the backtests were run. The composite first crossed it in {monthName(BIS_WARNINGS[0])}, seven months before the dot-com peak, and again in {monthName(BIS_WARNINGS[1])}, during the pandemic rally that opened the AI era. It never crossed it in 2007: that crisis was a credit event, and only the leverage pillar warned.
+          </p>
+          <h2><span class="k">Method</span>Limits</h2>
+          <p>
+            Concentration is a proxy, not a decomposition of index weights. Leverage sees listed corporate debt and bank conditions but not private credit. Three episodes is a sample of three, so the score describes resemblance to past bubbles; it does not forecast a date, a trigger or a drawdown. The panel ends at {monthName(data.last)} and later months are re-scored as the source series are revised.
+          </p>
+        </section>
+
+        <div class="bis-table-wrap">
+          <table class="bis-table">
+            <caption>
+              <span class="label">Three episodes, one latest reading</span>
+              <span class="note">z-scores; <span aria-hidden="true">▲</span> marks a value at or above the +{BIS_DANGER.toFixed(1)} danger line. Values read from the same CSV as the chart.</span>
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Episode</th>
+                <th scope="col" class="th-bis">BIS</th>
+                {PILLARS.map((p) => <th scope="col" abbr={PILLAR_NAMES[p]}>{p}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {table.map((r) => (
+                <tr class:list={[{ 'is-latest': r.latest }]}>
+                  <th scope="row">{r.label}<span class="when">{monthName(r.month)}</span></th>
+                  <td class:list={[{ 'is-hot': hot(r.row.BIS) }]}>{hot(r.row.BIS) && <span class="hot" aria-hidden="true">▲</span>}{fmtZ(r.row.BIS)}{hot(r.row.BIS) && <span class="sr-only"> above danger line</span>}</td>
+                  {PILLARS.map((p) => (
+                    <td class:list={[{ 'is-hot': hot(r.row[p]), 'is-l': r.highlight === p }]}>{hot(r.row[p]) && <span class="hot" aria-hidden="true">▲</span>}{fmtZ(r.row[p])}{hot(r.row[p]) && <span class="sr-only"> above danger line</span>}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="research-side">
+        <section class="side-block research-paper" aria-labelledby="paper-title">
+          <h2 id="paper-title" class="label">Paper</h2>
+          {ssrn ? <a class="badge" href={ssrn.href} rel="noopener">SSRN</a> : <p class="pending mono">{SSRN_PLACEHOLDER}</p>}
+          {ach && <a href={`/achievements/${ach.id}`}>{ach.data.title}</a>}
+          <p class="research-byline">Independent research by {PERSON.legalName}, {PERSON.school}.</p>
+        </section>
+
+        <section class="side-block" aria-labelledby="notes-title">
+          <h2 id="notes-title" class="label">Notes</h2>
+          <ul class="research-links">
+            {notes.map((n) => (
+              <li>
+                {n.href ? <a href={n.href}>{n.title}</a> : <span class="unpublished">{n.title}</span>}
+                <span class="kind">{n.href ? 'Note' : 'Unpublished'}</span>
+              </li>
+            ))}
+            {ach && (
+              <li>
+                <a href={`/achievements/${ach.id}`}>Research entry in the timeline</a>
+                <span class="kind">Achievement</span>
+              </li>
+            )}
+          </ul>
+        </section>
+
+        <section class="side-block" aria-labelledby="sources-title">
+          <h2 id="sources-title" class="label">Sources</h2>
+          <ul class="research-sources">
+            <li><span class="marker" aria-hidden="true"></span><span><span class="src">CBOE</span> — VIX</span></li>
+            <li><span class="marker" aria-hidden="true"></span><span><span class="src">Federal Reserve Bank of Chicago</span> — NFCI leverage subindex</span></li>
+            <li><span class="marker" aria-hidden="true"></span><span><span class="src">Federal Reserve Z.1</span> — nonfinancial corporate debt</span></li>
+            <li><span class="marker" aria-hidden="true"></span><span><span class="src">Robert Shiller</span> — CAPE</span></li>
+            <li><span class="marker" aria-hidden="true"></span><span><span class="src">Caldara &amp; Iacoviello (2022)</span> — Geopolitical Risk index</span></li>
+            <li><span class="marker" aria-hidden="true"></span><span><span class="src">Nasdaq Composite and S&amp;P 500</span> — via Yahoo Finance</span></li>
+          </ul>
+          <p class="research-retrieved mono">Retrieved 2026-08-26 · panel v1.0 · {data.first} to {data.last}</p>
+          <a class="chip research-download" href="/data/bis_panel_monthly.csv" download>Download CSV</a>
+        </section>
+      </aside>
+    </div>
+  </section>
+
   <ChapterNext current="research" />
 </Base>

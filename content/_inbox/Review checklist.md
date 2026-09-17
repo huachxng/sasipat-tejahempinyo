@@ -324,3 +324,11 @@ TODOs:
 - [ ] The CPR and First Aid certificate has no date; roughly when was it issued (school year)?
 - [ ] The 1-Day MBA (eddu) certificate shows only '2026'; what month was the program, and should it be listed under Ventures or Camps & Summer Programs?
 - [ ] The National Games Region 5 qualifier certificate lists the placing as 2nd runner-up in the women's individual recurve 18 m round; please confirm the age category, if any, for the caption.
+
+## Captions to confirm (identity was uncertain; hedges removed from the public text)
+- [ ] 11th Navy Archer Open 2024 — Two Podiums (Recurve Women U15; Recurve Open Women).md: `navy-archer-open-2024-04.jpg` — original caption: Archers on the beachside shooting line at the 11th Navy Archer Open; the archer in the black-and-white jersey is believed to be Sasipat.
+- [ ] Thailand Youth National Archery Team — 2025 World Archery Youth Championships, Winnipeg (Recurve Under-18 Women).md: `thailand-youth-national-archery-team-wayc-2025-04.jpg` — original caption: The qualification field at the 2025 World Archery Youth Championships in Winnipeg; the archer in red at target 28 is believed to be the client.
+- [ ] 23rd Kasetsart Open Archery Competition — 1st Runner-Up, Recurve Women Under-25 70 m.md: `kasetsart-open-archery-2025-03.jpg` — original caption: An archer believed to be Sasipat at full draw on the 70m line at the Kasetsart Open, March 2025.
+- [ ] 23rd Kasetsart Open Archery Competition — 1st Runner-Up, Recurve Women Under-25 70 m.md: `kasetsart-open-archery-2025-04.jpg` — original caption: Shooting line during the 23rd Kasetsart Open Archery Competition, March 2025; Sasipat is believed to be the archer in the black-and-white jersey.
+- [ ] 49th National Games Region 5 Qualifier ('Ozaburi Games') — 2nd Runner-Up, Women's Recurve 18 m.md: `national-games-region-5-qualifier-2024-04.jpg` — original caption: Phitsanulok archery team at the 49th National Games Region 5 qualifier, Lampang, July 2024; Sasipat is believed to be in the back row.
+- [ ] Kasetsart: the results-table screenshot was removed from the site because it lists other athletes' names; the full-draw photo is now the cover.

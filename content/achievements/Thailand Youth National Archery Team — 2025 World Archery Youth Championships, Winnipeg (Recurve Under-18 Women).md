@@ -24,4 +24,4 @@ Related notes: [[World Archery Youth Championships 2025]], [[Recurve Archery]], 
 ![[thailand-youth-national-archery-team-wayc-2025-01.jpg|Shooting the recurve qualification round for Thailand at the 2025 World Archery Youth Championships in Winnipeg, seen from behind the shooting line.]]
 ![[thailand-youth-national-archery-team-wayc-2025-02.jpg|On the shooting line next to a Guatemala archer during the 2025 World Archery Youth Championships in Winnipeg.]]
 ![[thailand-youth-national-archery-team-wayc-2025-03.jpg|With the Thai archery delegation at Suvarnabhumi Airport before departing for the 2025 World Archery Youth Championships.]]
-![[thailand-youth-national-archery-team-wayc-2025-04.jpg|The qualification field at the 2025 World Archery Youth Championships in Winnipeg; the archer in red at target 28 is believed to be the client.]]
+![[thailand-youth-national-archery-team-wayc-2025-04.jpg|The qualification field at the 2025 World Archery Youth Championships in Winnipeg.]]

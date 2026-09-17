@@ -1,5 +1,121 @@
 ---
-// STUB — replaced by the openers builder. Renders the chapter header; the scroll-driven BIS line scene comes later.
+// Chapter 03 opener (plan §6): the BIS composite line draws in with scroll (`pathLength="1"` + dash offset from
+// `--p-line`), the danger line first, and the three signature labels fade in as the line passes them. Geometry comes
+// from src/lib/bis.ts (same units as the chart: x = plot index, y = -value * 100). Static frame (no JS, reduced
+// motion, motion off): fully drawn, all labels visible, no pin. The SVG is decorative; the h1/dek and the chart below
+// carry the meaning.
 import ChapterHeader from './ChapterHeader.astro';
+import { BIS_DANGER, BIS_EPISODES, episodeRange, fmtZ, loadBis, monthName, pathD, signatureRows, yOf } from '../lib/bis.ts';
+import '../styles/scene.css';
+
+const data = loadBis();
+const N = data.plot.length;
+const [lo, hi] = data.yDomains.composite;
+const yTop = yOf(hi);
+const yH = (hi - lo) * 100;
+const viewBox = `0 ${yTop} ${N - 1} ${yH}`;
+/** percent from the top of the plot box for a z value */
+const pct = (v: number) => (((yOf(v) - yTop) / yH) * 100).toFixed(2);
+const bands = BIS_EPISODES.map((e) => ({ ...e, ...episodeRange(e.key, data) }));
+// Cumulative user-space length of the composite path at each plot index, as a fraction of its total. Dashes are laid
+// along the user-space path (pathLength normalises against it), so this is the exact moment the pen passes a point.
+const lenAt: number[] = [];
+let acc = 0;
+let prev: [number, number] | null = null;
+for (const r of data.plot) {
+  if (r.BIS === null) prev = null;
+  else {
+    const pt: [number, number] = [r.index, yOf(r.BIS)];
+    if (prev) acc += Math.hypot(pt[0] - prev[0], pt[1] - prev[1]);
+    prev = pt;
+  }
+  lenAt.push(acc);
+}
+const lenFrac = (i: number) => (acc > 0 ? lenAt[i] / acc : 0);
+const sigs = signatureRows(data).map((s) => ({
+  ...s,
+  when: monthName(s.month).replace(/^(\w{3})\w*/, '$1'),
+  bis: fmtZ(s.row.BIS),
+  hiVal: s.highlight ? fmtZ(s.row[s.highlight]) : null,
+  top: pct(s.row.BIS ?? 0),
+  draw: lenFrac(s.row.index),
+  below: (s.row.BIS ?? 0) < 1, // low readings label below-left so the text never sits on the line
+  end: s.at > 0.7 || (s.row.BIS ?? 0) < 1,
+}));
+const line = pathD('BIS', data.plot);
 ---
-<ChapterHeader slug="research" />
+<section class="scene scene--res" data-scene="research" data-months={N}>
+  <div class="scene-stage">
+    <ChapterHeader slug="research" />
+    <div class="res-open-plot" aria-hidden="true">
+      <svg viewBox={viewBox} preserveAspectRatio="none" focusable="false">
+        {bands.map((b) => <rect class="res-band" x={b.i0} y={yTop} width={Math.max(0, b.i1 - b.i0)} height={yH} data-episode={b.key} />)}
+        <path class="res-ghost" d={line} />
+        <path class="res-line" data-line pathLength="1" d={line} />
+      </svg>
+      <span class="res-danger-rule" data-danger style={`top:${pct(BIS_DANGER)}%`}></span>
+      <p class="res-danger mono" style={`top:${pct(BIS_DANGER)}%`}>+{BIS_DANGER.toFixed(1)}</p>
+      {sigs.map((s) => <i class="res-dot" style={`--at:${s.draw.toFixed(3)};left:${(s.at * 100).toFixed(2)}%;top:${s.top}%`}></i>)}
+    </div>
+    <ol class="res-sigs mono">
+      {sigs.map((s) => (
+        <li class:list={['res-sig', { 'is-end': s.end, 'is-below': s.below, 'is-hi': !!s.highlight }]} style={`--at:${s.draw.toFixed(3)};left:${(s.at * 100).toFixed(2)}%;top:${s.top}%`}>
+          <span class="res-sig-when">{s.when}</span>
+          <span class="res-sig-val">BIS {s.bis}{s.hiVal && <span class="res-sig-hi"> · {s.highlight} {s.hiVal}</span>}</span>
+          <span class="res-sig-what">{s.label}</span>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <script is:inline>
+    // Pre-arm before first paint (same conditions as scroll-scene.ts) so the line never flashes fully drawn.
+    try {
+      var h = document.documentElement;
+      if (!(matchMedia('(prefers-reduced-motion: reduce)').matches || h.dataset.motion === 'off') && 'IntersectionObserver' in window) {
+        var s = document.currentScript.parentElement;
+        s.classList.add('is-armed');
+        s.style.setProperty('--scene-p', '0');
+      }
+    } catch (e) {}
+  </script>
+</section>
+<script src="../scripts/scroll-scene.ts"></script>
+<style>
+  /* Static frame: fully drawn. Armed: the danger line draws over the first 15 % of the track, the composite over
+     p = .10 → .95; each label appears when the line passes its x fraction (--at). */
+  .scene--res { --p-line: 1; --p-danger: 1; }
+  .scene--res.is-armed {
+    --p-danger: clamp(0, var(--scene-p, 0) / 0.15, 1);
+    --p-line: clamp(0, (var(--scene-p, 0) - 0.10) / 0.85, 1);
+  }
+  .scene--res .scene-stage { grid-template-rows: auto minmax(0, 1fr); row-gap: clamp(12px, 3vh, 32px); }
+  .scene--res .scene-stage :global(.chapter-header) { grid-row: 1; grid-column: 1; padding-bottom: 0; }
+
+  .res-open-plot { grid-row: 2; grid-column: 1; position: relative; min-height: 0; margin-bottom: clamp(32px, 8vh, 80px); }
+  .res-open-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .res-band { fill: var(--rule); fill-opacity: 0.45; }
+  .res-danger-rule { position: absolute; left: 0; right: 0; height: 1px; background: var(--gold); opacity: 0.8; transform: scaleX(var(--p-danger)); transform-origin: left; }
+  .res-ghost { fill: none; stroke: var(--fg); stroke-opacity: 0.14; stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .res-line { fill: none; stroke: var(--fg); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1 1; stroke-dashoffset: calc(1 - var(--p-line)); }
+  .res-danger { position: absolute; right: var(--margin); margin: 0; transform: translateY(calc(-100% - 4px)); font-size: var(--t-label); letter-spacing: 0.08em; color: var(--gold); opacity: var(--p-danger); }
+  .res-dot { --on: clamp(0, (var(--p-line) - var(--at)) * 10, 1); position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: var(--gold); opacity: var(--on); }
+
+  /* labels share the plot's grid cell on desktop and float by percent; a row under the plot on phones */
+  .res-sigs { grid-row: 2; grid-column: 1; position: relative; list-style: none; margin: 0; padding: 0; pointer-events: none; min-height: 0; }
+  .res-sig { --on: clamp(0, (var(--p-line) - var(--at)) * 10, 1); --tx: 12px; --ty: calc(-100% - 6px); position: absolute; display: grid; gap: 0.15rem; padding: 0 0 12px 0; transform: translate(var(--tx), var(--ty)) translateY(calc((1 - var(--on)) * 6px)); opacity: var(--on); font-size: var(--t-label); letter-spacing: 0.04em; color: var(--fg-2); white-space: nowrap; }
+  .res-sig.is-end { --tx: calc(-100% - 12px); text-align: right; }
+  .res-sig.is-below { --ty: 10px; padding: 0; }
+  .res-sig-when { color: var(--fg-3); }
+  .res-sig-val { color: var(--fg); font-size: var(--t-small); }
+  .res-sig-hi { color: var(--bis-L, var(--gold-2)); }
+  .res-sig-what { color: var(--fg-2); }
+
+  @media (max-width: 1023px) {
+    .scene--res .scene-stage { grid-template-rows: auto minmax(0, 1fr) auto; row-gap: 12px; }
+    .scene--res .scene-stage :global(.chapter-header) { padding-top: 12px; }
+    .res-open-plot { margin-bottom: 0; min-height: 120px; }
+    .res-sigs { grid-row: 3; position: static; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gutter); width: min(100% - 2 * var(--margin), var(--max)); margin-inline: auto; padding-bottom: 20px; }
+    .res-sig, .res-sig.is-end, .res-sig.is-below { position: static; transform: translateY(calc((1 - var(--on)) * 6px)); text-align: left; white-space: normal; padding: 0; font-size: 11px; }
+    .res-sig-val { font-size: 13px; }
+  }
+</style>

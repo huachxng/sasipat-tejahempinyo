@@ -51,3 +51,40 @@ test.describe('/achievements timeline', () => {
     await expect(page.locator('main').getByText(/connected/i).first()).toBeAttached();
   });
 });
+
+test.describe('archery', () => {
+  test('Kasetsart shows the target face with an accessible title, the readout and the record with aria-current', async ({ page }) => {
+    const res = await page.goto(KNOWN.archery);
+    expect(res?.status()).toBe(200);
+    const svg = page.locator('[data-archery-target] svg[role="img"]');
+    await expect(svg).toBeVisible();
+    await expect(svg.locator('title')).toContainText('560');
+    const caption = page.locator('[data-archery-target] figcaption');
+    await expect(caption).toContainText('560');
+    await expect(caption).toContainText('7.8');
+    await expect(page.locator('[data-archery-target] .ring.is-avg')).toHaveAttribute('data-v', '8');
+    const record = page.locator('[data-archery-record]');
+    await expect(record).toBeAttached();
+    await expect(record).toHaveAttribute('id', 'archery-record');
+    await expect(record.locator('a[aria-current="page"]')).toHaveAttribute('href', KNOWN.archery);
+    expect(await record.locator('a[aria-current="page"]').count()).toBe(1);
+    // zero-JS components: no script inside either archery block
+    await expect(page.locator('[data-archery-target] script, [data-archery-record] script')).toHaveCount(0);
+  });
+
+  test('Nonthaburi shows a placing badge and no target face', async ({ page }) => {
+    await page.goto('/achievements/nonthaburi-cup-2023');
+    await expect(page.locator('[data-archery-placing]')).toContainText('1st');
+    await expect(page.locator('[data-archery-target]')).toHaveCount(0);
+  });
+
+  test('WAYC shows neither a target nor a badge, but the record lists it as competed', async ({ page }) => {
+    await page.goto('/achievements/thailand-youth-national-archery-team-wayc-2025');
+    await expect(page.locator('[data-archery-target]')).toHaveCount(0);
+    await expect(page.locator('[data-archery-placing]')).toHaveCount(0);
+    const row = page.locator('[data-archery-record] li', { has: page.locator('a[aria-current="page"]') });
+    await expect(row).toHaveCount(1);
+    await expect(row).toContainText('competed');
+    expect(await page.locator('[data-archery-record] li').count()).toBeGreaterThanOrEqual(2);
+  });
+});

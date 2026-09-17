@@ -1,0 +1,162 @@
+/* Chapter 03 — Research: the BIS chart, method, three-way table and sources (owned by the research builder).
+   Chart colours are scoped to .bis; the openers builder reuses --bis-l etc. from .page-research for the scene labels. */
+.page-research,
+.bis {
+  --bis-v: #7fb3d5;
+  --bis-l: #e07a5f;
+  --bis-s: #8fbf8f;
+  --bis-c: #b39ddb;
+}
+
+/* ---------------------------------------------------------------- section + figure */
+.bis-section { padding-block: clamp(40px, 6vh, 88px) clamp(56px, 8vh, 120px); }
+.bis { margin: 0; }
+.bis-head h2 { margin: 0; }
+.bis-dek { margin: 0.6rem 0 0; max-width: 64ch; }
+
+/* tools: zoom tabs left, pillar chips right */
+.bis-tools { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 0.75rem 1.5rem; margin: clamp(20px, 3vh, 36px) 0 0.75rem; }
+.bis-zoom { display: flex; gap: 1.25rem; }
+.bis-tab { appearance: none; background: none; border: 0; padding: 0.5rem 0; font-size: var(--t-small); color: var(--fg-2); border-bottom: 1px solid transparent; letter-spacing: 0.02em; cursor: pointer; transition: color var(--d-micro) var(--ease-out-quint), border-color var(--d-micro); }
+.bis-tab:hover { color: var(--gold-2); }
+.bis-tab[aria-pressed='true'] { color: var(--gold); border-bottom-color: var(--gold); }
+.bis-pillars { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.bis-chip { cursor: pointer; --sw: var(--fg-3); }
+.bis-chip[data-pillar='v'] { --sw: var(--bis-v); }
+.bis-chip[data-pillar='l'] { --sw: var(--bis-l); }
+.bis-chip[data-pillar='s'] { --sw: var(--bis-s); }
+.bis-chip[data-pillar='c'] { --sw: var(--bis-c); }
+/* a pressed pillar chip keeps its own colour as the identity (not the gold fill), so the legend matches the line */
+.bis-chip[aria-pressed='true'] { background: transparent; color: var(--fg); border-color: var(--sw); }
+.bis-chip[aria-pressed='true']:hover, .bis-chip[aria-pressed='true']:focus-visible { color: var(--fg); border-color: var(--sw); }
+.bis-swatch { display: inline-block; width: 22px; height: 2px; opacity: 0.55; background: var(--sw); }
+.bis-chip[aria-pressed='true'] .bis-swatch { opacity: 1; }
+.bis-swatch--l { background: repeating-linear-gradient(90deg, var(--sw) 0 6px, transparent 6px 9px); }
+.bis-swatch--s { background: repeating-linear-gradient(90deg, var(--sw) 0 2px, transparent 2px 5px); }
+.bis-swatch--c { background: repeating-linear-gradient(90deg, var(--sw) 0 6px, transparent 6px 9px, var(--sw) 9px 11px, transparent 11px 14px); }
+
+/* ---------------------------------------------------------------- frame: HTML axes around one SVG */
+.bis-frame { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); grid-template-rows: auto 1.6rem; margin-top: 0.5rem; outline-offset: 8px; }
+.bis-y { position: relative; grid-column: 1; grid-row: 1; font-size: var(--t-label); color: var(--fg-3); }
+.bis-y span { position: absolute; right: 0.6rem; transform: translateY(-50%); white-space: nowrap; }
+.bis-y .bis-y-danger { color: var(--gold); }
+.bis-plot { position: relative; grid-column: 2; grid-row: 1; aspect-ratio: 12 / 5; border-left: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); touch-action: pan-y; cursor: crosshair; background: var(--bg); }
+.bis-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: hidden; }
+.bis-x { position: relative; grid-column: 2; grid-row: 2; font-size: var(--t-label); color: var(--fg-3); }
+.bis-x span { position: absolute; top: 0.5rem; transform: translateX(-50%); white-space: nowrap; }
+
+/* geometry: every stroke is screen-space (the SVG is scaled non-uniformly) */
+.bis-band { fill: var(--fg); fill-opacity: 0.045; }
+.bis-zero { stroke: var(--rule-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.bis-danger { stroke: var(--gold); stroke-width: 1; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
+.bis-warn { stroke: var(--gold-dim); stroke-width: 1; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+.bis-series { fill: none; stroke-width: 1.25; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.bis-series--bis { stroke: var(--fg); stroke-width: 1.5; }
+.bis-series--v { stroke: var(--bis-v); }
+.bis-series--l { stroke: var(--bis-l); stroke-dasharray: 6 3; }
+.bis-series--s { stroke: var(--bis-s); stroke-dasharray: 1.5 3; }
+.bis-series--c { stroke: var(--bis-c); stroke-dasharray: 6 3 1.5 3; }
+.bis-series[hidden] { display: none; }
+
+/* signature markers: real buttons positioned in percent */
+.bis-marks { position: absolute; inset: 0; pointer-events: none; }
+.bis-sig { position: absolute; width: 24px; height: 24px; transform: translate(-50%, -50%); display: grid; place-items: center; pointer-events: auto; appearance: none; background: none; border: 0; padding: 0; cursor: pointer; }
+.bis-sig[hidden] { display: none; }
+.bis-sig-dot { width: 7px; height: 7px; background: var(--gold); box-shadow: 0 0 0 2px var(--bg); transition: transform var(--d-micro) var(--ease-out-quint); }
+.bis-sig:hover .bis-sig-dot, .bis-sig:focus-visible .bis-sig-dot { transform: scale(1.35); }
+.bis-sig-text { position: absolute; bottom: calc(100% - 2px); left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: var(--t-label); letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-2); }
+.bis-sig.is-below .bis-sig-text { bottom: auto; top: calc(100% - 2px); }
+.bis-sig:hover .bis-sig-text, .bis-sig:focus-visible .bis-sig-text { color: var(--gold); }
+
+/* cursor + tooltip (filled by the script; hidden until then) */
+.bis-cursor { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--gold); pointer-events: none; }
+.bis-cursor::after { content: ''; position: absolute; left: -4px; top: var(--cy, 50%); width: 7px; height: 7px; margin-top: -3.5px; background: var(--gold); box-shadow: 0 0 0 2px var(--bg); }
+.bis-cursor[hidden], .bis-tip[hidden] { display: none; }
+.bis-tip { position: absolute; top: 0.5rem; left: var(--tx, 0); transform: translateX(10px); z-index: 2; display: grid; gap: 0.2rem; padding: 0.55rem 0.7rem; background: var(--bg-2); border: 1px solid var(--rule-strong); font-size: var(--t-label); color: var(--fg); white-space: nowrap; pointer-events: none; }
+.bis-tip.is-flipped { transform: translateX(calc(-100% - 10px)); }
+.bis-tip-month { color: var(--fg-2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.15rem; }
+.bis-tip-row { display: grid; grid-template-columns: 14px 1.6em auto; align-items: center; gap: 0.5em; }
+.bis-tip-row .sw { display: inline-block; width: 12px; height: 2px; background: var(--sw, var(--fg)); }
+.bis-tip-row .k { color: var(--fg-3); }
+.bis-tip-row.is-bis .v { color: var(--fg); font-weight: 500; }
+.bis-tip-row.is-off { opacity: 0.5; }
+.bis-tip-row[data-s='v'] { --sw: var(--bis-v); }
+.bis-tip-row[data-s='l'] { --sw: var(--bis-l); }
+.bis-tip-row[data-s='s'] { --sw: var(--bis-s); }
+.bis-tip-row[data-s='c'] { --sw: var(--bis-c); }
+.bis-tip-row.is-hot .v { color: var(--gold); }
+
+.bis-foot { margin: 1.1rem 0 0; color: var(--fg-3); }
+.bis-foot a { color: var(--fg-2); text-decoration: underline; text-decoration-color: var(--gold-dim); }
+.bis-foot a:hover { color: var(--gold); }
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='off']) .bis-sig { transition: left var(--d-small) var(--ease-out-quint), top var(--d-small) var(--ease-out-quint); }
+}
+
+@media (max-width: 639px) {
+  .bis-frame { grid-template-columns: 2.25rem minmax(0, 1fr); }
+  .bis-plot { aspect-ratio: 4 / 3; }
+  .bis-sig-text { display: none; }
+  .bis-table th, .bis-table td { padding: 0.55em 0.4em; font-size: var(--t-label); }
+  .bis-tools { flex-direction: column; align-items: stretch; }
+  .bis-zoom { gap: 1rem; }
+  /* anchored to the plot's top-left corner so it never leaves the screen */
+  .bis-tip { left: 0.25rem !important; transform: none; top: 0.25rem; }
+  .bis-tip.is-flipped { left: auto !important; right: 0.25rem; transform: none; }
+}
+
+/* ---------------------------------------------------------------- method, table, sources */
+.research-body { padding-block: clamp(40px, 6vh, 88px) clamp(64px, 10vh, 160px); }
+.research-grid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); column-gap: var(--gutter); row-gap: clamp(48px, 8vh, 96px); }
+.research-main, .research-side { grid-column: 1 / -1; min-width: 0; }
+@media (min-width: 1024px) {
+  .research-main { grid-column: 1 / span 7; }
+  .research-side { grid-column: 9 / span 4; }
+}
+.research-method h2 { font-size: var(--t-3); }
+.research-method h2 .k { font-family: var(--font-mono), monospace; font-weight: 400; font-size: var(--t-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); margin-right: 0.75em; vertical-align: 0.35em; }
+.research-method > * + * { margin-top: 1.1em; }
+.research-method > h2 + p { margin-top: 0.6em; }
+.research-method .pill { font-family: var(--font-mono), monospace; font-size: 0.9em; }
+.research-method .pill::before { content: ''; display: inline-block; width: 12px; height: 2px; margin: 0 0.45em 0.25em 0; background: var(--sw); }
+.research-method .pill--v { --sw: var(--bis-v); }
+.research-method .pill--l { --sw: var(--bis-l); }
+.research-method .pill--s { --sw: var(--bis-s); }
+.research-method .pill--c { --sw: var(--bis-c); }
+
+.bis-table-wrap { position: relative; margin-top: clamp(40px, 6vh, 72px); overflow-x: auto; } /* positioned so the cells' sr-only spans stay inside the scroll box */
+.bis-table { width: 100%; border-collapse: collapse; font-size: var(--t-small); }
+.bis-table caption { text-align: left; caption-side: top; padding: 0 0 0.85rem; }
+.bis-table caption .label { display: block; }
+.bis-table caption .note { display: block; margin-top: 0.35rem; font-size: var(--t-label); color: var(--fg-3); }
+.bis-table th, .bis-table td { padding: 0.65em 0.6em; border-bottom: 1px solid var(--rule); text-align: right; font-family: var(--font-mono), monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bis-table thead th { font-weight: 500; font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-2); border-bottom-color: var(--rule-strong); }
+.bis-table th[scope='row'] { text-align: left; font-weight: 400; color: var(--fg); padding-left: 0; white-space: normal; min-width: 9em; }
+.bis-table th[scope='row'] .when { display: block; font-size: var(--t-label); color: var(--fg-3); letter-spacing: 0.04em; }
+.bis-table td:first-of-type, .bis-table thead th:nth-child(2) { padding-left: 1.2em; }
+.bis-table td.is-hot { color: var(--gold); }
+.bis-table td .hot { font-size: 0.7em; margin-right: 0.35em; vertical-align: 0.15em; }
+.bis-table td.is-l { text-decoration: underline; text-decoration-color: var(--bis-l); text-underline-offset: 0.3em; }
+.bis-table tr.is-latest th, .bis-table tr.is-latest td { color: var(--fg-2); }
+.bis-table tr.is-latest td.is-hot { color: var(--gold); }
+.bis-table .th-bis { color: var(--fg); }
+
+.side-block + .side-block { margin-top: clamp(32px, 5vh, 56px); }
+.side-block .label { margin: 0 0 1rem; }
+.research-links { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.research-links li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--gutter); align-items: baseline; padding: 0.8rem 0; border-bottom: 1px solid var(--rule); }
+.research-links a { color: var(--fg); }
+.research-links a:hover { color: var(--gold); text-decoration: none; }
+.research-links .kind { font-family: var(--font-mono), monospace; font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-3); }
+.research-links .unpublished { color: var(--fg-2); }
+.research-paper { display: grid; gap: 0.75rem; }
+.research-paper .badge { justify-self: start; }
+.research-paper .pending { color: var(--fg-3); font-size: var(--t-small); }
+.research-sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; font-size: var(--t-small); color: var(--fg-2); }
+.research-sources li { display: grid; grid-template-columns: 6px minmax(0, 1fr); gap: 0.75rem; align-items: start; }
+.research-sources .marker { margin-top: 0.5em; }
+.research-sources .src { color: var(--fg); }
+.research-retrieved { margin: 1rem 0 0; font-size: var(--t-label); color: var(--fg-3); letter-spacing: 0.04em; }
+.research-download { display: inline-flex; align-items: center; gap: 0.5em; margin-top: 1.25rem; }
+.research-byline { margin: 0.75rem 0 0; font-size: var(--t-small); color: var(--fg-2); }

@@ -194,3 +194,108 @@ html.is-filtering::view-transition-new(*):only-child { animation: ach-vt-in 300m
 
 /* cover already shown above the body: hide its duplicate as the first gallery figure (lightbox indexes still count it) */
 .ach-detail[data-cover-in-body] .ach-body .gallery:first-of-type .gallery-item:first-child { display: none; }
+
+/* ---------- Opener (scroll scene, plan §3; shared track/stage rules in scene.css) ----------
+   Static frame: --p-img 1 (photo fully revealed), --p-col 0 (monochrome), --p-num 1. Armed: all three derive from
+   --scene-p. The photo is clipped by a scaled overflow box (compositor-only, and a real clip so the LCP candidate is
+   only the visible band); --k is the visible fraction (16 % at p = 0 so the first paint is never blank). */
+.scene--ach { --p-img: 1; --p-col: 0; --p-num: 1; --k: calc(0.16 + 0.84 * var(--p-img)); }
+.scene--ach.is-armed {
+  --p-img: clamp(0, var(--scene-p, 0) / 0.55, 1);
+  --p-col: clamp(0, (var(--scene-p, 0) - 0.45) / 0.45, 1);
+  --p-num: clamp(0, (var(--scene-p, 0) - 0.10) / 0.65, 1);
+}
+.ach-open-img { position: absolute; inset: 0 0 0 45%; z-index: 0; overflow: hidden; background: var(--bg); }
+.ach-open-clip { position: absolute; inset: 0; overflow: hidden; transform: scaleY(var(--k)); transform-origin: 50% 50%; }
+.ach-open-clip img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; transform: scaleY(calc(1 / var(--k))) scale(calc(1.04 - 0.04 * var(--p-img))); transform-origin: 50% 50%; filter: grayscale(calc(1 - var(--p-col))) contrast(1.06); }
+.scene--ach.is-armed .ach-open-clip, .scene--ach.is-armed .ach-open-clip img { will-change: transform; }
+/* the type overlaps the photo's left and top edges: fade those edges into --bg */
+.ach-open-img::before, .ach-open-img::after { content: ''; position: absolute; pointer-events: none; z-index: 1; }
+.ach-open-img::after { inset: 0 auto 0 0; width: 34%; background: linear-gradient(90deg, var(--bg) 0%, rgba(10, 10, 11, 0.55) 45%, transparent 100%); }
+.ach-open-img::before { inset: 0 0 auto 0; height: 46%; background: linear-gradient(180deg, rgba(10, 10, 11, 0.9) 0%, rgba(10, 10, 11, 0.45) 45%, transparent 100%); }
+
+.ach-open-type { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: auto 1fr auto; column-gap: var(--gutter); width: min(100% - 2 * var(--margin), var(--max)); margin-inline: auto; padding-bottom: clamp(32px, 6vh, 72px); pointer-events: none; }
+.ach-open-type a { pointer-events: auto; }
+.scene--ach .scene-stage .chapter-header { grid-column: 1 / -1; grid-row: 1; width: auto; margin-inline: 0; min-width: 0; }
+.scene--ach .scene-stage .chapter-header .dek { max-width: 44ch; }
+.ach-open-num { grid-column: 1 / span 4; grid-row: 3; align-self: end; display: grid; }
+.ach-open-count { margin: 0 0 0 -0.04em; font-size: var(--t-numeral); line-height: 1; letter-spacing: -0.04em; color: var(--fg-3); transform: translateY(calc((1 - var(--p-num)) * 0.15em)); }
+.ach-open-label { margin: 0.75rem 0 0; font-size: var(--t-small); letter-spacing: 0.12em; color: var(--fg-2); }
+.ach-open-cap { grid-column: 8 / -1; grid-row: 3; align-self: end; justify-self: end; margin: 0; max-width: 32ch; font-size: 11px; line-height: 1.5; letter-spacing: 0.02em; color: var(--fg-2); padding: 0.5rem 0.7rem; background: rgba(18, 18, 20, 0.82); border: 1px solid var(--rule-strong); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: var(--p-num); }
+.ach-open-intro { padding-top: clamp(20px, 3vh, 32px); }
+
+@media (max-width: 1023px) {
+  /* photo on top (flexible height), type below on solid --bg; numeral and years share one row */
+  .scene--ach .scene-stage { grid-template-rows: minmax(0, 1fr) auto; }
+  .ach-open-img { position: relative; inset: auto; grid-row: 1; min-height: 96px; }
+  .ach-open-img::before { display: none; }
+  .ach-open-img::after { inset: auto 0 0 0; width: auto; height: 40px; background: linear-gradient(180deg, transparent, var(--bg)); }
+  .ach-open-clip img { object-position: 50% 28%; }
+  .ach-open-type { grid-row: 2; grid-template-rows: auto auto; padding-block: 12px 20px; align-content: end; }
+  .scene--ach .scene-stage .chapter-header { grid-column: 1 / -1; grid-row: 1; padding-top: 0; padding-bottom: 0; }
+  .ach-open-num { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: baseline; gap: 1.25rem; margin-top: 0.75rem; }
+  .ach-open-count { font-size: clamp(3.5rem, 14vw, 6rem); }
+  .ach-open-label { margin: 0; }
+  .ach-open-cap { display: none; }
+}
+
+/* ---------- Archery: target face, placing badge, record panel (ArcheryTarget / ArcheryRecord) ---------- */
+.ach-archery { margin: 1.25rem 0 0; padding-top: 1rem; border-top: 1px solid var(--rule); --size: 260px; }
+.ach-archery svg { display: block; width: min(100%, var(--size)); height: auto; overflow: visible; }
+/* Stroked rings: one element per ring so each can be lit on its own. Rest/lit opacities per ring value; colour by ring family. */
+.ach-archery .ring { fill: none; stroke: currentColor; stroke-width: 9.4; opacity: var(--rest); transition: opacity var(--d-small) var(--ease-out-expo); transition-delay: calc(var(--i, 0) * 45ms); }
+.ach-archery .ring[data-v='10'] { fill: currentColor; stroke: none; color: var(--gold-2); --rest: 0.5; --lit: 1; }
+.ach-archery .ring[data-v='9'] { color: var(--gold-dim); --rest: 0.75; --lit: 1; }
+.ach-archery .ring[data-v='8'] { color: var(--fg-2); --rest: 0.26; --lit: 0.55; }
+.ach-archery .ring[data-v='7'] { color: var(--fg-2); --rest: 0.2; --lit: 0.45; }
+.ach-archery .ring[data-v='6'] { color: var(--fg-3); --rest: 0.22; --lit: 0.48; }
+.ach-archery .ring[data-v='5'] { color: var(--fg-3); --rest: 0.16; --lit: 0.4; }
+.ach-archery .ring[data-v='4'] { color: var(--edge); --rest: 0.55; --lit: 1; }
+.ach-archery .ring[data-v='3'] { color: var(--edge); --rest: 0.45; --lit: 0.8; }
+.ach-archery .ring[data-v='2'] { color: var(--fg); --rest: 0.14; --lit: 0.3; }
+.ach-archery .ring[data-v='1'] { color: var(--fg); --rest: 0.1; --lit: 0.24; }
+.ach-archery .ring.is-avg { opacity: calc(var(--rest) + 0.14); }
+.ach-archery:hover .ring, .ach-archery:focus-within .ring { opacity: var(--lit); }
+.ach-archery .x-ring { fill: none; stroke: var(--gold-ink); stroke-width: 0.75; opacity: 0.5; }
+.ach-archery .avg-band { fill: none; stroke: var(--gold); stroke-width: 9.4; opacity: 0.12; }
+.ach-archery .avg-circle { fill: none; stroke: var(--gold-2); stroke-width: 1; }
+.ach-archery .avg-mark { fill: var(--gold-2); }
+@media (prefers-reduced-motion: reduce) { .ach-archery .ring { transition: none; } }
+html[data-motion='off'] .ach-archery .ring { transition: none; }
+.ach-archery figcaption { margin-top: 0.9rem; display: grid; gap: 0.65rem; }
+.ach-archery-readout { margin: 0; display: flex; flex-wrap: wrap; gap: 0.2em 0.5em; font-family: var(--font-mono), monospace; font-variant-numeric: tabular-nums; font-size: 13px; letter-spacing: 0.02em; color: var(--fg); }
+.ach-archery-readout .grp { display: inline-flex; gap: 0.35em; }
+.ach-archery-readout .n { font-weight: 500; }
+.ach-archery-readout .u, .ach-archery-readout .sep { color: var(--fg-3); }
+.ach-archery-tags { margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.ach-placing { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--gold); color: var(--gold); font-family: var(--font-mono), monospace; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+.ach-archery--compact { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.ach-archery-link { margin-left: auto; font-family: var(--font-mono), monospace; font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-2); }
+.ach-archery-link:hover { color: var(--gold); text-decoration: none; }
+
+.ach-record { margin-top: clamp(40px, 8vh, 96px); padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+.ach-record-inner { max-width: 62rem; }
+.ach-record-head { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: baseline; margin: 0 0 1rem; }
+.ach-record-head h2 { margin: 0; }
+.ach-record-sum { margin: 0; font-size: 12px; letter-spacing: 0.04em; color: var(--fg-3); }
+.ach-record-chart { display: block; width: 100%; height: auto; overflow: visible; }
+.ach-record-chart .rec-rule { stroke: var(--rule); stroke-width: 1; }
+.ach-record-chart .rec-rule--dotted { stroke-dasharray: 1 4; }
+.ach-record-chart .rec-base { stroke: var(--rule-strong); stroke-width: 1; }
+.ach-record-chart .rec-tick { stroke: var(--rule); stroke-width: 1; }
+.ach-record-chart .rec-square { fill: none; stroke-width: 1; }
+.ach-record-chart .rec-mark--avg .rec-square { fill: var(--gold); stroke: none; }
+.ach-record-chart .rec-mark--placing .rec-square { stroke: var(--gold); }
+.ach-record-chart .rec-mark--competed .rec-square { stroke: var(--fg-3); }
+.ach-record-chart .rec-current { fill: none; stroke: var(--gold-2); stroke-width: 1; }
+.ach-record-chart .is-current .rec-tick { stroke: var(--gold-dim); }
+.ach-record-years { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 11px; letter-spacing: 0.08em; color: var(--fg-3); }
+.ach-record-list { list-style: none; margin: 1.25rem 0 0; padding: 0; font-size: 13px; }
+.ach-record-list li { display: grid; grid-template-columns: 9em minmax(0, 1fr) auto; gap: 0.35rem 1rem; align-items: baseline; padding: 0.6rem 0; border-top: 1px solid var(--rule); }
+.ach-record-list li:last-child { border-bottom: 1px solid var(--rule); }
+.ach-record-list time { color: var(--fg-3); font-size: 12px; letter-spacing: 0.04em; }
+.ach-record-list a { color: var(--fg); }
+.ach-record-list a:hover { color: var(--gold); }
+.ach-record-list a[aria-current='page'] { color: var(--gold); }
+.ach-record-result { color: var(--fg-2); text-align: right; white-space: nowrap; }
+@media (max-width: 640px) { .ach-record-list li { grid-template-columns: minmax(0, 1fr) auto; } .ach-record-list time { grid-column: 1 / -1; } }

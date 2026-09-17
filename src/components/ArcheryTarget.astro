@@ -1,0 +1,88 @@
+---
+// Archery target face for an athletics achievement (zero JS). Three variants decided by
+// archeryPresentation(): a stroked-ring SVG target with the average-arrow ring in gold when a
+// score has a total and an arrow count; a compact placing badge when only a placing is known;
+// nothing otherwise (WAYC). Rings light up outside-in on hover / focus-within; instant under
+// prefers-reduced-motion and html[data-motion="off"]. Styles: the "Archery" block in achievements.css.
+import type { AchievementData } from '../schemas/achievement.ts';
+import { archeryPresentation, formatScore, maxOf, ordinal, radiusFor } from '../lib/archery.ts';
+
+interface Props {
+  data: AchievementData;
+  title: string;
+  /** Rendered width in px (220–320). */
+  size?: number;
+  /** Anchor of the Archery record panel; also the focusable child that lets :focus-within light the rings. */
+  recordHref?: string;
+  id?: string;
+}
+const { data, size = 260, recordHref, id = 'archery-target' } = Astro.props;
+const p = archeryPresentation(data);
+
+const C = 110; // centre of the 220-unit viewBox; the face itself is 100 units in radius
+const RINGS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const; // drawn inside-out so the outer strokes never cover the inner ones
+const ringRadius = (v: number) => (10.5 - v) * 10; // centre of the band for ring value v
+
+let readout: string[][] = [];
+let titleText = '';
+let avgRadius = 0;
+let avgText = '';
+if (p.kind === 'target') {
+  const s = p.score;
+  avgText = p.avg.toFixed(1);
+  avgRadius = radiusFor(p.avg);
+  const max = maxOf(s);
+  titleText = `Target face — ${s.label}: ${s.total}${max !== undefined ? ` of ${max}` : ''}, ${s.arrows} arrows${p.distance ? ` at ${p.distance}` : ''}, average ${avgText} per arrow`;
+  // "560 / 720 · 72 arrows · 70 m · avg 7.8" → groups of tokens; digits are the numbers, everything else is a unit word
+  readout = formatScore(s).split(' · ').map((part) => part.split(' '));
+}
+const isNumber = (t: string) => /^[\d.,]+$/.test(t);
+---
+{p.kind === 'target' && (
+  <figure class="ach-archery" data-archery-target style={`--size:${Math.min(320, Math.max(220, size))}px`}>
+    <svg role="img" viewBox="0 0 220 220" aria-labelledby={`${id}-t ${id}-d`} focusable="false">
+      <title id={`${id}-t`}>{titleText}</title>
+      <desc id={`${id}-d`}>Ten concentric scoring rings; the {p.ring} ring is highlighted where the average arrow lands.</desc>
+      {RINGS.map((v) => (
+        <circle
+          class:list={['ring', { 'is-avg': v === p.ring }]}
+          data-v={v}
+          cx={C}
+          cy={C}
+          r={v === 10 ? 9.7 : ringRadius(v)}
+          style={`--i:${v - 1}`}
+        />
+      ))}
+      <circle class="x-ring" cx={C} cy={C} r="5" />
+      <circle class="avg-band" cx={C} cy={C} r={ringRadius(p.ring)} />
+      <circle class="avg-circle" cx={C} cy={C} r={avgRadius.toFixed(2)} />
+      <rect class="avg-mark" x="-3" y="-3" width="6" height="6" transform={`translate(${(C + avgRadius).toFixed(2)} ${C}) rotate(45)`} />
+    </svg>
+    <figcaption>
+      <p class="ach-archery-readout">
+        {readout.map((group, gi) => (
+          <>
+            {gi > 0 && <span class="sep" aria-hidden="true">·</span>}
+            <span class="grp">{group.map((t) => (isNumber(t) ? <b class="n">{t}</b> : <span class="u">{t}</span>))}</span>
+          </>
+        ))}
+      </p>
+      {(p.placing || p.division || p.distance || recordHref) && (
+        <p class="ach-archery-tags">
+          {p.placing && <span class="ach-placing">{ordinal(p.placing)}<span class="sr-only"> place</span></span>}
+          {p.division && <span class="chip chip--ghost">{p.division}</span>}
+          {p.distance && !readout.flat().includes(p.distance.split(' ')[0]) && <span class="chip chip--ghost">{p.distance}</span>}
+          {recordHref && <a class="ach-archery-link" href={recordHref}>Archery record <span aria-hidden="true">↓</span></a>}
+        </p>
+      )}
+    </figcaption>
+  </figure>
+)}
+{p.kind === 'compact' && (
+  <p class="ach-archery ach-archery--compact" data-archery-placing>
+    <span class="ach-placing">{ordinal(p.placing)}<span class="sr-only"> place</span></span>
+    {p.division && <span class="chip chip--ghost">{p.division}</span>}
+    {p.distance && <span class="chip chip--ghost">{p.distance}</span>}
+    {recordHref && <a class="ach-archery-link" href={recordHref}>Archery record <span aria-hidden="true">↓</span></a>}
+  </p>
+)}

@@ -1,0 +1,18 @@
+/* Scroll scenes (plan §2): a track (.scene) with a sticky stage; scroll-scene.ts writes --scene-p 0–1 while armed.
+   Desktop: stage 100svh pinned for one viewport of scroll (track 2 vp). Phones: stage 70svh, track 140svh (≤ 1.5 vp).
+   The nav is overlaid like .hero (negative top margin + padding). Tokens from tokens.css; no radius anywhere. */
+:root { --scene-h: 100svh; --scene-len: 2; }
+@media (max-width: 1023px) { :root { --scene-h: 70svh; --scene-len: 1.4; } }
+
+.scene { position: relative; margin-top: calc(-1 * var(--nav-h)); height: calc(var(--scene-len) * 100svh); background: var(--bg); }
+.scene-stage { position: sticky; top: 0; height: var(--scene-h); padding-top: var(--nav-h); overflow: hidden; isolation: isolate; display: grid; background: var(--bg); }
+/* Phones: the stage may grow past 70svh when the type needs it (never clips); the track still exceeds it. */
+@media (max-width: 1023px) { .scene-stage { height: auto; min-height: var(--scene-h); } }
+
+/* Static frame (no JS, reduced motion, motion off, script error): no track, no pin, everything fully revealed. */
+.scene:not(.is-armed), html[data-motion='off'] .scene { height: auto; }
+.scene:not(.is-armed) .scene-stage, html[data-motion='off'] .scene .scene-stage { position: static; height: auto; min-height: var(--scene-h); }
+@media (prefers-reduced-motion: reduce) {
+  .scene { height: auto; }
+  .scene .scene-stage { position: static; height: auto; min-height: var(--scene-h); }
+}

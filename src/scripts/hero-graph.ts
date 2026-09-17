@@ -1,8 +1,12 @@
-// Home hero choreography (spec §7.2–7.5). Gates → fetch → first frame at the poster's camera → crossfade. Any exception
-// leaves the SVG poster in place. All motion is time-based: v += (target − v)·(1 − e^(−λ·dt)).
+// Home hero choreography (spec §7.2–7.5). Gates → fetch (+ lazy WebGL2 chunk) → first frame at the poster's camera →
+// crossfade. WebGL2 (graph-gl.ts) is preferred; Canvas 2D is the fallback when it is missing, refused (software GL),
+// fails to compile or loses its context. Any exception leaves the SVG poster in place. All motion is time-based:
+// v += (target − v)·(1 − e^(−λ·dt)). Sound: `sfx` drone follows the running state (`drone:on` / `drone:off`).
 import { CAM0, VB, bindPointer, clamp01, createRenderer, easeOutExpo, type GraphJson, type Pointer, type Renderer } from './graph-render.ts';
 
 const motionOff = () => matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
+/** Set once WebGL2 failed on this page (no context, compile error, context lost for > 1.5 s): later mounts use Canvas 2D. */
+let glFailed = false;
 
 {
   const hero = document.querySelector<HTMLElement>('[data-hero]');
@@ -15,6 +19,13 @@ const motionOff = () => matchMedia('(prefers-reduced-motion: reduce)').matches |
 
 function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, svg: SVGSVGElement, list: HTMLElement) {
   let live: { r: Renderer; ptr: Pointer; stop: () => void } | null = null;
+  /** A canvas that has had a webgl2 context can never hand out a 2d one (and vice versa), so every renderer change gets a fresh node. */
+  const swapCanvas = () => {
+    const c = canvas.cloneNode(false) as HTMLCanvasElement;
+    c.classList.remove('is-pointer');
+    canvas.replaceWith(c);
+    canvas = c;
+  };
 
   // Keyboard / AT: focusing a hub in the hidden list golds the poster node and, when live, applies the canvas hover state.
   const svgNode = (i: string) => svg.querySelector(`[data-i="${i}"]`);
@@ -37,14 +48,23 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
     live?.stop();
     live = null;
     hero.classList.remove('is-live');
+    delete hero.dataset.renderer;
     hero.style.removeProperty('--hg-p');
     svg.removeAttribute('inert');
     canvas.hidden = true;
+    swapCanvas();
   };
   const boot = () => idle(() => {
     if (live || !gate()) return;
     mount().catch((err) => { teardown(); console.warn('hero graph: keeping the poster', err); });
   });
+  /** WebGL context lost for good: fall back to Canvas 2D on a fresh canvas. */
+  const onLost = () => {
+    if (!live) return;
+    glFailed = true;
+    teardown();
+    mount().catch((err) => { teardown(); console.warn('hero graph: keeping the poster', err); });
+  };
   if (document.readyState === 'complete') boot();
   else addEventListener('load', boot, { once: true });
   addEventListener('motionchange', () => (motionOff() ? teardown() : boot()));
@@ -52,11 +72,20 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
   addEventListener('pageshow', (e) => { if (e.persisted) boot(); });
 
   async function mount() {
-    const res = await fetch('/graph.json');
+    const wantGL = !glFailed && 'WebGL2RenderingContext' in window;
+    const [res, glMod] = await Promise.all([fetch('/graph.json'), wantGL ? import('./graph-gl.ts').catch(() => null) : null]);
     if (!res.ok) throw new Error(`graph.json ${res.status}`);
     const g: GraphJson = await res.json();
+    if (live) return; // a second mount raced this one (motionchange / pageshow)
     canvas.hidden = false;
-    const r = createRenderer(canvas, g, '3d');
+    let r = glMod?.createGLRenderer(canvas, g, { onLost }) ?? null;
+    hero.dataset.renderer = r ? 'gl' : '2d';
+    if (!r) {
+      glFailed = true;
+      swapCanvas();
+      canvas.hidden = false;
+      r = createRenderer(canvas, g, '3d');
+    }
     r.resize();
 
     const chip = {
@@ -71,7 +100,7 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
     let raf = 0, running = false, lastFrame = 0, t0 = 0;
     let lastInput = performance.now();
     let tx = 0, ty = 0, fx = 0, fy = 0, px = 0; // cursor target, damped, parallax px
-    let spin = 0, vel = 0, dragging = false; // rad, rad/s
+    let spin = 0, vel = 0, dragging = false; // rad, rad/s (vel is an exponentially smoothed estimate)
     let inView = true, pageVisible = !document.hidden, p = 0, lastP = -1; // scroll recede
     // idle tour: seeded shuffle of the hubs
     const tour = [...g.hubs];
@@ -88,10 +117,13 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
       if (touring) { touring = false; if (ptr.hovered >= 0) ptr.hover(-1); }
       wake();
     };
+    /** The drone follows the running loop; sound.ts ignores the events while sound is off. */
+    const syncDrone = () => dispatchEvent(new CustomEvent('sfx', { detail: running ? 'drone:on' : 'drone:off' }));
+    const setRunning = (v: boolean) => { if (running !== v) { running = v; syncDrone(); } };
     const ptr = bindPointer(r, canvas, chip, {
       host: box,
       onActivity: activity,
-      onDrag: (dx, _dy, dt) => { dragging = true; const d = dx * 0.005; spin += d; vel = Math.max(-2.5, Math.min(2.5, d / dt)); },
+      onDrag: (dx, _dy, dt) => { dragging = true; const d = dx * 0.005; spin += d; vel += (Math.max(-2.5, Math.min(2.5, d / dt)) - vel) * (1 - Math.exp(-dt * 25)); },
       onDragEnd: () => { dragging = false; },
     });
 
@@ -103,12 +135,12 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
       const dt = lastFrame ? Math.min(0.1, (now - lastFrame) / 1000) : 1 / 60;
       lastFrame = now;
       recede();
-      if (p >= 1) { running = false; return; } // receded: the loop stops until the page scrolls back
+      if (p >= 1) { setRunning(false); return; } // receded: the loop stops until the page scrolls back
       const e = easeOutExpo(Math.min(1, (now - t0) / 900));
       const k5 = 1 - Math.exp(-5 * dt), k4 = 1 - Math.exp(-4 * dt);
       fx += (tx - fx) * k5;
       fy += (ty - fy) * k5;
-      if (!dragging) { spin += (0.04 + vel) * dt; vel *= Math.exp(-2 * dt); }
+      if (!dragging) { spin += (0.04 + vel) * dt; vel *= Math.exp(-1.3 * dt); } // coast: inertia decays with λ 1.3 into the idle spin
       const R = VB.r * Math.max(r.w / VB.w, r.h / VB.h);
       px += (fx * 0.04 * R - px) * k4;
       r.cam.yaw = CAM0.yaw + spin + fx * 0.45;
@@ -129,9 +161,10 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
     const wake = () => {
       if (!live) return;
       recede();
-      running = inView && pageVisible && p < 1;
+      setRunning(inView && pageVisible && p < 1);
       if (running && !raf) { lastFrame = 0; raf = requestAnimationFrame(frame); }
     };
+    addEventListener('soundchange', syncDrone, { signal });
 
     // cursor follow on the window; outside the hero the target eases back to 0
     addEventListener('pointermove', (ev) => {
@@ -154,7 +187,7 @@ function init(hero: HTMLElement, box: HTMLElement, canvas: HTMLCanvasElement, sv
     r.cam.scale = 0.97;
     r.cam.edgeMul = 0.6;
     r.draw(t0);
-    live = { r, ptr, stop: () => { running = false; cancelAnimationFrame(raf); raf = 0; io.disconnect(); ro.disconnect(); ac.abort(); ptr.release(); } };
+    live = { r, ptr, stop: () => { setRunning(false); cancelAnimationFrame(raf); raf = 0; io.disconnect(); ro.disconnect(); ac.abort(); ptr.release(); } };
     hero.classList.add('is-live');
     svg.setAttribute('inert', '');
     wake();

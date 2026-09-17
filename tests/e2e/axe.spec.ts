@@ -6,6 +6,7 @@ const PAGES: [string, string | null][] = [
   ['/', null],
   ['/achievements', null],
   ['an achievement', '/achievements/'],
+  ['/achievements/kasetsart-open-archery-2025', null],
   ['/notes', null],
   ['a post', '/blog/'],
   ['/research', null],

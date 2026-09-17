@@ -39,5 +39,13 @@ Still open:
 - Hero frame rate has not been measured on an older iPhone yet; it falls back to a static poster under reduced motion.
 - No newsletter, contact form, light theme or Thai version yet, by design.
 
+## v0.2 (added 2026-09-17)
+- **Real 3D hero**: shaded spheres with a gold glow when WebGL2 is available; the older renderer and the static poster remain as fallbacks.
+- **Sound**: off by default. The footer has a "Sound" chip next to "Motion". On: a soft drone on the home page, a tick when the timeline counter changes, a bow-release note when a graph node is opened. It never plays before someone turns it on.
+- **Chapter openers**: Achievements opens on your Winnipeg photo revealing as you scroll while the counter climbs to the entry count; Research opens with the BIS line drawing itself in.
+- **03 Research**: `/research` has the interactive Bubble Intensity Score chart (hover, arrow keys, pillar toggles, episode zoom), the method, the three-way table and a CSV download. To update the data, replace `content/data/bis_panel_monthly.csv` with the new export (same columns) and push.
+- **Archery scores**: archery entries can carry `scores`, `placing`, `division`, `distance` in their properties. One line per round, e.g. `Ranking round | 560/720 | 72 arrows | 70 m`. Entries with a total and an arrow count get the target face; entries with only `placing` get a badge; the WAYC entry shows nothing until you add a result. Every archery page also shows the season record.
+- Chapters are now 01 Achievements · 02 Notes & Blog · 03 Research · 04 About · 05 Resume · 06 Contact.
+
 ## How you publish a change (after step 4)
 Write in Obsidian → tick `publish` → GitHub Desktop → check the Changes list → Summary → Commit to main → Push origin → live in a few minutes.
