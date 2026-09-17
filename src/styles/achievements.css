@@ -198,8 +198,8 @@ html.is-filtering::view-transition-new(*):only-child { animation: ach-vt-in 300m
 /* ---------- Opener (scroll scene, plan §3; shared track/stage rules in scene.css) ----------
    Static frame: --p-img 1 (photo fully revealed), --p-col 0 (monochrome), --p-num 1. Armed: all three derive from
    --scene-p. The photo is clipped by a scaled overflow box (compositor-only, and a real clip so the LCP candidate is
-   only the visible band); --k is the visible fraction (16 % at p = 0 so the first paint is never blank). */
-.scene--ach { --p-img: 1; --p-col: 0; --p-num: 1; --k: calc(0.16 + 0.84 * var(--p-img)); }
+   only the visible band); --k is the visible fraction (8 % at p = 0: never blank, but small enough that the headline stays the LCP element). */
+.scene--ach { --p-img: 1; --p-col: 0; --p-num: 1; --k: calc(0.08 + 0.92 * var(--p-img)); }
 .scene--ach.is-armed {
   --p-img: clamp(0, var(--scene-p, 0) / 0.55, 1);
   --p-col: clamp(0, (var(--scene-p, 0) - 0.45) / 0.45, 1);
