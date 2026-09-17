@@ -75,7 +75,7 @@ export function remarkVault() {
         if (m[9] !== undefined) {
           if (inHeading || inLink) continue;
           const tag = normalizeTag(m[9]);
-          push({ type: 'link', url: `/tags/${encodeURIComponent(tag)}`, children: [{ type: 'text', value: `#${tag}` }], data: { hProperties: { className: ['tag-inline'], rel: 'tag' } } } as PhrasingContent);
+          push({ type: 'link', url: `/tags/${encodeURIComponent(tag)}`, children: [{ type: 'text', value: `#${tag}` }], data: { hProperties: { className: ['tag-inline'], rel: 'tag' } } } as unknown as PhrasingContent);
         }
       }
       if (!changed) return;
