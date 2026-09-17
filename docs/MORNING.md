@@ -23,5 +23,16 @@
 - Held back on purpose: 4 photos with arrows drawn on them (band ×2, FE Bootcamp line-up, TEO exam hall) — send clean originals; 3 certificates showing ID numbers (both AMO certificates, the World Archery accreditation card) — say yes and I crop the numbers out; the NAAT selection letter (contains a signature and office phone).
 - No usable headshot exists in your folder (the file named as one is your TEO certificate). Drop a portrait into `content/media/` and tell me; About and the hero have a slot for it.
 
+## Verification done before you woke up
+- `npm run build` on Vercel: content check 0 errors → 226 pages → `resume.pdf` (2 pages) → leak scan 0 errors. Home page JavaScript 5.9 KB gzipped (budget 60).
+- 106 unit tests and 67 browser tests (Chromium + WebKit: routes, no console errors, reduced-motion fallback, keyboard order, filters, lightbox, backlinks, search, PDF, 375 px no overflow, axe accessibility with zero serious issues) all pass.
+- All 88 published images were re-encoded without EXIF/GPS metadata; none exceeds 2 MB.
+
+## Known small gaps (not urgent)
+- Comments are off until the giscus app is installed (step 2).
+- Original photos are shipped next to the optimised versions (Astro behaviour); they carry no metadata and are ≤ 2 MB each.
+- Hero frame rate has not been measured on an older iPhone yet; it falls back to a static poster under reduced motion.
+- No newsletter, contact form, light theme or Thai version yet, by design.
+
 ## How you publish a change (after step 4)
 Write in Obsidian → tick `publish` → GitHub Desktop → check the Changes list → Summary → Commit to main → Push origin → live in a few minutes.
