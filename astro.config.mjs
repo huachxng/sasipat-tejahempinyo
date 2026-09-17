@@ -1,4 +1,3 @@
-// @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
 import sitemap from '@astrojs/sitemap';

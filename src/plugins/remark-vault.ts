@@ -102,7 +102,7 @@ export function remarkVault() {
         const url = filePath ? relativeMediaPath(filePath, abs) : abs;
         const hProperties: Record<string, unknown> = { class: 'vault-img' };
         if (width) hProperties.width = width;
-        return { type: 'image', url, alt, title: null, data: { hProperties } } as PhrasingContent;
+        return { type: 'image', url, alt, title: null, data: { hProperties } } as unknown as PhrasingContent;
       }
       const res = resolveWikilink(target, vault);
       const text = alias && alias.trim() ? alias.trim() : hash && !hash.startsWith('^') ? `${res.ok ? res.entry.title : target} › ${hash}` : res.ok ? res.entry.title : target;
@@ -115,7 +115,7 @@ export function remarkVault() {
       let url = res.href;
       if (hash && !hash.startsWith('^')) url += headingAnchor(hash);
       else if (hash) warn(`block reference "^${hash.slice(1)}" is not supported; linking to the note instead`);
-      return { type: 'link', url, title: null, children: [{ type: 'text', value: text }], data: { hProperties: { className: ['wl'], 'data-kind': res.entry.collection } } } as PhrasingContent;
+      return { type: 'link', url, title: null, children: [{ type: 'text', value: text }], data: { hProperties: { className: ['wl'], 'data-kind': res.entry.collection } } } as unknown as PhrasingContent;
     }
   };
 }
