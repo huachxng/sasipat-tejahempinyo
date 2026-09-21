@@ -30,7 +30,7 @@ export interface Chapter { num: string; slug: ChapterSlug; title: string; href: 
 export const CHAPTERS: Chapter[] = [
   { num: '01', slug: 'achievements', title: 'Achievements', href: '/achievements', dek: 'Competitions, research, ventures and service, newest first.' },
   { num: '02', slug: 'notes', title: 'Notes & Blog', href: '/notes', dek: 'Connected notes on markets, data and archery, plus longer essays.' },
-  { num: '03', slug: 'research', title: 'Research', href: '/research', dek: 'The Bubble Intensity Score: one number, four pillars, three episodes.' },
+  { num: '03', slug: 'research', title: 'Research & Writing', href: '/research', dek: 'The Bubble Intensity Score, and the essays behind the writing.' },
   { num: '04', slug: 'about', title: 'About', href: '/about', dek: 'Who is writing, and under which names.' },
   { num: '05', slug: 'resume', title: 'Resume', href: '/resume', dek: 'One page, generated from the same entries as the timeline.' },
   { num: '06', slug: 'contact', title: 'Contact', href: '/contact', dek: 'Email and links.' },

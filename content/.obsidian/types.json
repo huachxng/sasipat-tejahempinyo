@@ -1,6 +1,1 @@
-{"types":{"publish":"checkbox","comments":"checkbox","resume":"checkbox","featured":"checkbox",
-"date":"date","endDate":"date","updated":"date","tags":"tags","aliases":"aliases",
-"links":"multitext","previousSlugs":"multitext","skills":"multitext","languages":"multitext","now":"multitext","coursework":"multitext","education":"multitext",
-"title":"text","slug":"text","summary":"text","thai":"text","category":"text","dateText":"text","result":"text","org":"text",
-"location":"text","cover":"text","certificate":"text","resumeLine":"text","resumeSection":"text",
-"scores":"multitext","placing":"number","division":"text","distance":"text"}}
+{"types":{"publish":"checkbox","comments":"checkbox","resume":"checkbox","featured":"checkbox","date":"date","endDate":"date","updated":"date","tags":"tags","aliases":"aliases","links":"multitext","previousSlugs":"multitext","skills":"multitext","languages":"multitext","now":"multitext","coursework":"multitext","education":"multitext","title":"text","slug":"text","summary":"text","thai":"text","category":"text","dateText":"text","result":"text","org":"text","location":"text","cover":"text","certificate":"text","resumeLine":"text","resumeSection":"text","scores":"multitext","placing":"number","division":"text","distance":"text","kind":"text","course":"text","written":"date","prompt":"text"}}

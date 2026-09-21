@@ -47,5 +47,8 @@ Still open:
 - **Archery scores**: archery entries can carry `scores`, `placing`, `division`, `distance` in their properties. One line per round, e.g. `Ranking round | 560/720 | 72 arrows | 70 m`. Entries with a total and an arrow count get the target face; entries with only `placing` get a badge; the WAYC entry shows nothing until you add a result. Every archery page also shows the season record.
 - Chapters are now 01 Achievements · 02 Notes & Blog · 03 Research · 04 About · 05 Resume · 06 Contact.
 
+## Editing text directly, without Obsidian
+Every page is a Markdown file in the `content` folder. Open https://github.com/huachxng/sasipat-tejahempinyo/tree/main/content, click into `notes`, `blog` or `achievements`, open a file, press the pencil icon (Edit), change the text, then **Commit changes** (green button, keep "Commit directly to the main branch"). The site rebuilds and is live in about a minute. Tip: pressing the `.` key anywhere in the repository opens a full editor in the browser.
+
 ## How you publish a change (after step 4)
 Write in Obsidian → tick `publish` → GitHub Desktop → check the Changes list → Summary → Commit to main → Push origin → live in a few minutes.

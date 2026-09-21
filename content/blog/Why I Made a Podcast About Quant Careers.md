@@ -47,3 +47,5 @@ More episodes, on careers I understand less well than this one. The format I hav
 If you do a job you think students misunderstand, and you would sit down for an hour, write to me. The address is on the About page.
 
 %% TODO: confirm that further episodes are planned and, if there is a release schedule, state it. %%
+
+EP1 is on [Spotify](https://open.spotify.com/show/4D5C0tTqmRhPJzq9efBlHZ) and [YouTube](https://www.youtube.com/watch?v=T9wSqxgLnNw). EP2, on the high-school path into computer engineering, followed in August 2026.

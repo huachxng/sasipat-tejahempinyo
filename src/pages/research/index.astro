@@ -31,6 +31,10 @@ const notes = NOTE_LINKS.map((target) => {
 // The achievement entry and its SSRN link (chip only when a link host contains "ssrn").
 const ACH_ID = 'ai-bubble-mere-future-crisis-research';
 const ach = (await getPublished('achievements')).find((e) => e.id === ACH_ID);
+const essays = (await getPublished('notes'))
+  .filter((n) => n.data.kind === 'essay')
+  .sort((a, b) => (b.data.written ?? b.data.date ?? new Date(0)).getTime() - (a.data.written ?? a.data.date ?? new Date(0)).getTime());
+const essayYear = (n: (typeof essays)[number]) => (n.data.written ?? n.data.date)?.getUTCFullYear();
 const achLinks = (ach?.data.links ?? []).map(parseLink).filter((l): l is NonNullable<typeof l> => Boolean(l));
 const ssrn = achLinks.find((l) => l.host.includes('ssrn'));
 const SSRN_PLACEHOLDER = 'SSRN working paper: October 2026';
@@ -38,7 +42,7 @@ const SSRN_PLACEHOLDER = 'SSRN working paper: October 2026';
 const description = `The Bubble Intensity Score: a monthly composite of four pillar z-scores (valuation, leverage, sentiment, concentration), ${firstYear}–${lastYear}, with the dot-com, 2008 and AI episodes compared.`;
 const jsonLd = dataset({ first: data.first, last: data.last, sameAs: ssrn?.href });
 ---
-<Base title={`Research — ${PERSON.displayName}`} {description} active="research" image="/og/research.png" now={`${c.num} / Research / BIS v1.0`} bodyClass="page-research" {jsonLd}>
+<Base title={`Research & Writing — ${PERSON.displayName}`} {description} active="research" image="/og/research.png" now={`${c.num} / Research / BIS v1.0`} bodyClass="page-research" {jsonLd}>
   <ResearchOpener />
 
   <section class="bis-section container ruled" aria-labelledby="bis-title">
@@ -141,5 +145,44 @@ const jsonLd = dataset({ first: data.first, last: data.last, sameAs: ssrn?.href 
     </div>
   </section>
 
+  {essays.length > 0 && (
+    <section class="literature ruled" aria-labelledby="lit-title" data-pagefind-ignore>
+      <div class="container">
+        <header class="lit-head">
+          <p class="label">Literature</p>
+          <h2 id="lit-title" class="display t-2">Essays from English class</h2>
+          <p class="mono muted small">Written for Composition 9 and 10 and AP Language and Composition, published here as submitted. Byline Noah.</p>
+        </header>
+        <ol class="lit-list">
+          {essays.map((n) => (
+            <li class="lit-item">
+              <div class="lit-meta mono">
+                <span>{n.data.course}</span>
+                <span>{essayYear(n)}</span>
+              </div>
+              <h3 class="lit-title"><a href={`/notes/${n.id}`}>{n.data.title ?? n.id}</a></h3>
+              {n.data.prompt && <p class="lit-prompt muted small">{n.data.prompt}</p>}
+              {n.data.summary && <p class="lit-summary">{n.data.summary}</p>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
   <ChapterNext current="research" />
 </Base>
+<style>
+  .literature { padding-block: clamp(64px, 10vh, 140px); }
+  .lit-head { display: grid; gap: 0.75rem; margin-bottom: clamp(32px, 5vh, 64px); max-width: 60ch; }
+  .lit-head h2 { margin: 0; }
+  .lit-head p { margin: 0; }
+  .lit-list { list-style: none; margin: 0; padding: 0; }
+  .lit-item { display: grid; gap: 0.5rem; padding: 1.75rem 0; border-top: 1px solid var(--rule); }
+  .lit-meta { display: flex; gap: 1.25rem; font-size: var(--t-label); text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-3); }
+  .lit-title { margin: 0; font-family: var(--font-display), sans-serif; font-size: var(--t-3); letter-spacing: -0.02em; line-height: 1.15; }
+  .lit-title a { color: var(--fg); }
+  .lit-title a:hover { color: var(--gold); text-decoration: none; }
+  .lit-prompt { margin: 0; font-style: italic; }
+  .lit-summary { margin: 0; max-width: 68ch; }
+  @media (min-width: 1024px) { .lit-item { grid-template-columns: 3fr 9fr; column-gap: var(--gutter); } .lit-meta { flex-direction: column; gap: 0.35rem; } .lit-title, .lit-prompt, .lit-summary { grid-column: 2; } .lit-meta { grid-row: 1 / span 3; } }
+</style>
