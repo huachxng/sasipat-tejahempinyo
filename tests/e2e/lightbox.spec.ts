@@ -27,10 +27,14 @@ test.describe('achievement lightbox', () => {
     await expect(pswp).toBeVisible({ timeout: 10_000 });
     const counter = page.locator('.pswp__counter');
     await expect(counter).toContainText(/1\s*\/\s*\d+/);
-    await page.waitForTimeout(600); // PhotoSwipe ignores navigation keys until its opening animation (333 ms) has finished
-
-    await page.keyboard.press('ArrowRight');
-    await expect(counter).toContainText(/2\s*\/\s*\d+/);
+    // PhotoSwipe ignores navigation keys until its opening animation has finished; press again until it takes.
+    await expect
+      .poll(async () => {
+        await page.keyboard.press('ArrowRight');
+        await page.waitForTimeout(300);
+        return (await counter.textContent()) ?? '';
+      }, { timeout: 8_000 })
+      .toMatch(/2\s*\/\s*\d+/);
     await page.keyboard.press('ArrowLeft');
     await expect(counter).toContainText(/1\s*\/\s*\d+/);
 
