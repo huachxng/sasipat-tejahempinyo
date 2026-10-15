@@ -6,14 +6,13 @@ date: 2026-08-01
 dateText: "Aug 2026 – present"
 category: ventures
 org: "Independent project"
-result: "Founder and author"
-summary: "Built and published a free bilingual (English/Thai) retirement-math and tax guide with eight chapters and in-browser calculators for Thai savers."
+result: "Founder and designer"
+summary: "Free bilingual (English/Thai) retirement-math and tax guide with eight chapters and in-browser calculators for Thai savers; idea, product rules, visual direction and Thai copy by me, code written with an AI assistant."
 tags: ["personal-finance", "financial-literacy", "thai", "bilingual", "web", "calculators"]
 links: ["kasian-sultan.pages.dev | https://kasian-sultan.pages.dev"]
 resume: true
-resumeLine: "Founder and author, Kasian Sultan (kasian-sultan.pages.dev), 2026 — free bilingual EN/TH retirement-math and tax guide: 8 chapters, in-browser calculators."
+resumeLine: "Founder and designer, Kasian Sultan (kasian-sultan.pages.dev), 2026 — free bilingual EN/TH retirement-math and tax guide: 8 chapters, in-browser calculators; code written with an AI assistant."
 ---
 
-I wrote and built Kasian Sultan, a free English/Thai guide to retirement math and Thai tax rules for savers who do not have a financial adviser. It has eight chapters and in-browser calculators and is built privacy-first. The site is live at kasian-sultan.pages.dev.
+Kasian Sultan is a free English/Thai guide to retirement math and Thai tax rules for savers who do not have a financial adviser. It has eight chapters and in-browser calculators, including a Monte Carlo simulation, and it collects no data. I set the idea, the product rules, and the visual direction and rewrote the Thai copy; the code was written with an AI assistant, which is credited on the site. The site is live at kasian-sultan.pages.dev and was used in BISB economics and business classes in October 2026.
 
-%% TODO (review): Confirm the launch month (August 2026 is inferred from 'Grade 12' in Brag Sheet v2), that the URL is live and public, and that 'Kasian Sultan' is the final name. %%

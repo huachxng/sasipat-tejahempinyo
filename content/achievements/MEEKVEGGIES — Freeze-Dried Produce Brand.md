@@ -7,17 +7,16 @@ dateText: "Feb 2026 – present"
 category: ventures
 org: "MEEKVEGGIES (self-founded)"
 result: "Founder"
-summary: "Founded a freeze-dried fruit, vegetable, and mushroom brand; built the brand from February 2026, secured a dropship manufacturing partnership with the D'Nuts factory on 17 June 2026, and launched on Shopee and Lazada."
-tags: ["entrepreneurship", "food", "e-commerce", "shopee", "lazada", "freeze-dried", "thailand"]
+summary: "Pre-launch freeze-dried fruit, vegetable, and mushroom brand for the Thai market: brand identity and market research from February 2026, and a per-order dropship deal negotiated with the D'Nuts factory on 17 June 2026."
+tags: ["entrepreneurship", "food", "e-commerce", "freeze-dried", "thailand"]
 resume: true
-resumeLine: "Founder, MEEKVEGGIES (2026–present) — freeze-dried produce brand; negotiated a factory dropship partnership with D'Nuts (Jun 2026); built market research, margin model, and launch plan; launched on Shopee/Lazada."
+resumeLine: "Founder, MEEKVEGGIES (2026–present) — pre-launch freeze-dried produce brand; negotiated a per-order dropship deal with the D'Nuts factory (Jun 2026); margin model, launch plan, and storefront branding in progress."
 featured: true
 cover: meekveggies-01.png
 ---
 
-I founded MEEKVEGGIES, a premium freeze-dried fruit, vegetable, and mushroom brand for the Thai market, and began the brand identity and market research in February 2026. In June 2026 I cold-called the D'Nuts factory, negotiated a reseller arrangement in which the factory packs and ships each order directly to the customer, and confirmed the deal on 17 June 2026. I built the market research, the margin and feasibility model, and the launch plan myself, and the brand launched on Shopee and Lazada with dropship logistics.
+I founded MEEKVEGGIES, a freeze-dried fruit, vegetable, and mushroom brand for the Thai market, and began the brand identity and market research in February 2026. In June 2026 I called the D'Nuts factory, negotiated a reseller arrangement in which the factory packs and ships each order directly to the customer for a flat ฿50, and confirmed the deal on 17 June 2026. The market research, margin model, and launch plan were drafted with an AI assistant and tested against the factory's terms. The brand has not launched yet: the storefront branding is in progress as of October 2026.
 
-%% TODO (review): Confirm the founding month (brand assets date from Feb 2026), the Shopee/Lazada launch date, whether the D'Nuts deal is exclusive (Brag Sheet v2 says exclusive; the 17 June feasibility note does not), and whether the factory name may be published. Note the banner art spells the name MEEKVEGIES. %%
 
 Related notes: [[MEEKVEGGIES]].
 
